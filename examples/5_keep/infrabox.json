@@ -1,0 +1,18 @@
+{
+    "version": 1,
+    "jobs": [{
+        "type": "docker",
+        "name": "producer",
+        "docker_file": "Dockerfile_producer",
+        "build_only": false,
+        "machine_config": "vm-1-2048"
+    }, {
+        "type": "docker",
+        "name": "consumer",
+        "docker_file": "Dockerfile_consumer",
+        "build_only": false,
+        "machine_config": "vm-1-2048",
+        "keep": true,
+        "depends_on": ["producer"]
+    }]
+}

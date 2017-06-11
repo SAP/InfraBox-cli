@@ -1,0 +1,21 @@
+{
+    "version": 1,
+    "tests": [{
+        "name": "test 1",
+        "suite": "Test suite",
+        "status": "ok",
+        "duration": 123,
+        "measurements": [{
+            "name": "Custom measurement",
+            "value": "123",
+            "unit": "hz"
+        }]
+    }, {
+        "name": "test 2",
+        "suite": "Test suite",
+        "status": "error",
+        "duration": 43,
+        "message": "TypeError: Again !?!",
+        "stack": "Traceback (most recent call last):\n  File \"e.py\", line 7, in <module>\n    raise TypeError(\"Again !?!\")"
+    }]
+}

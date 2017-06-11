@@ -1,0 +1,17 @@
+FROM alpine:3.4
+
+RUN apk add --no-cache py-pip py-yaml
+RUN pip install coverage
+
+RUN adduser -S tester
+
+COPY . /infraboxcli
+RUN chown -R tester /infraboxcli
+
+WORKDIR /infraboxcli
+
+RUN pip install .
+
+USER tester
+
+CMD /infraboxcli/infrabox/infraboxcli/entrypoint.sh

@@ -1,0 +1,6 @@
+.git
+.infrabox
+Dockerfile
+.dockerignore
+*.pyc
+__pycache__

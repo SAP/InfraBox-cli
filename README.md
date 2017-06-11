@@ -1,2 +1,1 @@
-# cli
-CLI for InfraBox
+# InfraBox CLI
