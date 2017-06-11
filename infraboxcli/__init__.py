@@ -10,7 +10,8 @@ from infraboxcli.list_jobs import list_jobs
 from infraboxcli.log import logger
 from infraboxcli.init import init
 from infraboxcli.pull import pull
-from infraboxcli.version import version
+
+version = '0.2.0'
 
 def main():
     parser = argparse.ArgumentParser(prog="infrabox")

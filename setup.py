@@ -1,13 +1,11 @@
 from setuptools import setup
 
-from infraboxcli.version import version
-
 def readme():
     with open('README.md') as f:
         return f.read()
 
 setup(name='infraboxcli',
-      version=version,
+      version='0.2.0',
       url='https://github.com/infrabox/cli',
       description='Command Line Interface for InfraBox',
       long_description=readme(),
