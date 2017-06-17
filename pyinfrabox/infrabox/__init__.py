@@ -48,7 +48,7 @@ def parse_environment(e, path):
 
 
 def parse_git(d, path):
-    check_allowed_properties(d, path, ("type", "name", "commit", "clone_url", "depends_on"))
+    check_allowed_properties(d, path, ("type", "name", "commit", "clone_url", "depends_on", "environment"))
     check_required_properties(d, path, ("type", "name", "commit", "clone_url"))
     check_name(d['name'], path + ".name")
     check_text(d['commit'], path + ".commit")
@@ -56,6 +56,9 @@ def parse_git(d, path):
 
     if 'depends_on' in d:
         check_name_array(d['depends_on'], path + ".depends_on")
+
+    if 'environment' in d:
+        parse_environment(d['environment'], path + ".environment")
 
 def parse_workflow(d, path):
     check_allowed_properties(d, path, ("type", "name", "infrabox_file", "depends_on"))
@@ -100,7 +103,7 @@ def parse_docker(d, path):
         parse_environment(d['environment'], path + ".environment")
 
 def parse_docker_compose(d, path):
-    check_allowed_properties(d, path, ("type", "name", "docker_compose_file", "depends_on", "machine_config"))
+    check_allowed_properties(d, path, ("type", "name", "docker_compose_file", "depends_on", "machine_config", "environment"))
     check_required_properties(d, path, ("type", "name", "docker_compose_file", "machine_config"))
     check_name(d['name'], path + ".name")
     check_text(d['docker_compose_file'], path + ".docker_compose_file")
@@ -108,6 +111,9 @@ def parse_docker_compose(d, path):
 
     if 'depends_on' in d:
         check_name_array(d['depends_on'], path + ".depends_on")
+
+    if 'environment' in d:
+        parse_environment(d['environment'], path + ".environment")
 
 def parse_wait(d, path):
     check_allowed_properties(d, path, ("type", "name", "depends_on"))
