@@ -27,6 +27,26 @@ def check_version(v, path):
     if v != 1:
         raise ValidationError(path, "unsupported version")
 
+def parse_environment(e, path):
+    if not isinstance(e, dict):
+        raise ValidationError(path, "must be an object")
+
+    for key in e:
+        value = e[key]
+        p = path + "." + key
+
+        if isinstance(value, dict):
+            if "$ref" not in value:
+                raise ValidationError(p, "must contain a $ref")
+
+            check_text(value['$ref'], p + ".$ref")
+        else:
+            try:
+                check_text(value, p)
+            except:
+                raise ValidationError(p, "must be a string or object")
+
+
 def parse_git(d, path):
     check_allowed_properties(d, path, ("type", "name", "commit", "clone_url", "depends_on"))
     check_required_properties(d, path, ("type", "name", "commit", "clone_url"))
@@ -54,7 +74,7 @@ def parse_security(d, path):
         raise ValidationError(path + ".scan_container", "Must be boolean")
 
 def parse_docker(d, path):
-    check_allowed_properties(d, path, ("type", "name", "docker_file", "depends_on", "machine_config", "build_only", "security", "commit_after_run", "keep"))
+    check_allowed_properties(d, path, ("type", "name", "docker_file", "depends_on", "machine_config", "build_only", "security", "commit_after_run", "keep", "environment"))
     check_required_properties(d, path, ("type", "name", "docker_file", "machine_config"))
     check_name(d['name'], path + ".name")
     check_text(d['docker_file'], path + ".docker_file")
@@ -76,6 +96,8 @@ def parse_docker(d, path):
         if not isinstance(d['commit_after_run'], bool):
             raise ValidationError(path + ".commit_after_run", "Must be boolean")
 
+    if 'environment' in d:
+        parse_environment(d['environment'], path + ".environment")
 
 def parse_docker_compose(d, path):
     check_allowed_properties(d, path, ("type", "name", "docker_compose_file", "depends_on", "machine_config"))

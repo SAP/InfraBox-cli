@@ -138,13 +138,14 @@ def build_and_run_docker_compose(args, job):
     os.remove(compose_file_new)
 
 def check_username(image_name):
-    inspect = subprocess.check_output(('docker', 'inspect', image_name))
-    inspect = json.loads(inspect)
+    #inspect = subprocess.check_output(('docker', 'inspect', image_name))
+    #inspect = json.loads(inspect)
 
-    user = inspect[0]['Config']['User']
-    if not user or user == 'root':
-        logger.error("Container '%s' must not use root user" % image_name)
-        sys.exit(1)
+    #user = inspect[0]['Config']['User']
+    #if not user or user == 'root':
+    #    logger.error("Container '%s' must not use root user" % image_name)
+    #    sys.exit(1)
+    pass
 
 def build_and_run_docker(args, job):
     infrabox = create_infrabox_directories(args, job)

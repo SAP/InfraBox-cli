@@ -32,7 +32,7 @@ def pull(args):
     infraboxcli.env.check_env_project_id(args)
 
     headers = {'auth-token': args.token}
-    url = '%s/api/v1/project/%s/job/%s/manifest' % (args.host, args.project_id, args.job_id)
+    url = '%s/v1/project/%s/job/%s/manifest' % (args.host, args.project_id, args.job_id)
     r = requests.get(url, headers=headers, timeout=5)
 
     if r.status_code != 200:
@@ -74,10 +74,23 @@ def pull(args):
     # remove download dir again
     shutil.rmtree(download_path)
 
+    # login
+    logger.info("Login to registry")
+    image = manifest['image'].replace("//", "/")
+    subprocess.check_call(('docker', 'login', image, '-p', args.token, '-u', 'infrabox'))
+
     # pulling images
     logger.info("Pulling image")
-    image = manifest['image'].replace("//", "/")
     subprocess.check_call(('docker', 'pull', image))
 
+    # running it
     logger.info("Running container")
-    subprocess.check_call(('docker', 'run', '-v', '%s:/infrabox' % path, image))
+
+    cmd = ['docker', 'run', '-v', '%s:/infrabox' % path]
+
+    for e in args.environment:
+        cmd += ['-e', e]
+
+    cmd.append(image)
+
+    subprocess.check_call(cmd)

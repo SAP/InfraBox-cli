@@ -85,9 +85,9 @@ def show_console(build_id, args):
                         name = jobs[job_id]['name']
 
                         if state == 'finished':
-                            logger.error("Job %s finished successfully" % state)
+                            logger.info("Job %s finished successfully" % state)
                         else:
-                            logger.info("Job %s failed with '%s'" % (name, state))
+                            logger.error("Job %s failed with '%s'" % (name, state))
 
                     sys.exit(rc)
 

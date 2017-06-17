@@ -170,6 +170,35 @@ def test_may_not_create_jobs():
 
     raises_expect(d, "#jobs[0].name: 'Create Jobs' not a valid value")
 
+def test_environment():
+    d = {
+        "version": 1,
+        "jobs": [{
+            "type": "docker",
+            "name": "test",
+            "docker_file": "Dockerfile",
+            "machine_config": "vm",
+            "environment": None
+        }]
+    }
+
+    raises_expect(d, "#jobs[0].environment: must be an object")
+
+    d['jobs'][0]['environment'] = []
+    raises_expect(d, "#jobs[0].environment: must be an object")
+
+    d['jobs'][0]['environment'] = {'key': 123}
+    raises_expect(d, "#jobs[0].environment.key: must be a string or object")
+
+    d['jobs'][0]['environment'] = {'key': {}}
+    raises_expect(d, "#jobs[0].environment.key: must contain a $ref")
+
+    d['jobs'][0]['environment'] = {'key': {'$ref': None}}
+    raises_expect(d, "#jobs[0].environment.key.$ref: is not a string")
+
+    d['jobs'][0]['environment'] = {}
+    validate_json(d)
+
 def test_valid():
     d = {
         "version": 1,

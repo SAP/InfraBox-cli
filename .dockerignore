@@ -1,6 +1,9 @@
 .git
 .infrabox
+build
 Dockerfile
+dist
 .dockerignore
+infraboxcli.egg-info
 *.pyc
 __pycache__

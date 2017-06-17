@@ -15,7 +15,7 @@ version = '0.2.0'
 
 def main():
     parser = argparse.ArgumentParser(prog="infrabox")
-    parser.add_argument("--host", required=False, default="https://dashboard.infrabox.net")
+    parser.add_argument("--host", required=False, default="https://api.infrabox.net")
     sub_parser = parser.add_subparsers(help='sub-command help')
 
     # version
@@ -35,9 +35,12 @@ def main():
     parser_push.set_defaults(validate_only=False)
     parser_push.set_defaults(func=push)
 
-    # push
+    # pull
     parser_pull = sub_parser.add_parser('pull', help='Pull a remote job')
     parser_pull.add_argument("--job-id", required=True)
+    parser_pull.add_argument("-e", dest='environment', default=[], required=False,
+                             action='append', type=str,
+                             help="Add environment variable to jobs")
     parser_pull.set_defaults(func=pull)
 
     # graph
