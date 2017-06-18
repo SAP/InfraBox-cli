@@ -1,14 +1,7 @@
 from builtins import int, range
 
 from pyinfrabox import ValidationError
-from pyinfrabox.utils import check_allowed_properties, check_required_properties, check_number, check_color
-
-def check_text(t, path, allowEmpty=False):
-    if not isinstance(t, str):
-        raise ValidationError(path, "is not a string")
-
-    if not allowEmpty and not t:
-        raise ValidationError(path, "empty string not allowed")
+from pyinfrabox.utils import check_allowed_properties, check_required_properties, check_number, check_color, check_text
 
 def check_version(v, path):
     if not isinstance(v, int):
