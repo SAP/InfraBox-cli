@@ -21,14 +21,10 @@ def parse_measurements(e, path):
     if not isinstance(e, list):
         raise ValidationError(path, "must be an array")
 
-    if not e:
-        raise ValidationError(path, "must not be empty")
-
     for i in range(0, len(e)):
         elem = e[i]
         path = "%s[%s]" % (path, i)
         parse_measurement(elem, path)
-
 
 def parse_t(d, path):
     check_allowed_properties(d, path,

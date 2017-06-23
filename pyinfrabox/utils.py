@@ -49,5 +49,3 @@ def check_number(d, path):
 def check_color(d, path):
     if d not in ("red", "green", "blue", "yellow", "orange", "white", "black", "grey"):
         raise ValidationError(path, "not a valid value")
-
-

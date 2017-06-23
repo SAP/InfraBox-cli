@@ -27,6 +27,9 @@ def on_console_update(*args):
     job_id = u['job_id']
     output = u['data']
 
+    if not output:
+        return
+
     job_name = jobs[job_id]['name']
     color = jobs[job_id]['color']
 

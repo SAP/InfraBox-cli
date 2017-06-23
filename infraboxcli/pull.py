@@ -74,6 +74,9 @@ def pull(args):
     # remove download dir again
     shutil.rmtree(download_path)
 
+    if not args.pull_container:
+        return
+
     # login
     logger.info("Login to registry")
     image = manifest['image'].replace("//", "/")
@@ -82,6 +85,9 @@ def pull(args):
     # pulling images
     logger.info("Pulling image")
     subprocess.check_call(('docker', 'pull', image))
+
+    if not args.run_container:
+        return
 
     # running it
     logger.info("Running container")

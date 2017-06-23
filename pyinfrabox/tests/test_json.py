@@ -28,7 +28,7 @@ def test_dep_defined_later():
             "type": "docker",
             "name": "source",
             "docker_file": "Dockerfile",
-            "machine_config": "vm_ubuntu_6c_8gb",
+            "resources": {"limits": {"cpu": 1, "memory": 1024}},
             "build_only": False,
             "depends_on": ["compile"]
         }, {
@@ -36,7 +36,7 @@ def test_dep_defined_later():
             "name": "compile",
             "docker_file": "Dockerfile",
             "build_only": False,
-            "machine_config": "vm_ubuntu_6c_8gb"
+            "resources": {"limits": {"cpu": 1, "memory": 1024}},
         }]
     }
 
@@ -49,7 +49,7 @@ def test_dep_not_found():
             "type": "docker",
             "name": "compile",
             "docker_file": "test/Dockerfile_benchmarks",
-            "machine_config": "vm_ubuntu_6c_8gb",
+            "resources": {"limits": {"cpu": 1, "memory": 1024}},
             "build_only": False,
             "depends_on": ["not_found"]
         }]
@@ -65,13 +65,13 @@ def test_deps_must_be_unique():
             "name": "source",
             "docker_file": "Dockerfile",
             "build_only": False,
-            "machine_config": "vm_ubuntu_6c_8gb"
+            "resources": {"limits": {"cpu": 1, "memory": 1024}},
         }, {
             "type": "docker",
             "name": "compile",
             "docker_file": "Dockerfile",
             "build_only": False,
-            "machine_config": "vm_ubuntu_6c_8gb",
+            "resources": {"limits": {"cpu": 1, "memory": 1024}},
             "depends_on": ["source", "source"]
         }]
     }
@@ -86,12 +86,12 @@ def test_duplicate_job_name():
             "name": "compile",
             "docker_file": "test/Dockerfile_benchmarks",
             "build_only": False,
-            "machine_config": "vm_ubuntu_6c_8gb"
+            "resources": {"limits": {"cpu": 1, "memory": 1024}},
         }, {
             "type": "docker",
             "name": "compile",
             "docker_file": "test/Dockerfile_benchmarks",
-            "machine_config": "vm_ubuntu_6c_8gb",
+            "resources": {"limits": {"cpu": 1, "memory": 1024}},
             "build_only": False,
             "depends_on": ["compile"]
         }]
@@ -106,7 +106,7 @@ def test_empty_dep_array():
             "type": "docker",
             "name": "compile",
             "docker_file": "test/Dockerfile_benchmarks",
-            "machine_config": "vm_ubuntu_6c_8gb",
+            "resources": {"limits": {"cpu": 1, "memory": 1024}},
             "build_only": False,
             "depends_on": []
         }]
@@ -122,7 +122,7 @@ def test_invalid_name():
             "name": "../blub",
             "docker_file": "Dockerfile",
             "build_only": False,
-            "machine_config": "vm_ubuntu_6c_8gb"
+            "resources": {"limits": {"cpu": 1, "memory": 1024}},
         }]
     }
 
@@ -135,7 +135,7 @@ def test_invalid_name():
             "name": "blub'",
             "docker_file": "Dockerfile",
             "build_only": False,
-            "machine_config": "vm_ubuntu_6c_8gb"
+            "resources": {"limits": {"cpu": 1, "memory": 1024}},
         }]
     }
 
@@ -148,7 +148,7 @@ def test_may_not_depend_on_itself():
             "type": "docker",
             "name": "compile",
             "docker_file": "Dockerfile",
-            "machine_config": "vm_ubuntu_6c_8gb",
+            "resources": {"limits": {"cpu": 1, "memory": 1024}},
             "build_only": False,
             "depends_on": ["compile"]
         }]
@@ -164,7 +164,7 @@ def test_may_not_create_jobs():
             "name": "Create Jobs",
             "docker_file": "test/Dockerfile_benchmarks",
             "build_only": False,
-            "machine_config": "vm_ubuntu_6c_8gb"
+            "resources": {"limits": {"cpu": 1, "memory": 1024}},
         }]
     }
 
@@ -177,7 +177,7 @@ def test_environment():
             "type": "docker",
             "name": "test",
             "docker_file": "Dockerfile",
-            "machine_config": "vm",
+            "resources": {"limits": {"cpu": 1, "memory": 1024}},
             "environment": None
         }]
     }
@@ -207,19 +207,19 @@ def test_valid():
             "name": "compile",
             "docker_file": "test/Dockerfile_benchmarks",
             "build_only": False,
-            "machine_config": "vm_ubuntu_6c_8gb"
+            "resources": {"limits": {"cpu": 1, "memory": 1024}},
         }, {
             "type": "docker",
             "name": "benchmark_server",
             "docker_file": "test/Dockerfile_benchmarks",
-            "machine_config": "vm_ubuntu_6c_8gb",
+            "resources": {"limits": {"cpu": 1, "memory": 1024}},
             "build_only": False,
             "depends_on": ["compile"]
         }, {
             "type": "docker",
             "name": "test_server",
             "docker_file": "test/Dockerfile_test_server",
-            "machine_config": "vm_ubuntu_6c_8gb",
+            "resources": {"limits": {"cpu": 1, "memory": 1024}},
             "build_only": False,
             "depends_on": ["compile"]
         }]

@@ -76,12 +76,38 @@ def parse_security(d, path):
     if not isinstance(d['scan_container'], bool):
         raise ValidationError(path + ".scan_container", "Must be boolean")
 
+def parse_limits(d, path):
+    check_allowed_properties(d, path, ("memory", "cpu"))
+    check_required_properties(d, path, ("memory", "cpu"))
+
+    check_number(d['cpu'], path + ".cpu")
+    check_number(d['memory'], path + ".memory")
+
+    if d['cpu'] <= 0:
+        raise ValidationError(path + ".cpu", "must be greater than 0")
+
+    if d['cpu'] > 4:
+        raise ValidationError(path + ".cpu", "must be less than 5")
+
+    if d['memory'] <= 255:
+        raise ValidationError(path + ".memory", "must be greater than 255")
+
+    if d['memory'] > 8192:
+        raise ValidationError(path + ".memory", "must be greater than 8193")
+
+
+def parse_resources(d, path):
+    check_allowed_properties(d, path, ("limits",))
+    check_required_properties(d, path, ("limits",))
+
+    parse_limits(d['limits'], path + ".limits")
+
 def parse_docker(d, path):
-    check_allowed_properties(d, path, ("type", "name", "docker_file", "depends_on", "machine_config", "build_only", "security", "commit_after_run", "keep", "environment"))
-    check_required_properties(d, path, ("type", "name", "docker_file", "machine_config"))
+    check_allowed_properties(d, path, ("type", "name", "docker_file", "depends_on", "resources", "build_only", "security", "commit_after_run", "keep", "environment"))
+    check_required_properties(d, path, ("type", "name", "docker_file", "resources"))
     check_name(d['name'], path + ".name")
     check_text(d['docker_file'], path + ".docker_file")
-    check_text(d['machine_config'], path + ".machine_config")
+    parse_resources(d['resources'], path + ".resources")
 
     if 'build_only' in d:
         check_boolean(d['build_only'], path + ".build_only")
@@ -103,11 +129,11 @@ def parse_docker(d, path):
         parse_environment(d['environment'], path + ".environment")
 
 def parse_docker_compose(d, path):
-    check_allowed_properties(d, path, ("type", "name", "docker_compose_file", "depends_on", "machine_config", "environment"))
-    check_required_properties(d, path, ("type", "name", "docker_compose_file", "machine_config"))
+    check_allowed_properties(d, path, ("type", "name", "docker_compose_file", "depends_on", "environment", "resources"))
+    check_required_properties(d, path, ("type", "name", "docker_compose_file", "resources"))
     check_name(d['name'], path + ".name")
     check_text(d['docker_compose_file'], path + ".docker_compose_file")
-    check_text(d['machine_config'], path + ".machine_config")
+    parse_resources(d['resources'], path + ".resources")
 
     if 'depends_on' in d:
         check_name_array(d['depends_on'], path + ".depends_on")

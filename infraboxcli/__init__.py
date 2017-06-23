@@ -11,7 +11,7 @@ from infraboxcli.log import logger
 from infraboxcli.init import init
 from infraboxcli.pull import pull
 
-version = '0.2.1'
+version = '0.2.3'
 
 def main():
     parser = argparse.ArgumentParser(prog="infrabox")
@@ -38,6 +38,14 @@ def main():
     # pull
     parser_pull = sub_parser.add_parser('pull', help='Pull a remote job')
     parser_pull.add_argument("--job-id", required=True)
+    parser_pull.add_argument("--no-container", required=False, dest='pull_container', action='store_false',
+                             help="Only the inputs will be downloaded but not the actual container. Implies --no-run.")
+    parser_pull.set_defaults(pull_container=True)
+
+    parser_pull.add_argument("--no-run", required=False, dest='run_container', action='store_false',
+                             help="The container will not be run.")
+    parser_pull.set_defaults(run_container=True)
+
     parser_pull.add_argument("-e", dest='environment', default=[], required=False,
                              action='append', type=str,
                              help="Add environment variable to jobs")
