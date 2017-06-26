@@ -86,15 +86,8 @@ def parse_limits(d, path):
     if d['cpu'] <= 0:
         raise ValidationError(path + ".cpu", "must be greater than 0")
 
-    if d['cpu'] > 4:
-        raise ValidationError(path + ".cpu", "must be less than 5")
-
     if d['memory'] <= 255:
         raise ValidationError(path + ".memory", "must be greater than 255")
-
-    if d['memory'] > 8192:
-        raise ValidationError(path + ".memory", "must be greater than 8193")
-
 
 def parse_resources(d, path):
     check_allowed_properties(d, path, ("limits",))
