@@ -110,18 +110,19 @@ def build_and_run_docker_compose(args, job):
         s = e.split("=")
         env[s[0]] = s[1]
 
+    if 'environment' in job:
+        for name, value in job['environment'].iteritems():
+            if isinstance(value, dict):
+                continue
+
+            env[name] = value
+
     if args.clean:
         execute(['docker-compose', '-p', args.project_name,
                  '-f', compose_file_new, 'rm', '-f'], env=env, cwd=job['base_path'])
 
     execute(['docker-compose', '-p', args.project_name,
              '-f', compose_file_new, 'build'], env=env, cwd=job['base_path'])
-
-    pname = args.project_name.replace("-", "")
-    image_names = subprocess.check_output("docker images | grep %s | awk '{print $1;}'" % pname, shell=True)
-
-    for l in image_names.splitlines():
-        check_username(l)
 
     def signal_handler(_, __):
         logger.info("Stopping docker containers")
@@ -137,16 +138,6 @@ def build_and_run_docker_compose(args, job):
 
     os.remove(compose_file_new)
 
-def check_username(image_name):
-    #inspect = subprocess.check_output(('docker', 'inspect', image_name))
-    #inspect = json.loads(inspect)
-
-    #user = inspect[0]['Config']['User']
-    #if not user or user == 'root':
-    #    logger.error("Container '%s' must not use root user" % image_name)
-    #    sys.exit(1)
-    pass
-
 def build_and_run_docker(args, job):
     infrabox = create_infrabox_directories(args, job)
 
@@ -161,13 +152,18 @@ def build_and_run_docker(args, job):
     execute(['docker', 'rm', container_name], cwd=args.project_root, ignore_error=True, ignore_output=True)
     execute(['docker', 'build', '-t', image_name, '.', '-f', job['docker_file']], cwd=job['base_path'])
 
-    check_username(image_name)
-
     # Run it
     cmd = ['docker', 'run', '--name', container_name, '-v', '%s:/infrabox' % infrabox]
 
     for e in args.environment:
         cmd += ['-e', e]
+
+    if 'environment' in job:
+        for name, value in job['environment'].iteritems():
+            if isinstance(value, dict):
+                continue
+
+            cmd += ['-e', '%s=%s' %(name, value)]
 
     cmd.append(image_name)
 

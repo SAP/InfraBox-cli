@@ -70,6 +70,7 @@ def pull(args):
         # unpack
         tar = tarfile.open(package_path)
         tar.extractall(p)
+        logger.info('Storing it at %s' % p)
 
     # remove download dir again
     shutil.rmtree(download_path)
