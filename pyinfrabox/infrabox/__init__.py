@@ -27,6 +27,15 @@ def check_version(v, path):
     if v != 1:
         raise ValidationError(path, "unsupported version")
 
+def parse_build_args(e, path):
+    if not isinstance(e, dict):
+        raise ValidationError(path, "must be an object")
+
+    for key in e:
+        value = e[key]
+        p = path + "." + key
+        check_text(value, p)
+
 def parse_environment(e, path):
     if not isinstance(e, dict):
         raise ValidationError(path, "must be an object")
@@ -96,7 +105,7 @@ def parse_resources(d, path):
     parse_limits(d['limits'], path + ".limits")
 
 def parse_docker(d, path):
-    check_allowed_properties(d, path, ("type", "name", "docker_file", "depends_on", "resources", "build_only", "security", "commit_after_run", "keep", "environment"))
+    check_allowed_properties(d, path, ("type", "name", "docker_file", "depends_on", "resources", "build_only", "security", "commit_after_run", "keep", "environment", "build_arguments"))
     check_required_properties(d, path, ("type", "name", "docker_file", "resources"))
     check_name(d['name'], path + ".name")
     check_text(d['docker_file'], path + ".docker_file")
@@ -120,6 +129,9 @@ def parse_docker(d, path):
 
     if 'environment' in d:
         parse_environment(d['environment'], path + ".environment")
+
+    if 'build_arguments' in d:
+        parse_build_args(d['build_arguments'], path + ".build_arguments")
 
 def parse_docker_compose(d, path):
     check_allowed_properties(d, path, ("type", "name", "docker_compose_file", "depends_on", "environment", "resources"))

@@ -150,29 +150,36 @@ def build_and_run_docker(args, job):
     # Build the image
     logger.info("Build docker image")
     execute(['docker', 'rm', container_name], cwd=args.project_root, ignore_error=True, ignore_output=True)
-    execute(['docker', 'build', '-t', image_name, '.', '-f', job['docker_file']], cwd=job['base_path'])
+
+    cmd = ['docker', 'build', '-t', image_name, '.', '-f', job['docker_file']]
+    if 'build_arguments' in job:
+        for name, value in job['build_arguments'].iteritems():
+            cmd += ['--build-arg', '%s=%s' %(name, value)]
+
+    execute(cmd, cwd=job['base_path'])
 
     # Run it
-    cmd = ['docker', 'run', '--name', container_name, '-v', '%s:/infrabox' % infrabox]
+    if 'build_only' in job and not job['build_only']:
+        cmd = ['docker', 'run', '--name', container_name, '-v', '%s:/infrabox' % infrabox]
 
-    for e in args.environment:
-        cmd += ['-e', e]
+        for e in args.environment:
+            cmd += ['-e', e]
 
-    if 'environment' in job:
-        for name, value in job['environment'].iteritems():
-            if isinstance(value, dict):
-                continue
+        if 'environment' in job:
+            for name, value in job['environment'].iteritems():
+                if isinstance(value, dict):
+                    continue
 
-            cmd += ['-e', '%s=%s' %(name, value)]
+                cmd += ['-e', '%s=%s' %(name, value)]
 
-    cmd.append(image_name)
+        cmd.append(image_name)
 
-    logger.info("Run docker container")
-    execute(cmd, cwd=args.project_root)
+        logger.info("Run docker container")
+        execute(cmd, cwd=args.project_root)
 
-    if job.get('commit_after_run', False):
-        logger.info("Commiting Container")
-        execute(['docker', 'commit', container_name, image_name], cwd=args.project_root)
+        if job.get('commit_after_run', False):
+            logger.info("Commiting Container")
+            execute(['docker', 'commit', container_name, image_name], cwd=args.project_root)
 
 def build_and_run(args, job):
     job_type = job['type']

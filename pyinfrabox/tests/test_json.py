@@ -199,6 +199,32 @@ def test_environment():
     d['jobs'][0]['environment'] = {}
     validate_json(d)
 
+def test_build_arguments():
+    d = {
+        "version": 1,
+        "jobs": [{
+            "type": "docker",
+            "name": "test",
+            "docker_file": "Dockerfile",
+            "resources": {"limits": {"cpu": 1, "memory": 1024}},
+            "build_arguments": None
+        }]
+    }
+
+    raises_expect(d, "#jobs[0].build_arguments: must be an object")
+
+    d['jobs'][0]['build_arguments'] = []
+    raises_expect(d, "#jobs[0].build_arguments: must be an object")
+
+    d['jobs'][0]['build_arguments'] = {'key': 123}
+    raises_expect(d, "#jobs[0].build_arguments.key: is not a string")
+
+    d['jobs'][0]['build_arguments'] = {'key': {}}
+    raises_expect(d, "#jobs[0].build_arguments.key: is not a string")
+
+    d['jobs'][0]['build_arguments'] = {}
+    validate_json(d)
+
 def test_valid():
     d = {
         "version": 1,
