@@ -141,9 +141,12 @@ def build_and_run_docker_compose(args, job):
 def build_and_run_docker(args, job):
     infrabox = create_infrabox_directories(args, job)
 
-    image_name = args.project_name + '_' + job['name']
-    image_name = image_name.replace("/", "-")
-    image_name = image_name.lower()
+    if args.tag:
+        image_name = args.tag
+    else:
+        image_name = args.project_name + '_' + job['name']
+        image_name = image_name.replace("/", "-")
+        image_name = image_name.lower()
 
     container_name = job['name'].replace("/", "-")
 

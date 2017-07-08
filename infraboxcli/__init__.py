@@ -67,13 +67,16 @@ def main():
 
     # run
     parser_run = sub_parser.add_parser('run', help='Run your jobs locally')
-    parser_run.add_argument("--job-name", required=False, type=str,
+    parser_run.add_argument("-j", "--job-name", required=False, type=str,
                             help="Job name to execute")
     parser_run.add_argument("--clean", action='store_true', required=False,
                             help="Runs 'docker-compose rm' before building")
     parser_run.add_argument("-e", dest='environment', default=[], required=False,
                             action='append', type=str,
                             help="Add environment variable to jobs")
+    parser_run.add_argument("-t", dest='tag', required=False, type=str,
+                            help="Docker image tag")
+
     parser_run.set_defaults(clean=False)
     parser_run.set_defaults(func=run)
 
