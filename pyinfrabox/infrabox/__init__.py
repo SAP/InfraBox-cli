@@ -36,6 +36,15 @@ def parse_build_args(e, path):
         p = path + "." + key
         check_text(value, p)
 
+def parse_secret_ref(value, p):
+    if not isinstance(value, dict):
+        raise ValidationError(p, "must be an object")
+
+    if "$ref" not in value:
+        raise ValidationError(p, "must contain a $ref")
+
+    check_text(value['$ref'], p + ".$ref")
+
 def parse_environment(e, path):
     if not isinstance(e, dict):
         raise ValidationError(path, "must be an object")
@@ -45,10 +54,7 @@ def parse_environment(e, path):
         p = path + "." + key
 
         if isinstance(value, dict):
-            if "$ref" not in value:
-                raise ValidationError(p, "must contain a $ref")
-
-            check_text(value['$ref'], p + ".$ref")
+            parse_secret_ref(value, p)
         else:
             try:
                 check_text(value, p)
@@ -105,7 +111,7 @@ def parse_resources(d, path):
     parse_limits(d['limits'], path + ".limits")
 
 def parse_docker(d, path):
-    check_allowed_properties(d, path, ("type", "name", "docker_file", "depends_on", "resources", "build_only", "security", "commit_after_run", "keep", "environment", "build_arguments"))
+    check_allowed_properties(d, path, ("type", "name", "docker_file", "depends_on", "resources", "build_only", "security", "commit_after_run", "keep", "environment", "build_arguments", "deployments"))
     check_required_properties(d, path, ("type", "name", "docker_file", "resources"))
     check_name(d['name'], path + ".name")
     check_text(d['docker_file'], path + ".docker_file")
@@ -133,6 +139,9 @@ def parse_docker(d, path):
     if 'build_arguments' in d:
         parse_build_args(d['build_arguments'], path + ".build_arguments")
 
+    if 'deployments' in d:
+        parse_deployments(d['deployments'], path + ".deployments")
+
 def parse_docker_compose(d, path):
     check_allowed_properties(d, path, ("type", "name", "docker_compose_file", "depends_on", "environment", "resources"))
     check_required_properties(d, path, ("type", "name", "docker_compose_file", "resources"))
@@ -153,6 +162,40 @@ def parse_wait(d, path):
 
     if 'depends_on' in d:
         check_name_array(d['depends_on'], path + ".depends_on")
+
+def parse_deployment_docker_registry(d, path):
+    check_allowed_properties(d, path, ("type", "host", "repository", "username", "password"))
+    check_required_properties(d, path, ("type", "host", "repository"))
+    check_text(d['host'], path + ".host")
+    check_text(d['repository'], path + ".repository")
+
+    if 'username' in d:
+        check_text(d['username'], path + ".username")
+
+    if 'password' in d:
+        parse_secret_ref(d['password'], path + ".password")
+
+def parse_deployments(e, path):
+    if not isinstance(e, list):
+        raise ValidationError(path, "must be an array")
+
+    if not e:
+        raise ValidationError(path, "must not be empty")
+
+    for i in range(0, len(e)):
+        elem = e[i]
+        p = "%s[%s]" % (path, i)
+
+        if 'type' not in elem:
+            raise ValidationError(p, "does not contain a 'type'")
+
+        t = elem['type']
+
+        if t == 'docker-registry':
+            parse_deployment_docker_registry(elem, p)
+        else:
+            raise ValidationError(p, "type '%s' not supported" % t)
+
 
 def parse_jobs(e, path):
     if not isinstance(e, list):
@@ -183,15 +226,34 @@ def parse_jobs(e, path):
         else:
             raise ValidationError(p, "type '%s' not supported" % t)
 
+def parse_generator(d, path):
+    check_allowed_properties(d, "#", ("docker_file",))
+    check_required_properties(d, "#", ("docker_file",))
+    check_text(d['docker_file'], path + ".docker_file")
+
 def parse_document(d):
-    check_allowed_properties(d, "#", ("version", "jobs"))
-    check_required_properties(d, "#", ("version", "jobs"))
+    check_allowed_properties(d, "#", ("version", "jobs", "generator"))
+    check_required_properties(d, "#", ("version", ))
 
     check_version(d['version'], "#version")
-    parse_jobs(d['jobs'], "#jobs")
+
+    if 'generator' not in d and 'jobs' not in d:
+        raise ValidationError("#", "Either 'jobs' or 'generator' must be set")
+
+    if 'generator' in d and 'jobs' in d:
+        raise ValidationError("#", "Either 'jobs' or 'generator' must be set, not both")
+
+    if 'jobs' in d:
+        parse_jobs(d['jobs'], "#jobs")
+
+    if 'generator' in d:
+        parse_generator(d['generator'], "#generator")
 
 def validate_json(d):
     parse_document(d)
+
+    if 'jobs' not in d:
+        return True
 
     jobs = {}
     for i in range(0, len(d['jobs'])):

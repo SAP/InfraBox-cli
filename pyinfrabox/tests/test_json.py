@@ -16,7 +16,7 @@ def test_version():
     raises_expect({'version': 2, 'jobs': []}, "#version: unsupported version")
 
 def test_jobs():
-    raises_expect({'version': 1}, "#: property 'jobs' is required")
+    raises_expect({'version': 1}, "#: Either 'jobs' or 'generator' must be set")
     raises_expect({'version': 1, 'jobs': 'asd'}, "#jobs: must be an array")
     raises_expect({'version': 1, 'jobs': []}, "#jobs: must not be empty")
     raises_expect({'version': 1, 'jobs': [{}]}, "#jobs[0]: does not contain a 'type'")
@@ -197,6 +197,35 @@ def test_environment():
     raises_expect(d, "#jobs[0].environment.key.$ref: is not a string")
 
     d['jobs'][0]['environment'] = {}
+    validate_json(d)
+
+def test_deployments():
+    d = {
+        "version": 1,
+        "jobs": [{
+            "type": "docker",
+            "name": "test",
+            "docker_file": "Dockerfile",
+            "resources": {"limits": {"cpu": 1, "memory": 1024}},
+            "deployments": None
+        }]
+    }
+
+    raises_expect(d, "#jobs[0].deployments: must be an array")
+
+    d['jobs'][0]['deployments'] = []
+    raises_expect(d, "#jobs[0].deployments: must not be empty")
+
+    d['jobs'][0]['deployments'] = [{}]
+    raises_expect(d, "#jobs[0].deployments[0]: does not contain a 'type'")
+
+    d['jobs'][0]['deployments'] = [{'type': 'unknown'}]
+    raises_expect(d, "#jobs[0].deployments[0]: type 'unknown' not supported")
+
+    d['jobs'][0]['deployments'] = [{'type': 'docker-registry', 'host': 'hostname', 'repository': 'repo', 'username': 'user', 'password': 'value'}]
+    raises_expect(d, "#jobs[0].deployments[0].password: must be an object")
+
+    d['jobs'][0]['deployments'] = [{'type': 'docker-registry', 'host': 'hostname', 'repository': 'repo', 'username': 'user', 'password': {'$ref': 'blub'}}]
     validate_json(d)
 
 def test_build_arguments():
