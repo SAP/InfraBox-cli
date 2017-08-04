@@ -1,6 +1,10 @@
+import os
 import subprocess
 
-def execute(command, cwd=None, env={}, ignore_error=False, ignore_output=False):
+def execute(command, cwd=None, env=None, ignore_error=False, ignore_output=False):
+    if env is None:
+        env = os.environ
+
     process = subprocess.Popen(command, shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd, env=env, universal_newlines=True)
 
     # Poll process for new output until finished
