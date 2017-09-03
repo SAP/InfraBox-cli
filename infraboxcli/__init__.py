@@ -15,7 +15,7 @@ version = '0.2.5'
 
 def main():
     parser = argparse.ArgumentParser(prog="infrabox")
-    parser.add_argument("--host", required=False, default="https://api.infrabox.net")
+    parser.add_argument("--host", required=False, default=os.environ.get('INFRABOX_HOST', 'https://api.infrabox.net'))
     sub_parser = parser.add_subparsers(help='sub-command help')
 
     # version
@@ -76,6 +76,9 @@ def main():
                             help="Add environment variable to jobs")
     parser_run.add_argument("-t", dest='tag', required=False, type=str,
                             help="Docker image tag")
+    parser_run.add_argument("--local-cache", required=False, type=str, default="/tmp/infrabox/local-cache",
+                            help="Path to the local cache")
+
 
     parser_run.set_defaults(clean=False)
     parser_run.set_defaults(func=run)
@@ -86,6 +89,11 @@ def main():
     if 'version' in args:
         print('infraboxcli %s' % version)
         return
+
+    if "DOCKER_HOST" in os.environ:
+        logger.error("DOCKER_HOST is set")
+        logger.error("infrabox can't be used to run jobs on a remote machine")
+        sys.exit(1)
 
     # Find infrabox.json
     p = os.getcwd()

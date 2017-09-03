@@ -56,10 +56,10 @@ def pull(args):
     output_path = os.path.join(path, 'output')
     os.makedirs(output_path)
 
-    # download dependencies
+    # download inputs
     for d in manifest['dependencies']:
-        logger.info('Downloading output of %s' % d['name'])
         p = os.path.join(inputs_path, d['name'])
+        logger.info('Downloading output of %s to %s' % (d['name'], p))
         os.makedirs(p)
         package_path = os.path.join(download_path, '%s.%s' % (d['id'], d['output']['format']))
         download_file(d['output']['url'], package_path, args)
@@ -70,7 +70,16 @@ def pull(args):
         # unpack
         tar = tarfile.open(package_path)
         tar.extractall(p)
-        logger.info('Storing it at %s' % p)
+
+    # download output
+    logger.info('Downloading output of %s to %s' % (manifest['name'], output_path))
+
+    package_path = os.path.join(download_path, '%s.%s' % (manifest['id'], manifest['output']['format']))
+    download_file(manifest['output']['url'], package_path, args)
+
+    if os.path.exists(package_path):
+        tar = tarfile.open(package_path)
+        tar.extractall(output_path)
 
     # remove download dir again
     shutil.rmtree(download_path)

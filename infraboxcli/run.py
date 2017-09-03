@@ -3,7 +3,6 @@ import json
 import signal
 import shutil
 import sys
-import subprocess
 from datetime import datetime
 import yaml
 
@@ -31,7 +30,7 @@ def create_infrabox_directories(args, job, service=None):
     infrabox_cache = os.path.join(infrabox, 'cache')
     infrabox_output = os.path.join(infrabox, 'output')
     infrabox_inputs = os.path.join(infrabox, 'inputs')
-    infrabox_upload = os.path.join(infrabox, 'upload', 'testresult')
+    infrabox_testresult = os.path.join(infrabox, 'upload', 'testresult')
     infrabox_markup = os.path.join(infrabox, 'upload', 'markup')
     infrabox_badge = os.path.join(infrabox, 'upload', 'badge')
     infrabox_job_json = os.path.join(infrabox, 'job.json')
@@ -45,8 +44,8 @@ def create_infrabox_directories(args, job, service=None):
     if os.path.exists(infrabox_inputs):
         shutil.rmtree(infrabox_inputs)
 
-    if os.path.exists(infrabox_upload):
-        shutil.rmtree(infrabox_upload)
+    if os.path.exists(infrabox_testresult):
+        shutil.rmtree(infrabox_testresult)
 
     if os.path.exists(infrabox_markup):
         shutil.rmtree(infrabox_markup)
@@ -59,9 +58,19 @@ def create_infrabox_directories(args, job, service=None):
 
     makedirs(infrabox_output)
     makedirs(infrabox_inputs)
-    makedirs(infrabox_upload)
+    makedirs(infrabox_testresult)
     makedirs(infrabox_markup)
     makedirs(infrabox_badge)
+
+    job['directories'] = {
+        "output": infrabox_output,
+        "inputs": infrabox_inputs,
+        "upload/testresult": infrabox_testresult,
+        "upload/markup": infrabox_markup,
+        "upload/badge": infrabox_badge,
+        "cache": infrabox_cache,
+        "local-cache": args.local_cache
+    }
 
     # create job.json
     with open(infrabox_job_json, 'w') as out:
@@ -87,9 +96,7 @@ def create_infrabox_directories(args, job, service=None):
         destination_path = os.path.join(infrabox_inputs, dep)
 
         if os.path.exists(source_path):
-            shutil.copytree(source_path, destination_path)
-
-    return infrabox
+            shutil.copytree(source_path, destination_path, symlinks=True)
 
 def build_and_run_docker_compose(args, job):
     compose_file = os.path.join(job['base_path'], job['docker_compose_file'])
@@ -98,8 +105,13 @@ def build_and_run_docker_compose(args, job):
     # rewrite compose file
     compose_file_content = docker_compose.create_from(compose_file)
     for service in compose_file_content['services']:
-        infrabox = create_infrabox_directories(args, job, service=service)
-        compose_file_content['services'][service]['volumes'] = ["%s:/infrabox" % str(infrabox)]
+        create_infrabox_directories(args, job, service=service)
+
+        volumes = []
+        for name, path in job['directories'].items():
+            volumes.append('%s:/infrabox/%s' % (path, name))
+
+        compose_file_content['services'][service]['volumes'] = volumes
 
     with open(compose_file_new, "w+") as out:
         yaml.dump(compose_file_content, out, default_flow_style=False)
@@ -139,7 +151,7 @@ def build_and_run_docker_compose(args, job):
     os.remove(compose_file_new)
 
 def build_and_run_docker(args, job):
-    infrabox = create_infrabox_directories(args, job)
+    create_infrabox_directories(args, job)
 
     if args.tag:
         image_name = args.tag
@@ -163,7 +175,12 @@ def build_and_run_docker(args, job):
 
     # Run it
     if 'build_only' in job and not job['build_only']:
-        cmd = ['docker', 'run', '--name', container_name, '-v', '%s:/infrabox' % infrabox]
+        cmd = ['docker', 'run', '--name', container_name]
+
+        for name, path in job['directories'].items():
+            cmd += ['-v', '%s:/infrabox/%s' % (path, name)]
+
+        cmd += ['-m', '%sm' % job['resources']['limits']['memory']]
 
         for e in args.environment:
             cmd += ['-e', e]
@@ -216,6 +233,27 @@ def build_and_run(args, job):
 def run(args):
     # validate infrabox.json
     data = load_infrabox_json(args.infrabox_json)
+
+    # If generator is set we have to run it first
+    if 'generator' in data:
+        job = {
+            "name": "Generator",
+            "type": "docker",
+            "docker_file": data['generator']['docker_file'],
+            "build_only": False,
+            "resources": {"limits": {"memory": 1024, "cpu": 1}},
+            "base_path": None
+        }
+
+        build_and_run(args, job)
+        infrabox_json = os.path.join(job['directories']['output'], 'infrabox.json')
+
+        if not os.path.exists(infrabox_json):
+            logger.error("Generator did not create an infrabox.json file")
+            sys.exit(1)
+
+        data = load_infrabox_json(infrabox_json)
+
     jobs = get_job_list(data, args, base_path=args.project_root)
 
     # check if job name exists

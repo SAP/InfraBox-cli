@@ -29,10 +29,10 @@ def init(_):
                 "name": "test",
                 "type": "docker",
                 "build_only": False,
-                "machine_config": "vm-1-2048",
+                "resources": {"limits": {"memory": 1024, "cpu": 1}},
                 "docker_file": "infrabox/test/Dockerfile"
             }]
-        }, f)
+        }, f, sort_keys=True, indent=4)
 
     logger.info("Creating infrabox/test/Dockerfile")
     os.makedirs(infrabox_test)

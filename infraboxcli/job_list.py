@@ -1,9 +1,5 @@
 import os
 import json
-import sys
-import subprocess
-import signal
-import shutil
 import uuid
 
 from builtins import range
@@ -29,8 +25,12 @@ def get_parent_name(parents):
     return name
 
 
-def get_job_list(data, args, parents=[], base_path=None):
+def get_job_list(data, args, parents=None, base_path=None):
     jobs = []
+
+    if not parents:
+        parents = []
+
     parent_name = get_parent_name(parents)
 
     for job in data['jobs']:
