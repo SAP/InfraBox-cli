@@ -197,9 +197,8 @@ def build_and_run_docker(args, job):
         logger.info("Run docker container")
         execute(cmd, cwd=args.project_root)
 
-        if job.get('commit_after_run', False):
-            logger.info("Commiting Container")
-            execute(['docker', 'commit', container_name, image_name], cwd=args.project_root)
+        logger.info("Commiting Container")
+        execute(['docker', 'commit', container_name, image_name], cwd=args.project_root)
 
 def build_and_run(args, job):
     job_type = job['type']
