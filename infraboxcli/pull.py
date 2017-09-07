@@ -4,6 +4,7 @@ import tempfile
 import tarfile
 import shutil
 import subprocess
+import json
 
 import requests
 
@@ -12,7 +13,7 @@ from infraboxcli.log import logger
 
 def download_file(url, filename, args):
     headers = {'auth-token': args.token}
-    r = requests.get(url, headers=headers, stream=True, timeout=5)
+    r = requests.get(url, headers=headers, stream=True, timeout=5, verify=args.ca_bundle)
 
     if r.status_code == 404:
         # no file exists
@@ -33,7 +34,7 @@ def pull(args):
 
     headers = {'auth-token': args.token}
     url = '%s/v1/project/%s/job/%s/manifest' % (args.host, args.project_id, args.job_id)
-    r = requests.get(url, headers=headers, timeout=5)
+    r = requests.get(url, headers=headers, timeout=5, verify=args.ca_bundle)
 
     if r.status_code != 200:
         logger.error("Failed to download job manifest")

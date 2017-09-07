@@ -15,7 +15,8 @@ version = '0.3.0'
 
 def main():
     parser = argparse.ArgumentParser(prog="infrabox")
-    parser.add_argument("--host", required=False, default=os.environ.get('INFRABOX_HOST', 'https://api.infrabox.net'))
+    parser.add_argument("--host", required=False, default=os.environ.get('INFRABOX_HOST', 'https://api.infrabox.net'), help="Address of the API server. Required if you want to use your own InfraBox Instance")
+    parser.add_argument("--ca-bundle", required=False, default=os.environ.get('INFRABOX_CA_BUNDLE', None), help="Path to a CA_BUNDLE file or directory with certificates of trusted CAs")
     sub_parser = parser.add_subparsers(help='sub-command help')
 
     # version
@@ -67,7 +68,7 @@ def main():
 
     # run
     parser_run = sub_parser.add_parser('run', help='Run your jobs locally')
-    parser_run.add_argument("-j", "--job-name", required=False, type=str,
+    parser_run.add_argument("job_name", type=str,
                             help="Job name to execute")
     parser_run.add_argument("--clean", action='store_true', required=False,
                             help="Runs 'docker-compose rm' before building")
@@ -78,7 +79,6 @@ def main():
                             help="Docker image tag")
     parser_run.add_argument("--local-cache", required=False, type=str, default="/tmp/infrabox/local-cache",
                             help="Path to the local cache")
-
 
     parser_run.set_defaults(clean=False)
     parser_run.set_defaults(func=run)
@@ -94,6 +94,14 @@ def main():
         logger.error("DOCKER_HOST is set")
         logger.error("infrabox can't be used to run jobs on a remote machine")
         sys.exit(1)
+
+    if args.ca_bundle:
+        if args.ca_bundle.lower() == "false":
+            args.ca_bundle = False
+        else:
+            if not os.path.exists(args.ca_bundle):
+                logger.error("INFRABOX_CA_BUNDLE: %s not found" % args.ca_bundle)
+                sys.exit(1)
 
     # Find infrabox.json
     p = os.getcwd()

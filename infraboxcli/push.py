@@ -66,7 +66,7 @@ def upload_zip(args, f):
     url = '%s/v1/project/%s/upload' % (args.host, args.project_id)
     files = {'project.zip': f}
     headers = {'Authorization': args.token}
-    r = requests.post(url, files=files, headers=headers, timeout=120)
+    r = requests.post(url, files=files, headers=headers, timeout=120, verify=args.ca_bundle)
 
     d = r.json()
 
