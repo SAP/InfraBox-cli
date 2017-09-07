@@ -5,7 +5,7 @@ def readme():
         return f.read()
 
 setup(name='infraboxcli',
-      version='0.3.0',
+      version='0.3.1',
       url='https://github.com/infrabox/cli',
       description='Command Line Interface for InfraBox',
       long_description=readme(),
