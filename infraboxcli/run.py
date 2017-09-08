@@ -98,6 +98,21 @@ def create_infrabox_directories(args, job, service=None):
         if os.path.exists(source_path):
             shutil.copytree(source_path, destination_path, symlinks=True)
 
+def get_secret(args, name):
+    secrets_file = os.path.join(args.project_root, '.infraboxsecrets.json')
+    if not os.path.exists(secrets_file):
+        logger.error("No secrets file found")
+        sys.exit(1)
+
+    with open(secrets_file) as f:
+        secrets = json.load(f)
+
+        if name not in secrets:
+            logger.error("%s not found in .infraboxsecrets.json" % name)
+            sys.exit(1)
+
+        return secrets[name]
+
 def build_and_run_docker_compose(args, job):
     compose_file = os.path.join(job['base_path'], job['docker_compose_file'])
     compose_file_new = compose_file + ".infrabox"
@@ -118,16 +133,12 @@ def build_and_run_docker_compose(args, job):
 
     env = {"PATH": os.environ['PATH']}
 
-    for e in args.environment:
-        s = e.split("=")
-        env[s[0]] = s[1]
-
     if 'environment' in job:
         for name, value in job['environment'].iteritems():
             if isinstance(value, dict):
-                continue
-
-            env[name] = value
+                env[name] = get_secret(args, value['$ref'])
+            else:
+                env[name] = value
 
     if args.clean:
         execute(['docker-compose', '-p', args.project_name,
@@ -182,15 +193,12 @@ def build_and_run_docker(args, job):
 
         cmd += ['-m', '%sm' % job['resources']['limits']['memory']]
 
-        for e in args.environment:
-            cmd += ['-e', e]
-
         if 'environment' in job:
             for name, value in job['environment'].iteritems():
                 if isinstance(value, dict):
-                    continue
-
-                cmd += ['-e', '%s=%s' %(name, value)]
+                    cmd += ['-e', '%s=%s' %(name, get_secret(args, value['$ref']))]
+                else:
+                    cmd += ['-e', '%s=%s' %(name, value)]
 
         cmd.append(image_name)
 

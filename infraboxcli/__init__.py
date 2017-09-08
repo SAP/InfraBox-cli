@@ -46,10 +46,6 @@ def main():
     parser_pull.add_argument("--no-run", required=False, dest='run_container', action='store_false',
                              help="The container will not be run.")
     parser_pull.set_defaults(run_container=True)
-
-    parser_pull.add_argument("-e", dest='environment', default=[], required=False,
-                             action='append', type=str,
-                             help="Add environment variable to jobs")
     parser_pull.set_defaults(func=pull)
 
     # graph
@@ -68,13 +64,10 @@ def main():
 
     # run
     parser_run = sub_parser.add_parser('run', help='Run your jobs locally')
-    parser_run.add_argument("job_name", type=str,
+    parser_run.add_argument("job_name", nargs="?", type=str,
                             help="Job name to execute")
     parser_run.add_argument("--clean", action='store_true', required=False,
                             help="Runs 'docker-compose rm' before building")
-    parser_run.add_argument("-e", dest='environment', default=[], required=False,
-                            action='append', type=str,
-                            help="Add environment variable to jobs")
     parser_run.add_argument("-t", dest='tag', required=False, type=str,
                             help="Docker image tag")
     parser_run.add_argument("--local-cache", required=False, type=str, default="/tmp/infrabox/local-cache",
