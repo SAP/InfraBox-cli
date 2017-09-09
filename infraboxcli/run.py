@@ -277,8 +277,6 @@ def run(args):
 
     jobs = get_job_list(data, args, base_path=args.project_root)
 
-    print json.dumps(jobs, indent=5)
-
     # check if job name exists
     job = None
     if args.job_name:
