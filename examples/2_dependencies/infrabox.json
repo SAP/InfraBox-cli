@@ -5,13 +5,13 @@
         "name": "producer",
         "docker_file": "Dockerfile_producer",
         "build_only": false,
-        "machine_config": "vm-1-2048"
+        "resources": {"limits": {"cpu": 1, "memory": 1024}}
     }, {
         "type": "docker",
         "name": "consumer",
         "docker_file": "Dockerfile_consumer",
         "build_only": false,
-        "machine_config": "vm-1-2048",
+        "resources": {"limits": {"cpu": 1, "memory": 1024}},
         "depends_on": ["producer"]
     }]
 }

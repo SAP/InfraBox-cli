@@ -24,6 +24,25 @@ def get_parent_name(parents):
 
     return name
 
+def rewrite_job_dependencies(job):
+    # rewrite depends_on from
+    # "jobname" -> {"job": "jobname", "on": ["finished"]}
+    # "*" => ["finished", "error", "failure"]
+    if 'depends_on' in job:
+        for x in range(0, len(job['depends_on'])):
+            dep = job['depends_on'][x]
+            if not isinstance(dep, dict):
+                job['depends_on'][x] = {"job": dep, "on": ["finished"]}
+            else:
+                for o in dep['on']:
+                    if o != "*":
+                        continue
+
+                    job['depends_on'][x] = {
+                        "job": dep['job'],
+                        "on": ["finished", "error", "failure"]
+                    }
+
 
 def get_job_list(data, args, parents=None, base_path=None):
     jobs = []
@@ -44,7 +63,13 @@ def get_job_list(data, args, parents=None, base_path=None):
 
             deps = job.get('depends_on', [])
             for x in range(0, len(deps)):
-                deps[x] = parent_name + "/" + deps[x]
+                dep = deps[x]
+                if isinstance(dep, dict):
+                    dep = dep['job']
+
+                deps[x] = parent_name + "/" + dep
+
+        rewrite_job_dependencies(job)
 
         job_name = job['name']
 
@@ -74,7 +99,7 @@ def get_job_list(data, args, parents=None, base_path=None):
         job_with_children = {}
         for s in sub:
             deps = s.get('depends_on', [])
-            if len(deps) == 0:
+            if not deps:
                 s['depends_on'] = job.get('depends_on', [])
 
             for d in deps:
@@ -96,7 +121,7 @@ def get_job_list(data, args, parents=None, base_path=None):
         for s in sub:
             sub_name = s['name']
             if sub_name not in job_with_children:
-                final_job['depends_on'].append(sub_name)
+                final_job['depends_on'].append({"job": sub_name, "on": ["finished"]})
 
         jobs.append(final_job)
 

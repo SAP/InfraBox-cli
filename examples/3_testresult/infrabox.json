@@ -5,6 +5,6 @@
         "name": "testresult",
         "docker_file": "Dockerfile",
         "build_only": false,
-        "machine_config": "vm-1-2048"
+        "resources": {"limits": {"cpu": 1, "memory": 1024}}
     }]
 }

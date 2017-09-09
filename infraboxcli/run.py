@@ -90,9 +90,9 @@ def create_infrabox_directories(args, job, service=None):
     # copy inputs
     for dep in job.get('depends_on', []):
         source_path = os.path.join(args.project_root, '.infrabox',
-                                   'jobs', dep, 'infrabox', 'output')
+                                   'jobs', dep['job'], 'infrabox', 'output')
 
-        dep = dep.split("/")[-1]
+        dep = dep['job'].split("/")[-1]
         destination_path = os.path.join(infrabox_inputs, dep)
 
         if os.path.exists(source_path):
@@ -208,7 +208,21 @@ def build_and_run_docker(args, job):
         logger.info("Commiting Container")
         execute(['docker', 'commit', container_name, image_name], cwd=args.project_root)
 
+def get_parent_job(name):
+    for job in parent_jobs:
+        if job['name'] == name:
+            return job
+
 def build_and_run(args, job):
+    # check if depedency conditions are met
+    for dep in job.get("depends_on", []):
+        on = dep['on']
+        parent = get_parent_job(dep['job'])
+
+        if parent['state'] not in on:
+            logger.info('Skipping job %s' % job['name'])
+            return
+
     job_type = job['type']
     start_date = datetime.now()
 
@@ -262,6 +276,8 @@ def run(args):
         data = load_infrabox_json(infrabox_json)
 
     jobs = get_job_list(data, args, base_path=args.project_root)
+
+    print json.dumps(jobs, indent=5)
 
     # check if job name exists
     job = None
