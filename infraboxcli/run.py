@@ -124,7 +124,7 @@ def build_and_run_docker_compose(args, job):
 
         volumes = []
         for name, path in job['directories'].items():
-            volumes.append('%s:/infrabox/%s' % (path, name))
+            volumes.append(str('%s:/infrabox/%s' % (path, name)))
 
         compose_file_content['services'][service]['volumes'] = volumes
 
@@ -218,6 +218,9 @@ def build_and_run(args, job):
     for dep in job.get("depends_on", []):
         on = dep['on']
         parent = get_parent_job(dep['job'])
+
+        if not parent:
+            continue
 
         if parent['state'] not in on:
             logger.info('Skipping job %s' % job['name'])
