@@ -11,7 +11,7 @@ from infraboxcli.log import logger
 from infraboxcli.init import init
 from infraboxcli.pull import pull
 
-version = '0.3.2'
+version = '0.3.3'
 
 def main():
     parser = argparse.ArgumentParser(prog="infrabox")
