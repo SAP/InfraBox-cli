@@ -68,7 +68,11 @@ def upload_zip(args, f):
     headers = {'Authorization': args.token}
     r = requests.post(url, files=files, headers=headers, timeout=120, verify=args.ca_bundle)
 
-    d = r.json()
+    try:
+        d = r.json()
+    except:
+        print r.text
+        raise
 
     if r.status_code != 200:
         logger.error("Upload failed: %s" % d['message'])

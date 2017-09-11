@@ -184,34 +184,47 @@ def build_and_run_docker(args, job):
 
     execute(cmd, cwd=job['base_path'])
 
-    # Run it
-    if 'build_only' in job and not job['build_only']:
-        cmd = ['docker', 'run', '--name', container_name]
+    if 'build_only' not in job:
+        return
 
-        for name, path in job['directories'].items():
-            cmd += ['-v', '%s:/infrabox/%s' % (path, name)]
+    if job['build_only']:
+        return
 
-        cmd += ['-m', '%sm' % job['resources']['limits']['memory']]
+    cmd = ['docker', 'run', '--name', container_name]
 
-        if 'environment' in job:
-            for name, value in job['environment'].iteritems():
-                if isinstance(value, dict):
-                    cmd += ['-e', '%s=%s' %(name, get_secret(args, value['$ref']))]
-                else:
-                    cmd += ['-e', '%s=%s' %(name, value)]
+    for name, path in job['directories'].items():
+        cmd += ['-v', '%s:/infrabox/%s' % (path, name)]
 
-        cmd.append(image_name)
+    cmd += ['-m', '%sm' % job['resources']['limits']['memory']]
 
-        logger.info("Run docker container")
-        execute(cmd, cwd=args.project_root)
+    if 'environment' in job:
+        for name, value in job['environment'].iteritems():
+            if isinstance(value, dict):
+                cmd += ['-e', '%s=%s' %(name, get_secret(args, value['$ref']))]
+            else:
+                cmd += ['-e', '%s=%s' %(name, value)]
 
-        logger.info("Commiting Container")
-        execute(['docker', 'commit', container_name, image_name], cwd=args.project_root)
+    cmd.append(image_name)
+
+    logger.info("Run docker container")
+    execute(cmd, cwd=args.project_root)
+
+    logger.info("Commiting Container")
+    execute(['docker', 'commit', container_name, image_name], cwd=args.project_root)
 
 def get_parent_job(name):
     for job in parent_jobs:
         if job['name'] == name:
             return job
+
+def track_as_parent(job, state, start_date=datetime.now(), end_date=datetime.now()):
+    parent_jobs.append({
+        "name": job['name'],
+        "state": state,
+        "start_date": str(start_date),
+        "end_date": str(end_date),
+        "depends_on": job.get('depends_on', [])
+    })
 
 def build_and_run(args, job):
     # check if depedency conditions are met
@@ -224,6 +237,7 @@ def build_and_run(args, job):
 
         if parent['state'] not in on:
             logger.info('Skipping job %s' % job['name'])
+            track_as_parent(job, 'skipped')
             return
 
     job_type = job['type']
@@ -231,27 +245,26 @@ def build_and_run(args, job):
 
     logger.info("Starting job %s" % job['name'])
 
-    if job_type == "docker-compose":
-        build_and_run_docker_compose(args, job)
-    elif job_type == "docker":
-        build_and_run_docker(args, job)
-    elif job_type == "wait":
-        # do nothing
-        pass
-    else:
-        logger.error("Unknown job type")
-        sys.exit(1)
+    state = 'finished'
+
+    try:
+        if job_type == "docker-compose":
+            build_and_run_docker_compose(args, job)
+        elif job_type == "docker":
+            build_and_run_docker(args, job)
+        elif job_type == "wait":
+            # do nothing
+            pass
+        else:
+            logger.error("Unknown job type")
+            sys.exit(1)
+    except:
+        state = 'failure'
+        logger.warn("Job failed")
+
     end_date = datetime.now()
 
-    # track as parent
-    parent_jobs.append({
-        "name": job['name'],
-        "state": 'finished',
-        "start_date": str(start_date),
-        "end_date": str(end_date),
-        "machine_config": job.get('machine_config', None),
-        "depends_on": job.get('depends_on', [])
-    })
+    track_as_parent(job, state, start_date, end_date)
     logger.info("Finished job %s" % job['name'])
 
 def run(args):

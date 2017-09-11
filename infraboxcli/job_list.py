@@ -40,7 +40,7 @@ def rewrite_job_dependencies(job):
 
                     job['depends_on'][x] = {
                         "job": dep['job'],
-                        "on": ["finished", "error", "failure"]
+                        "on": ["finished", "error", "failure", "skipped"]
                     }
 
 
