@@ -71,7 +71,7 @@ def upload_zip(args, f):
     try:
         d = r.json()
     except:
-        print r.text
+        print(r.text)
         raise
 
     if r.status_code != 200:
