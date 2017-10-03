@@ -15,8 +15,14 @@ version = '0.3.3'
 
 def main():
     parser = argparse.ArgumentParser(prog="infrabox")
-    parser.add_argument("--host", required=False, default=os.environ.get('INFRABOX_HOST', 'https://api.infrabox.net'), help="Address of the API server. Required if you want to use your own InfraBox Instance")
-    parser.add_argument("--ca-bundle", required=False, default=os.environ.get('INFRABOX_CA_BUNDLE', None), help="Path to a CA_BUNDLE file or directory with certificates of trusted CAs")
+    parser.add_argument("--api-url",
+                        required=False,
+                        default=os.environ.get('INFRABOX_API_URL', None),
+                        help="Address of the API server")
+    parser.add_argument("--ca-bundle",
+                        required=False,
+                        default=os.environ.get('INFRABOX_CA_BUNDLE', None),
+                        help="Path to a CA_BUNDLE file or directory with certificates of trusted CAs")
     sub_parser = parser.add_subparsers(help='sub-command help')
 
     # version

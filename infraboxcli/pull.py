@@ -4,7 +4,6 @@ import tempfile
 import tarfile
 import shutil
 import subprocess
-import json
 
 import requests
 
@@ -33,7 +32,7 @@ def pull(args):
     infraboxcli.env.check_env_project_id(args)
 
     headers = {'auth-token': args.token}
-    url = '%s/v1/project/%s/job/%s/manifest' % (args.host, args.project_id, args.job_id)
+    url = '%s/v1/project/%s/job/%s/manifest' % (args.api_url, args.project_id, args.job_id)
     r = requests.get(url, headers=headers, timeout=5, verify=args.ca_bundle)
 
     if r.status_code != 200:

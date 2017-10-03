@@ -40,7 +40,7 @@ def on_console_update(*args):
 
 def show_console(build_id, args):
     logger.info("Starting console output for build %s" % build_id)
-    with SocketIO(args.host) as s:
+    with SocketIO(args.api_url) as s:
         def on_job_update(*args):
             u = args[0]['data']
             job = u['job']
