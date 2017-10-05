@@ -258,9 +258,9 @@ def build_and_run(args, job):
         else:
             logger.error("Unknown job type")
             sys.exit(1)
-    except:
+    except Exception as e:
         state = 'failure'
-        logger.warn("Job failed")
+        logger.warn("Job failed: %s" % e)
 
     end_date = datetime.now()
 
