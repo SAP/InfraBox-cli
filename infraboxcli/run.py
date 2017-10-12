@@ -98,6 +98,8 @@ def create_infrabox_directories(args, job, service=None):
         if os.path.exists(source_path):
             shutil.copytree(source_path, destination_path, symlinks=True)
 
+    return infrabox_job_json
+
 def get_secret(args, name):
     secrets_file = os.path.join(args.project_root, '.infraboxsecrets.json')
     if not os.path.exists(secrets_file):
@@ -162,7 +164,7 @@ def build_and_run_docker_compose(args, job):
     os.remove(compose_file_new)
 
 def build_and_run_docker(args, job):
-    create_infrabox_directories(args, job)
+    infrabox_job_json = create_infrabox_directories(args, job)
 
     if args.tag:
         image_name = args.tag
@@ -195,6 +197,7 @@ def build_and_run_docker(args, job):
     for name, path in job['directories'].items():
         cmd += ['-v', '%s:/infrabox/%s' % (path, name)]
 
+    cmd += ['-v', '%s:/infrabox/job.json' % infrabox_job_json]
     cmd += ['-m', '%sm' % job['resources']['limits']['memory']]
 
     if 'environment' in job:

@@ -51,10 +51,12 @@ CMD echo "hello world"
     if os.path.exists(gitignore):
         with open(gitignore, 'a') as f:
             f.write("\n.infrabox/")
+            f.write("\n.infraboxsecrets.json")
 
     dockerignore = os.path.join(p, '.dockerignore')
     with open(dockerignore, 'a') as f:
         f.write("\n.infrabox/")
+        f.write("\n.infraboxsecrets.json")
 
     logger.info("Successfully initialized project")
     logger.info("Use 'infrabox run' to execute your jobs")

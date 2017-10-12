@@ -103,10 +103,6 @@ def pull(args):
     logger.info("Running container")
 
     cmd = ['docker', 'run', '-v', '%s:/infrabox' % path]
-
-    for e in args.environment:
-        cmd += ['-e', e]
-
     cmd.append(image)
 
     subprocess.check_call(cmd)
