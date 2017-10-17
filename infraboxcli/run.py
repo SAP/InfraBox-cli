@@ -34,6 +34,7 @@ def create_infrabox_directories(args, job, service=None):
     infrabox_markup = os.path.join(infrabox, 'upload', 'markup')
     infrabox_badge = os.path.join(infrabox, 'upload', 'badge')
     infrabox_job_json = os.path.join(infrabox, 'job.json')
+    infrabox_context = os.path.join(args.project_root)
 
     if not os.path.exists(infrabox_cache):
         makedirs(infrabox_cache)
@@ -64,12 +65,12 @@ def create_infrabox_directories(args, job, service=None):
 
     job['directories'] = {
         "output": infrabox_output,
-        "inputs": infrabox_inputs,
         "upload/testresult": infrabox_testresult,
         "upload/markup": infrabox_markup,
         "upload/badge": infrabox_badge,
         "cache": infrabox_cache,
-        "local-cache": args.local_cache
+        "local-cache": args.local_cache,
+        "context": infrabox_context
     }
 
     # create job.json
@@ -93,10 +94,9 @@ def create_infrabox_directories(args, job, service=None):
                                    'jobs', dep['job'], 'infrabox', 'output')
 
         dep = dep['job'].split("/")[-1]
-        destination_path = os.path.join(infrabox_inputs, dep)
-
-        if os.path.exists(source_path):
-            shutil.copytree(source_path, destination_path, symlinks=True)
+        job['directories'] = {
+            "inputs/%s" % dep['job']: source_path
+        }
 
     return infrabox_job_json
 
@@ -198,6 +198,7 @@ def build_and_run_docker(args, job):
         cmd += ['-v', '%s:/infrabox/%s' % (path, name)]
 
     cmd += ['-v', '%s:/infrabox/job.json' % infrabox_job_json]
+    cmd += ['-v', '/var/run/docker.sock:/var/run/docker.sock']
     cmd += ['-m', '%sm' % job['resources']['limits']['memory']]
 
     if 'environment' in job:
