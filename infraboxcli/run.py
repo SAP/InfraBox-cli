@@ -3,7 +3,10 @@ import json
 import signal
 import shutil
 import sys
+import stat
 from datetime import datetime
+import traceback
+import getpass
 import yaml
 
 from infraboxcli.execute import execute
@@ -24,7 +27,7 @@ def create_infrabox_directories(args, job, service=None):
         job_name += "/" + service
 
     # Create dirs
-    job_dir = os.path.join(args.project_root, '.infrabox', 'jobs', job_name)
+    job_dir = os.path.join(args.project_root, '.infraboxwork', 'jobs', job_name)
     job_git_source = os.path.join(job_dir, 'git_source')
     infrabox = os.path.join(job_dir, 'infrabox')
     infrabox_cache = os.path.join(infrabox, 'cache')
@@ -34,6 +37,7 @@ def create_infrabox_directories(args, job, service=None):
     infrabox_markup = os.path.join(infrabox, 'upload', 'markup')
     infrabox_badge = os.path.join(infrabox, 'upload', 'badge')
     infrabox_job_json = os.path.join(infrabox, 'job.json')
+    infrabox_gosu = os.path.join(infrabox, 'gosu.sh')
     infrabox_context = os.path.join(args.project_root)
 
     if not os.path.exists(infrabox_cache):
@@ -70,7 +74,9 @@ def create_infrabox_directories(args, job, service=None):
         "upload/badge": infrabox_badge,
         "cache": infrabox_cache,
         "local-cache": args.local_cache,
-        "context": infrabox_context
+        "context": infrabox_context,
+        "job.json": infrabox_job_json,
+        "gosu.sh": infrabox_gosu
     }
 
     # create job.json
@@ -88,17 +94,41 @@ def create_infrabox_directories(args, job, service=None):
 
         json.dump(o, out)
 
-    # copy inputs
+    with open(infrabox_gosu, 'w') as out:
+        out.write('''
+#!/bin/sh
+USER_ID=${INFRABOX_UID:-9001}
+GROUP_ID=${INFRABOX_GID:-9001}
+
+echo "Starting with UID:GID: $USER_ID:$GROUP_ID"
+addgroup -g $GROUP_ID infrabox
+adduser -D -u $USER_ID -G infrabox infrabox
+#useradd --shell /bin/bash -u $USER_ID -o -c "" -m infrabox
+export HOME=/home/infrabox
+
+exec su-exec infrabox "$@"
+''')
+        st = os.stat(infrabox_gosu)
+        os.chmod(infrabox_gosu, st.st_mode | stat.S_IEXEC)
+
+    # Inputs
+    repo_infrabox = os.path.join(args.project_root, '.infrabox')
+    if os.path.exists(repo_infrabox):
+        shutil.rmtree(repo_infrabox)
+
     for dep in job.get('depends_on', []):
-        source_path = os.path.join(args.project_root, '.infrabox',
+        source_path = os.path.join(args.project_root, '.infraboxwork',
                                    'jobs', dep['job'], 'infrabox', 'output')
-
         dep = dep['job'].split("/")[-1]
-        job['directories'] = {
-            "inputs/%s" % dep['job']: source_path
-        }
 
-    return infrabox_job_json
+        # Copy to .infrabox so we can use it in a COPY/ADD instruction
+        destination_path = os.path.join(repo_infrabox, 'inputs', dep)
+
+        if os.path.exists(source_path):
+            shutil.copytree(source_path, destination_path, symlinks=True)
+
+        # Mount to /infrabox/inputs
+        job['directories']['inputs/%s' % dep] = source_path
 
 def get_secret(args, name):
     secrets_file = os.path.join(args.project_root, '.infraboxsecrets.json')
@@ -164,7 +194,7 @@ def build_and_run_docker_compose(args, job):
     os.remove(compose_file_new)
 
 def build_and_run_docker(args, job):
-    infrabox_job_json = create_infrabox_directories(args, job)
+    create_infrabox_directories(args, job)
 
     if args.tag:
         image_name = args.tag
@@ -197,16 +227,18 @@ def build_and_run_docker(args, job):
     for name, path in job['directories'].items():
         cmd += ['-v', '%s:/infrabox/%s' % (path, name)]
 
-    cmd += ['-v', '%s:/infrabox/job.json' % infrabox_job_json]
     cmd += ['-v', '/var/run/docker.sock:/var/run/docker.sock']
     cmd += ['-m', '%sm' % job['resources']['limits']['memory']]
 
     if 'environment' in job:
         for name, value in job['environment'].iteritems():
             if isinstance(value, dict):
-                cmd += ['-e', '%s=%s' %(name, get_secret(args, value['$ref']))]
+                cmd += ['-e', '%s=%s' % (name, get_secret(args, value['$ref']))]
             else:
-                cmd += ['-e', '%s=%s' %(name, value)]
+                cmd += ['-e', '%s=%s' % (name, value)]
+
+    cmd += ['-e', 'INFRABOX_UID=%s' % os.geteuid()]
+    cmd += ['-e', 'INFRABOX_GID=%s' % os.getegid()]
 
     cmd.append(image_name)
 
@@ -264,37 +296,33 @@ def build_and_run(args, job):
             sys.exit(1)
     except Exception as e:
         state = 'failure'
+        traceback.print_exc(file=sys.stdout)
         logger.warn("Job failed: %s" % e)
+
+    # Dynamic child jobs
+    infrabox_json = os.path.join(job['directories']['output'], 'infrabox.json')
+
+    jobs = []
+    if os.path.exists(infrabox_json):
+        logger.info("Loading generated jobs")
+
+        data = load_infrabox_json(infrabox_json)
+        jobs = get_job_list(data, args, base_path=args.project_root)
 
     end_date = datetime.now()
 
     track_as_parent(job, state, start_date, end_date)
     logger.info("Finished job %s" % job['name'])
 
+    for j in jobs:
+        if not j.get('depends_on', None):
+            j['depends_on'] = [{"on": ["finished"], "job": job['name']}]
+
+        build_and_run(args, j)
+
 def run(args):
     # validate infrabox.json
     data = load_infrabox_json(args.infrabox_json)
-
-    # If generator is set we have to run it first
-    if 'generator' in data:
-        job = {
-            "name": "Generator",
-            "type": "docker",
-            "docker_file": data['generator']['docker_file'],
-            "build_only": False,
-            "resources": {"limits": {"memory": 1024, "cpu": 1}},
-            "base_path": None
-        }
-
-        build_and_run(args, job)
-        infrabox_json = os.path.join(job['directories']['output'], 'infrabox.json')
-
-        if not os.path.exists(infrabox_json):
-            logger.error("Generator did not create an infrabox.json file")
-            sys.exit(1)
-
-        data = load_infrabox_json(infrabox_json)
-
     jobs = get_job_list(data, args, base_path=args.project_root)
 
     # check if job name exists
