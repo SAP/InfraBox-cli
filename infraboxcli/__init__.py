@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+import pwd
 
 from infraboxcli.push import push
 from infraboxcli.run import run
@@ -14,6 +15,8 @@ from infraboxcli.pull import pull
 version = '0.3.4'
 
 def main():
+    username = pwd.getpwuid(os.getuid()).pw_name
+
     parser = argparse.ArgumentParser(prog="infrabox")
     parser.add_argument("--api-url",
                         required=False,
@@ -76,7 +79,8 @@ def main():
                             help="Runs 'docker-compose rm' before building")
     parser_run.add_argument("-t", dest='tag', required=False, type=str,
                             help="Docker image tag")
-    parser_run.add_argument("--local-cache", required=False, type=str, default="/tmp/infrabox/local-cache",
+    parser_run.add_argument("--local-cache", required=False, type=str,
+                            default="/tmp/{}/infrabox/local-cache".format(username),
                             help="Path to the local cache")
 
     parser_run.set_defaults(clean=False)

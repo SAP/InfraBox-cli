@@ -6,7 +6,6 @@ import sys
 import stat
 from datetime import datetime
 import traceback
-import getpass
 import yaml
 
 from infraboxcli.execute import execute
@@ -39,6 +38,9 @@ def create_infrabox_directories(args, job, service=None):
     infrabox_job_json = os.path.join(infrabox, 'job.json')
     infrabox_gosu = os.path.join(infrabox, 'gosu.sh')
     infrabox_context = os.path.join(args.project_root)
+
+    if not os.path.exists(args.local_cache):
+        makedirs(infrabox_cache)
 
     if not os.path.exists(infrabox_cache):
         makedirs(infrabox_cache)
