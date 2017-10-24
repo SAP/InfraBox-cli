@@ -11,6 +11,7 @@ import yaml
 from infraboxcli.execute import execute
 from infraboxcli.job_list import get_job_list, load_infrabox_json
 from infraboxcli.log import logger
+from infraboxcli.workflow import WorkflowCache
 from pyinfrabox import docker_compose
 
 parent_jobs = []
@@ -26,9 +27,11 @@ def create_infrabox_directories(args, job, service=None):
         job_name += "/" + service
 
     # Create dirs
-    job_dir = os.path.join(args.project_root, '.infraboxwork', 'jobs', job_name)
+    work_dir = os.path.join(args.project_root, '.infraboxwork')
+    job_dir = os.path.join(work_dir, 'jobs', job_name)
     job_git_source = os.path.join(job_dir, 'git_source')
     infrabox = os.path.join(job_dir, 'infrabox')
+    infrabox_work = os.path.join(job_dir, 'work')
     infrabox_cache = os.path.join(infrabox, 'cache')
     infrabox_output = os.path.join(infrabox, 'output')
     infrabox_inputs = os.path.join(infrabox, 'inputs')
@@ -44,6 +47,9 @@ def create_infrabox_directories(args, job, service=None):
 
     if not os.path.exists(infrabox_cache):
         makedirs(infrabox_cache)
+
+    if os.path.exists(infrabox_work):
+        shutil.rmtree(infrabox_work)
 
     if os.path.exists(infrabox_output):
         shutil.rmtree(infrabox_output)
@@ -63,6 +69,7 @@ def create_infrabox_directories(args, job, service=None):
     if os.path.exists(job_git_source):
         shutil.rmtree(job_git_source)
 
+    makedirs(infrabox_work)
     makedirs(infrabox_output)
     makedirs(infrabox_inputs)
     makedirs(infrabox_testresult)
@@ -76,9 +83,10 @@ def create_infrabox_directories(args, job, service=None):
         "upload/badge": infrabox_badge,
         "cache": infrabox_cache,
         "local-cache": args.local_cache,
-        "context": infrabox_context,
-        "job.json": infrabox_job_json,
-        "gosu.sh": infrabox_gosu
+        "context:ro": infrabox_context,
+        "context/.infraboxwork:ro": infrabox_work,
+        "job.json:ro": infrabox_job_json,
+        "gosu.sh:ro": infrabox_gosu
     }
 
     # create job.json
@@ -264,7 +272,7 @@ def track_as_parent(job, state, start_date=datetime.now(), end_date=datetime.now
         "depends_on": job.get('depends_on', [])
     })
 
-def build_and_run(args, job):
+def build_and_run(args, job, cache):
     # check if depedency conditions are met
     for dep in job.get("depends_on", []):
         on = dep['on']
@@ -317,30 +325,37 @@ def build_and_run(args, job):
     logger.info("Finished job %s" % job['name'])
 
     for j in jobs:
+        # Prefix name with parent
+        j['name'] = job['name'] + '/' + j['name']
+
+        # Add dependencies to all root jobs
         if not j.get('depends_on', None):
             j['depends_on'] = [{"on": ["finished"], "job": job['name']}]
 
-        build_and_run(args, j)
+        cache.add_job(j)
+
+    for j in jobs:
+        build_and_run(args, j, cache)
 
 def run(args):
+    # Init workflow cache
+    cache = WorkflowCache(args)
+
     # validate infrabox.json
     data = load_infrabox_json(args.infrabox_json)
     jobs = get_job_list(data, args, base_path=args.project_root)
 
-    # check if job name exists
-    job = None
     if args.job_name:
-        for j in jobs:
-            if j['name'] == args.job_name:
-                job = j
-                break
+        cache.add_jobs(jobs)
+        job = cache.get_job(args.job_name)
 
         if not job:
             logger.error("job %s not found in infrabox.json" % args.job_name)
             sys.exit(1)
 
-    if job:
-        build_and_run(args, job)
+        build_and_run(args, job, cache)
     else:
+        cache.clear()
+        cache.add_jobs(jobs)
         for j in jobs:
-            build_and_run(args, j)
+            build_and_run(args, j, cache)
