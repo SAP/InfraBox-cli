@@ -36,7 +36,7 @@ class WorkflowCache(object):
 
     def add_job(self, job):
         updated = False
-        for i in xrange(0, len(self.jobs)):
+        for i in range(0, len(self.jobs)):
             if self.jobs[i]['name'] == job['name']:
                 updated = True
                 self.jobs[i] = job
