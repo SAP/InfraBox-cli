@@ -53,4 +53,4 @@ class WorkflowCache(object):
 
     def print_tree(self):
         for j in self.jobs:
-            print j['name']
+            print (j['name'])
