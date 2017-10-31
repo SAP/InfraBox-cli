@@ -31,11 +31,6 @@ cd 3_testresult
 infrabox validate
 cd ..
 
-echo "## validate 4_security_scan"
-cd 4_security_scan
-infrabox validate
-cd ..
-
 echo "## validate 5_keep"
 cd 5_keep
 infrabox validate
