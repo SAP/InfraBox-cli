@@ -114,16 +114,19 @@ def create_infrabox_directories(args, job, service=None):
     with open(infrabox_gosu, 'w') as out:
         out.write('''
 #!/bin/sh
+set -x
+
 USER_ID=${INFRABOX_UID:-9001}
 GROUP_ID=${INFRABOX_GID:-9001}
 
 echo "Starting with UID:GID: $USER_ID:$GROUP_ID"
-addgroup -g $GROUP_ID infrabox
-adduser -D -u $USER_ID -G infrabox infrabox
-#useradd --shell /bin/bash -u $USER_ID -o -c "" -m infrabox
+cat /etc/group
+groupadd --gid $GROUP_ID infrabox
+useradd --no-user-group --no-create-home --non-unique --uid $USER_ID --groups infrabox infrabox
 export HOME=/home/infrabox
 
-exec su-exec infrabox "$@"
+# Note you need to preserve PATH as well, usually - but this cannot be achived with su!?
+exec su --preserve-environment infrabox -c "$@"
 ''')
         st = os.stat(infrabox_gosu)
         os.chmod(infrabox_gosu, st.st_mode | stat.S_IEXEC)
