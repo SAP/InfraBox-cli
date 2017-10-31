@@ -16,7 +16,6 @@ def test_version():
     raises_expect({'version': 2, 'jobs': []}, "#version: unsupported version")
 
 def test_jobs():
-    raises_expect({'version': 1}, "#: Either 'jobs' or 'generator' must be set")
     raises_expect({'version': 1, 'jobs': 'asd'}, "#jobs: must be an array")
     raises_expect({'version': 1, 'jobs': []}, "#jobs: must not be empty")
     raises_expect({'version': 1, 'jobs': [{}]}, "#jobs[0]: does not contain a 'type'")
@@ -228,10 +227,10 @@ def test_environment():
     raises_expect(d, "#jobs[0].environment.key: must be a string or object")
 
     d['jobs'][0]['environment'] = {'key': {}}
-    raises_expect(d, "#jobs[0].environment.key: must contain a $ref")
+    raises_expect(d, "#jobs[0].environment.key: must contain a $secret")
 
-    d['jobs'][0]['environment'] = {'key': {'$ref': None}}
-    raises_expect(d, "#jobs[0].environment.key.$ref: is not a string")
+    d['jobs'][0]['environment'] = {'key': {'$secret': None}}
+    raises_expect(d, "#jobs[0].environment.key.$secret: is not a string")
 
     d['jobs'][0]['environment'] = {}
     validate_json(d)
@@ -262,7 +261,7 @@ def test_deployments():
     d['jobs'][0]['deployments'] = [{'type': 'docker-registry', 'host': 'hostname', 'repository': 'repo', 'username': 'user', 'password': 'value'}]
     raises_expect(d, "#jobs[0].deployments[0].password: must be an object")
 
-    d['jobs'][0]['deployments'] = [{'type': 'docker-registry', 'host': 'hostname', 'repository': 'repo', 'username': 'user', 'password': {'$ref': 'blub'}}]
+    d['jobs'][0]['deployments'] = [{'type': 'docker-registry', 'host': 'hostname', 'repository': 'repo', 'username': 'user', 'password': {'$secret': 'blub'}}]
     validate_json(d)
 
 def test_build_arguments():
@@ -289,6 +288,54 @@ def test_build_arguments():
     raises_expect(d, "#jobs[0].build_arguments.key: is not a string")
 
     d['jobs'][0]['build_arguments'] = {}
+    validate_json(d)
+
+def test_security_context():
+    d = {
+        "version": 1,
+        "jobs": [{
+            "type": "docker",
+            "name": "test",
+            "docker_file": "Dockerfile",
+            "resources": {"limits": {"cpu": 1, "memory": 1024}},
+            "security_context": []
+        }]
+    }
+
+    raises_expect(d, "#jobs[0].security_context: must be an object")
+
+    d['jobs'][0]['security_context'] = {'capabilities': []}
+    raises_expect(d, "#jobs[0].security_context.capabilities: must be an object")
+
+    d['jobs'][0]['security_context'] = {'capabilities': {'add': {}}}
+    raises_expect(d, "#jobs[0].security_context.capabilities.add: must be an array")
+
+    d['jobs'][0]['security_context'] = {'capabilities': {'add': [123]}}
+    raises_expect(d, "#jobs[0].security_context.capabilities.add[0]: is not a string")
+
+    d['jobs'][0]['security_context'] = {'capabilities': {'add': ['CAP']}}
+    validate_json(d)
+
+def test_kubernetes_limits():
+    d = {
+        "version": 1,
+        "jobs": [{
+            "type": "docker",
+            "name": "test",
+            "docker_file": "Dockerfile",
+            "resources": {
+                "limits": {
+                    "cpu": 1, "memory": 1024
+                },
+                "kubernetes": {
+                    "limits": {
+                        "cpu": 1, "memory": 1024
+                    }
+                }
+            }
+        }]
+    }
+
     validate_json(d)
 
 def test_valid():
