@@ -242,6 +242,9 @@ def build_and_run_docker(args, job):
         return
 
     cmd = ['docker', 'run', '--name', container_name]
+    caps = job.get('security_context', {}).get('capabilities', {}).get('add', [])
+    if caps:
+        cmd += ['--cap-add=' + ','.join(caps)]
 
     for name, path in job['directories'].items():
         cmd += ['-v', '%s:/infrabox/%s' % (path, name)]
