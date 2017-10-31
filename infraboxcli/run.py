@@ -20,6 +20,10 @@ def makedirs(path):
     os.makedirs(path)
     os.chmod(path, 0o777)
 
+def makedirs_if_not_exists(path):
+    if not os.path.exists(path):
+        makedirs(path)
+
 def create_infrabox_directories(args, job, service=None):
     job_name = job['name']
 
@@ -41,12 +45,13 @@ def create_infrabox_directories(args, job, service=None):
     infrabox_job_json = os.path.join(infrabox, 'job.json')
     infrabox_gosu = os.path.join(infrabox, 'gosu.sh')
     infrabox_context = os.path.join(args.project_root)
+    infrabox_local_cache = args.local_cache
 
-    if not os.path.exists(args.local_cache):
-        makedirs(infrabox_cache)
+    # If any directories used as volumes in docker do not exist prior to the docker run call,
+    # docker will create them as root!
+    makedirs_if_not_exists(infrabox_cache)
+    makedirs_if_not_exists(infrabox_local_cache)
 
-    if not os.path.exists(infrabox_cache):
-        makedirs(infrabox_cache)
     logger.info('Deleting old infrabox directories')
 
     if os.path.exists(infrabox_work):
