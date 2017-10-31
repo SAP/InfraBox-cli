@@ -1,7 +1,10 @@
 import os
 import subprocess
+from infraboxcli.log import logger
 
 def execute(command, cwd=None, env=None, ignore_error=False, ignore_output=False):
+    logger.info('Running external process: ' + ' '.join(command))
+
     if env is None:
         env = os.environ
 

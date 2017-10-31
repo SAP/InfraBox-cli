@@ -9,7 +9,7 @@ class Logger(object):
         print("%s[infrabox] %s%s" % (color, s, Fore.RESET))
 
     def info(self, s):
-        self._print(Fore.WHITE, s)
+        self._print(Fore.BLUE, s)
 
     def warn(self, s):
         self._print(Fore.YELLOW, s)

@@ -47,6 +47,7 @@ def create_infrabox_directories(args, job, service=None):
 
     if not os.path.exists(infrabox_cache):
         makedirs(infrabox_cache)
+    logger.info('Deleting old infrabox directories')
 
     if os.path.exists(infrabox_work):
         shutil.rmtree(infrabox_work)
@@ -69,6 +70,7 @@ def create_infrabox_directories(args, job, service=None):
     if os.path.exists(job_git_source):
         shutil.rmtree(job_git_source)
 
+    logger.info('Creating infrabox directories')
     makedirs(infrabox_work)
     makedirs(infrabox_output)
     makedirs(infrabox_inputs)
@@ -126,6 +128,8 @@ exec su-exec infrabox "$@"
     if os.path.exists(repo_infrabox):
         shutil.rmtree(repo_infrabox)
 
+    # copy inputs
+    logger.info('Copying job inputs to {}'.format(infrabox_inputs))
     for dep in job.get('depends_on', []):
         source_path = os.path.join(args.project_root, '.infraboxwork',
                                    'jobs', dep['job'], 'infrabox', 'output')
