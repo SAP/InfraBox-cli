@@ -13,7 +13,7 @@ from infraboxcli.log import logger
 from infraboxcli.init import init
 from infraboxcli.pull import pull
 
-version = '0.3.4'
+version = '0.4.0'
 
 def main():
     username = pwd.getpwuid(os.getuid()).pw_name
