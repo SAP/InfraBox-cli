@@ -90,9 +90,8 @@ def get_job_list(data, args, parents=None, base_path=None):
             sub = get_job_list(data, args, new_parents, base_path=repo_path)
         else:
             p = os.path.join(base_path, job['infrabox_file'])
-            bp = os.path.dirname(p)
             data = load_infrabox_json(p)
-            sub = get_job_list(data, args, new_parents, base_path=bp)
+            sub = get_job_list(data, args, new_parents, base_path=base_path)
 
         # every sub job which does not have a parent
         # should be a child of the current job
@@ -103,7 +102,7 @@ def get_job_list(data, args, parents=None, base_path=None):
                 s['depends_on'] = job.get('depends_on', [])
 
             for d in deps:
-                job_with_children[d] = True
+                job_with_children[d['job']] = True
 
         jobs += sub
 

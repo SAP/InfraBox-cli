@@ -3,6 +3,7 @@ import json
 import signal
 import shutil
 import sys
+import copy
 import stat
 from datetime import datetime
 import traceback
@@ -25,7 +26,7 @@ def makedirs_if_not_exists(path):
         makedirs(path)
 
 def create_infrabox_directories(args, job, service=None):
-    job_name = job['name']
+    job_name = job['name'].replace('/', '_')
 
     if service:
         job_name += "/" + service
@@ -140,7 +141,7 @@ exec su --preserve-environment infrabox -c "$@"
     logger.info('Copying job inputs to {}'.format(infrabox_inputs))
     for dep in job.get('depends_on', []):
         source_path = os.path.join(args.project_root, '.infraboxwork',
-                                   'jobs', dep['job'], 'infrabox', 'output')
+                                   'jobs', dep['job'].replace('/', '_'), 'infrabox', 'output')
         dep = dep['job'].split("/")[-1]
 
         # Copy to .infrabox so we can use it in a COPY/ADD instruction
@@ -225,7 +226,7 @@ def build_and_run_docker(args, job):
         image_name = image_name.replace("/", "-")
         image_name = image_name.lower()
 
-    container_name = job['name'].replace("/", "-")
+    container_name = 'ib_' + job['name'].replace("/", "-")
 
     # Build the image
     logger.info("Build docker image")
@@ -346,8 +347,18 @@ def build_and_run(args, job, cache):
         # Add dependencies to all root jobs
         if not j.get('depends_on', None):
             j['depends_on'] = [{"on": ["finished"], "job": job['name']}]
+        else:
+            dependencies = copy.deepcopy(j['depends_on'])
+
+            for d in dependencies:
+                d['job'] = job['name'] + '/' + d['job']
+
+            j['depends_on'] = dependencies
 
         cache.add_job(j)
+
+    if job['name'] == args.job_name:
+        return
 
     for j in jobs:
         build_and_run(args, j, cache)
