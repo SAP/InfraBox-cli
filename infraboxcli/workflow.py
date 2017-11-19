@@ -5,7 +5,7 @@ class WorkflowCache(object):
     def __init__(self, args):
         self.jobs = []
 
-        work_dir = os.path.join(args.project_root, '.infraboxwork')
+        work_dir = os.path.join(args.project_root, '.infrabox', 'work')
 
         if not os.path.exists(work_dir):
             os.makedirs(work_dir)

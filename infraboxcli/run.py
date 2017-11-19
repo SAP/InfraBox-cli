@@ -25,6 +25,13 @@ def makedirs_if_not_exists(path):
     if not os.path.exists(path):
         makedirs(path)
 
+def recreate_sym_link(source, link_name):
+    if os.path.exists(link_name):
+        os.remove(link_name)
+
+    os.symlink(source, link_name)
+
+
 def create_infrabox_directories(args, job, service=None):
     job_name = job['name'].replace('/', '_')
 
@@ -32,17 +39,17 @@ def create_infrabox_directories(args, job, service=None):
         job_name += "/" + service
 
     # Create dirs
-    work_dir = os.path.join(args.project_root, '.infraboxwork')
+    work_dir = os.path.join(args.project_root, '.infrabox', 'work')
     job_dir = os.path.join(work_dir, 'jobs', job_name)
-    job_git_source = os.path.join(job_dir, 'git_source')
     infrabox = os.path.join(job_dir, 'infrabox')
     infrabox_work = os.path.join(job_dir, 'work')
     infrabox_cache = os.path.join(infrabox, 'cache')
     infrabox_output = os.path.join(infrabox, 'output')
     infrabox_inputs = os.path.join(infrabox, 'inputs')
-    infrabox_testresult = os.path.join(infrabox, 'upload', 'testresult')
-    infrabox_markup = os.path.join(infrabox, 'upload', 'markup')
-    infrabox_badge = os.path.join(infrabox, 'upload', 'badge')
+    infrabox_upload = os.path.join(infrabox, 'upload')
+    infrabox_testresult = os.path.join(infrabox_upload, 'testresult')
+    infrabox_markup = os.path.join(infrabox_upload, 'markup')
+    infrabox_badge = os.path.join(infrabox_upload, 'badge')
     infrabox_job_json = os.path.join(infrabox, 'job.json')
     infrabox_gosu = os.path.join(infrabox, 'gosu.sh')
     infrabox_context = os.path.join(args.project_root)
@@ -53,36 +60,22 @@ def create_infrabox_directories(args, job, service=None):
     makedirs_if_not_exists(infrabox_cache)
     makedirs_if_not_exists(infrabox_local_cache)
 
-    logger.info('Deleting old infrabox directories')
+    logger.info('Recreating directories')
 
-    if os.path.exists(infrabox_work):
-        shutil.rmtree(infrabox_work)
+    recreate_dirs = [
+        infrabox_work,
+        infrabox_output,
+        infrabox_inputs,
+        infrabox_testresult,
+        infrabox_markup,
+        infrabox_badge
+    ]
 
-    if os.path.exists(infrabox_output):
-        shutil.rmtree(infrabox_output)
+    for d in recreate_dirs:
+        if os.path.exists(d):
+            shutil.rmtree(d)
 
-    if os.path.exists(infrabox_inputs):
-        shutil.rmtree(infrabox_inputs)
-
-    if os.path.exists(infrabox_testresult):
-        shutil.rmtree(infrabox_testresult)
-
-    if os.path.exists(infrabox_markup):
-        shutil.rmtree(infrabox_markup)
-
-    if os.path.exists(infrabox_badge):
-        shutil.rmtree(infrabox_badge)
-
-    if os.path.exists(job_git_source):
-        shutil.rmtree(job_git_source)
-
-    logger.info('Creating infrabox directories')
-    makedirs(infrabox_work)
-    makedirs(infrabox_output)
-    makedirs(infrabox_inputs)
-    makedirs(infrabox_testresult)
-    makedirs(infrabox_markup)
-    makedirs(infrabox_badge)
+        makedirs(d)
 
     job['directories'] = {
         "output": infrabox_output,
@@ -92,7 +85,6 @@ def create_infrabox_directories(args, job, service=None):
         "cache": infrabox_cache,
         "local-cache": args.local_cache,
         "context:ro": infrabox_context,
-        "context/.infraboxwork:ro": infrabox_work,
         "job.json:ro": infrabox_job_json,
         "gosu.sh:ro": infrabox_gosu
     }
@@ -132,26 +124,11 @@ exec su --preserve-environment infrabox -c "$@"
         st = os.stat(infrabox_gosu)
         os.chmod(infrabox_gosu, st.st_mode | stat.S_IEXEC)
 
-    # Inputs
-    repo_infrabox = os.path.join(args.project_root, '.infrabox')
-    if os.path.exists(repo_infrabox):
-        shutil.rmtree(repo_infrabox)
-
-    # copy inputs
-    logger.info('Copying job inputs to {}'.format(infrabox_inputs))
-    for dep in job.get('depends_on', []):
-        source_path = os.path.join(args.project_root, '.infraboxwork',
-                                   'jobs', dep['job'].replace('/', '_'), 'infrabox', 'output')
-        dep = dep['job'].split("/")[-1]
-
-        # Copy to .infrabox so we can use it in a COPY/ADD instruction
-        destination_path = os.path.join(repo_infrabox, 'inputs', dep)
-
-        if os.path.exists(source_path):
-            shutil.copytree(source_path, destination_path, symlinks=True)
-
-        # Mount to /infrabox/inputs
-        job['directories']['inputs/%s' % dep] = source_path
+    # Create symlinks
+    recreate_sym_link(infrabox_inputs, os.path.join(args.project_root, '.infrabox', 'inputs'))
+    recreate_sym_link(infrabox_output, os.path.join(args.project_root, '.infrabox', 'output'))
+    recreate_sym_link(infrabox_upload, os.path.join(args.project_root, '.infrabox', 'upload'))
+    recreate_sym_link(infrabox_cache, os.path.join(args.project_root, '.infrabox', 'cache'))
 
 def get_secret(args, name):
     secrets_file = os.path.join(args.project_root, '.infraboxsecrets.json')
