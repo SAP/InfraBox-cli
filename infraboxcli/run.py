@@ -124,8 +124,26 @@ exec su --preserve-environment infrabox -c "$@"
         st = os.stat(infrabox_gosu)
         os.chmod(infrabox_gosu, st.st_mode | stat.S_IEXEC)
 
+
+    if os.path.exists(os.path.join(args.project_root, '.infrabox', 'inputs')):
+        shutil.rmtree(os.path.join(args.project_root, '.infrabox', 'inputs'))
+
+    for dep in job.get('depends_on', []):
+        source_path = os.path.join(args.project_root, '.infrabox', 'work',
+                                   'jobs', dep['job'].replace('/', '_'), 'infrabox', 'output')
+
+        if not os.path.exists(source_path):
+            continue
+
+        dep = dep['job'].split("/")[-1]
+        destination_path = os.path.join(args.project_root, '.infrabox', 'inputs', dep)
+
+        shutil.copytree(source_path, destination_path, symlinks=True)
+
+        job['directories']['inputs/%s' % dep] = source_path
+
     # Create symlinks
-    recreate_sym_link(infrabox_inputs, os.path.join(args.project_root, '.infrabox', 'inputs'))
+    # recreate_sym_link(infrabox_inputs, os.path.join(args.project_root, '.infrabox', 'inputs'))
     recreate_sym_link(infrabox_output, os.path.join(args.project_root, '.infrabox', 'output'))
     recreate_sym_link(infrabox_upload, os.path.join(args.project_root, '.infrabox', 'upload'))
     recreate_sym_link(infrabox_cache, os.path.join(args.project_root, '.infrabox', 'cache'))
@@ -301,6 +319,7 @@ def build_and_run(args, job, cache):
         state = 'failure'
         traceback.print_exc(file=sys.stdout)
         logger.warn("Job failed: %s" % e)
+        sys.exit(1)
         
     if not job.get('directories', None):
         return
