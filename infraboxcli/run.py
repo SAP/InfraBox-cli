@@ -301,6 +301,9 @@ def build_and_run(args, job, cache):
         state = 'failure'
         traceback.print_exc(file=sys.stdout)
         logger.warn("Job failed: %s" % e)
+        
+    if not job.get('directories', None):
+        return
 
     # Dynamic child jobs
     infrabox_json = os.path.join(job['directories']['output'], 'infrabox.json')
