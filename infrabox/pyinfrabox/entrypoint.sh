@@ -1,7 +1,4 @@
 #!/bin/sh -e
-mkdir -p /infrabox/upload/badge
-mkdir -p /infrabox/upload/markup
-
 echo "## Run tests"
 nosetests \
     --with-xunit \

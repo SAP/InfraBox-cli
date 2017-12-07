@@ -11,7 +11,7 @@ import infraboxcli.env
 from infraboxcli.log import logger
 
 def download_file(url, filename, args):
-    headers = {'auth-token': args.token}
+    headers = {'Authorization': 'token ' + args.token}
     r = requests.get(url, headers=headers, stream=True, timeout=5, verify=args.ca_bundle)
 
     if r.status_code == 404:
@@ -29,9 +29,8 @@ def download_file(url, filename, args):
 
 def pull(args):
     infraboxcli.env.check_env_cli_token(args)
-    infraboxcli.env.check_env_project_id(args)
 
-    headers = {'auth-token': args.token}
+    headers = {'Authorization': 'token ' + args.token}
     url = '%s/v1/project/%s/job/%s/manifest' % (args.api_url, args.project_id, args.job_id)
     r = requests.get(url, headers=headers, timeout=5, verify=args.ca_bundle)
 

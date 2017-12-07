@@ -65,7 +65,7 @@ def upload_zip(args, f):
     logger.info('Uploading ...')
     url = '%s/v1/project/%s/upload' % (args.api_url, args.project_id)
     files = {'project.zip': f}
-    headers = {'Authorization': args.token}
+    headers = {'Authorization': 'token ' + args.token}
     r = requests.post(url, files=files, headers=headers, timeout=120, verify=args.ca_bundle)
 
     try:
@@ -82,7 +82,6 @@ def upload_zip(args, f):
 
 def push(args):
     infraboxcli.env.check_env_cli_token(args)
-    infraboxcli.env.check_env_project_id(args)
 
     if not args.api_url:
         logger.error('either --api-url or INFRABOX_API_URL must be set')

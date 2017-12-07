@@ -1,4 +1,5 @@
 import os
+import jwt
 
 from infraboxcli.log import logger
 
@@ -10,10 +11,5 @@ def check_env_cli_token(args):
 
     args.token = token
 
-def check_env_project_id(args):
-    project_id = os.environ.get('INFRABOX_CLI_PROJECT_ID', None)
-    if not project_id:
-        logger.error('INFRABOX_CLI_PROJECT_ID env var must be set')
-        exit(1)
-
-    args.project_id = project_id
+    t = jwt.decode(token, verify=False)
+    args.project_id = t['project']['id']

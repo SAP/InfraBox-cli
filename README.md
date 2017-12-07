@@ -64,12 +64,11 @@ Some of your job may require additional environment variables set from the outsi
     infrabox run -e VARNAME=SomeValue -e ANOTHERVAR=123
 
 ## Push a Job
-To be able to use infrabox push you have to create a project in the InfraBox Dashboard first. See Create an upload project on how to create it. You also need the corresponding Project ID. See Get the ID of a project for instructions on how to obtain it. Last but not least a Access Token is required. See Create a Personal Access Token on how to setup one.
+To be able to use infrabox push you have to [create a project](https://infrabox.ninja/docs/#create-upload-project) in the InfraBox Dashboard and [create an auth token](https://infrabox.ninja/docs/#create-auth-token) for it.
 
-The Project ID, Access Token and InfraBox API Host must be set as environment variables. If you want to use the InfraBox Demo use _INFRABOX_API_URL=https://api.infrabox.net_.
+Auth Token and InfraBox API Host must be set as environment variables. If you want to use the infrabox.ninja playground use INFRABOX_API_URL=https://infrabox.ninja/api/cli.
 
     export INFRABOX_CLI_TOKEN=<YOUR_ACCESS_TOKEN>
-    export INFRABOX_CLI_PROJECT_ID=<YOUR_PROJECT_ID>
     export INFRABOX_API_URL=<INFRABOX_API_URL>
 
 To push your local project simply do:
