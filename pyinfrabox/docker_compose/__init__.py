@@ -1,16 +1,15 @@
 import yaml
 
 def handle_version(d, r):
-    if str(d['version']) != "2":
-        raise Exception("version '%s' not supported" % d['version'])
+    supported_versions = ("3.2",)
+    v = str(d['version'])
+    if v not in supported_versions:
+        raise Exception("version '%s' not supported, supported versions are: %s" % (v, supported_versions))
 
-    r["version"] = "2"
+    r["version"] = v
 
 def handle_service(name, d, r):
-    r['services'][name] = {
-        "dns": "8.8.8.8",
-        "dns_search": ""
-    }
+    r['services'][name] = {}
 
     for key, value in d[name].iteritems():
         if key == "links":
