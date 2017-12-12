@@ -14,4 +14,6 @@ RUN pip3 install .
 
 USER tester
 
+RUN dos2unix /infraboxcli/infrabox/infraboxcli/entrypoint.sh
+
 CMD /infraboxcli/infrabox/infraboxcli/entrypoint.sh

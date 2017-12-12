@@ -14,4 +14,6 @@ USER tester
 
 WORKDIR /pyinfrabox
 
+RUN dos2unix /pyinfrabox/entrypoint.sh
+
 CMD /pyinfrabox/entrypoint.sh

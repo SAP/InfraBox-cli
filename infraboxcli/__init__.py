@@ -1,8 +1,6 @@
 import argparse
 import os
-import pwd
 import sys
-import pwd
 
 from infraboxcli.push import push
 from infraboxcli.run import run
@@ -16,7 +14,11 @@ from infraboxcli.pull import pull
 version = '0.5.0'
 
 def main():
-    username = pwd.getpwuid(os.getuid()).pw_name
+    username = 'unknown'
+
+    if os.name != 'nt':
+        import pwd
+        username = pwd.getpwuid(os.getuid()).pw_name
 
     parser = argparse.ArgumentParser(prog="infrabox")
     parser.add_argument("--api-url",

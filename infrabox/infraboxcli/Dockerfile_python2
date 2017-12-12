@@ -11,6 +11,7 @@ RUN chown -R tester /infraboxcli
 WORKDIR /infraboxcli
 
 RUN pip install .
+RUN dos2unix /infraboxcli/infrabox/infraboxcli/entrypoint.sh
 
 USER tester
 

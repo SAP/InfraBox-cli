@@ -26,10 +26,14 @@ def makedirs_if_not_exists(path):
         makedirs(path)
 
 def recreate_sym_link(source, link_name):
-    if os.path.exists(link_name):
-        os.remove(link_name)
-
-    os.symlink(source, link_name)
+    if os.name == 'nt':
+        if os.path.exists(link_name):
+            shutil.rmtree(link_name)
+        shutil.copytree(source, link_name)
+    else:
+        if os.path.exists(link_name):
+            os.remove(link_name)
+        os.symlink(source, link_name)
 
 
 def create_infrabox_directories(args, job, service=None):
@@ -258,8 +262,9 @@ def build_and_run_docker(args, job):
             else:
                 cmd += ['-e', '%s=%s' % (name, value)]
 
-    cmd += ['-e', 'INFRABOX_UID=%s' % os.geteuid()]
-    cmd += ['-e', 'INFRABOX_GID=%s' % os.getegid()]
+    if os.name != 'nt':
+        cmd += ['-e', 'INFRABOX_UID=%s' % os.geteuid()]
+        cmd += ['-e', 'INFRABOX_GID=%s' % os.getegid()]
 
     cmd.append(image_name)
 
