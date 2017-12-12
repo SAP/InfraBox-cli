@@ -1,5 +1,3 @@
-<a href="http://infrabox.net"><img src="src\dashboard-client\static\logo_compact_transparent.png" width="200"></a>
-
 # InfraBox CLI
 [![Build Status](https://infrabox.ninja/api/cli/v1/project/6055cd3b-f37f-48a1-bc04-010b2e2aeb68/build/state.svg)](https://infrabox.ninja/dashboard/project/6055cd3b-f37f-48a1-bc04-010b2e2aeb68)
 [![coverage](https://infrabox.ninja/api/cli/v1/project/6055cd3b-f37f-48a1-bc04-010b2e2aeb68/badge.svg?subject=coverage&job_name=pyinfrabox)](https://infrabox.ninja/dashboard/#/project/ib-cli)
