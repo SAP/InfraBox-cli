@@ -1,9 +1,9 @@
-[![][InfraBoxImage]][website]
+<a href="http://infrabox.net"><img src="src\dashboard-client\static\logo_compact_transparent.png" width="200"></a>
 
 # InfraBox CLI
-[![Build Status](https://api.infrabox.net/v1/project/70741c75-a8e5-4ebf-8abd-ca3b1b6f025f/build/state.svg)](https://demo.infrabox.net/dashboard/project/70741c75-a8e5-4ebf-8abd-ca3b1b6f025f)
-[![Code Coverage](https://api.infrabox.net/v1/project/70741c75-a8e5-4ebf-8abd-ca3b1b6f025f/badge.svg?subject=coverage&job_name=pyinfrabox)](https://demo.infrabox.net/dashboard/project/70741c75-a8e5-4ebf-8abd-ca3b1b6f025f)
-[![Test Status](https://api.infrabox.net/v1/project/70741c75-a8e5-4ebf-8abd-ca3b1b6f025f/build/tests.svg)](https://demo.infrabox.net/dashboard/project/70741c75-a8e5-4ebf-8abd-ca3b1b6f025f)
+[![Build Status](https://infrabox.ninja/api/cli/v1/project/6055cd3b-f37f-48a1-bc04-010b2e2aeb68/build/state.svg)](https://infrabox.ninja/dashboard/project/6055cd3b-f37f-48a1-bc04-010b2e2aeb68)
+[![coverage](https://infrabox.ninja/api/cli/v1/project/6055cd3b-f37f-48a1-bc04-010b2e2aeb68/badge.svg?subject=coverage&job_name=pyinfrabox)](https://infrabox.ninja/dashboard/#/project/ib-cli)
+[![Test Status](https://infrabox.ninja/api/cli/v1/project/6055cd3b-f37f-48a1-bc04-010b2e2aeb68/build/tests.svg)](https://infrabox.ninja/dashboard/project/6055cd3b-f37f-48a1-bc04-010b2e2aeb68)
 
 ## Install
 To install infraboxcli you need to have these requirements already installed:
