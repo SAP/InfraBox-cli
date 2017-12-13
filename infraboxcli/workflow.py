@@ -4,6 +4,7 @@ import json
 class WorkflowCache(object):
     def __init__(self, args):
         self.jobs = []
+        self.persist = True
 
         work_dir = os.path.join(args.project_root, '.infrabox', 'work')
 
@@ -16,6 +17,13 @@ class WorkflowCache(object):
             with open(self.infrabox_full_workflow) as f:
                 data = json.load(f)
                 self.jobs = data['jobs']
+
+        if args.infrabox_json_file:
+            # a infrabox.json file was specified with -f
+            # so we don't persist the cache to not overwrite
+            # the full workflow graph
+            self.persist = False
+            self.jobs = []
 
     def clear(self):
         if os.path.exists(self.infrabox_full_workflow):
@@ -48,6 +56,9 @@ class WorkflowCache(object):
         self._write()
 
     def _write(self):
+        if not self.persist:
+            return
+
         with open(self.infrabox_full_workflow, 'w') as out:
             json.dump({'version': 1, 'jobs': self.jobs}, out, indent=4)
 

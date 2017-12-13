@@ -29,6 +29,8 @@ def main():
                         required=False,
                         default=os.environ.get('INFRABOX_CA_BUNDLE', None),
                         help="Path to a CA_BUNDLE file or directory with certificates of trusted CAs")
+    parser.add_argument("-f", dest='infrabox_json_file', required=False, type=str,
+                        help="Path to an infrabox.json file")
     sub_parser = parser.add_subparsers(help='sub-command help')
 
     # version
@@ -125,6 +127,9 @@ def main():
     if 'project_root' not in args and 'is_init' not in args:
         logger.error("infrabox.json not found in current or any parent directory")
         sys.exit(1)
+
+    if args.infrabox_json_file:
+        args.infrabox_json = args.infrabox_json_file
 
     # Run command
     args.func(args)
