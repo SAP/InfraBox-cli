@@ -88,7 +88,7 @@ def create_infrabox_directories(args, job, service=None):
         "upload/badge": infrabox_badge,
         "cache": infrabox_cache,
         "local-cache": args.local_cache,
-        "context:ro": infrabox_context,
+        "context": infrabox_context,
         "job.json:ro": infrabox_job_json,
         "gosu.sh:ro": infrabox_gosu
     }
@@ -258,7 +258,7 @@ def build_and_run_docker(args, job):
     if 'environment' in job:
         for name, value in job['environment'].iteritems():
             if isinstance(value, dict):
-                cmd += ['-e', '%s=%s' % (name, get_secret(args, value['$ref']))]
+                cmd += ['-e', '%s=%s' % (name, get_secret(args, value['$secret']))]
             else:
                 cmd += ['-e', '%s=%s' % (name, value)]
 
@@ -325,7 +325,7 @@ def build_and_run(args, job, cache):
         traceback.print_exc(file=sys.stdout)
         logger.warn("Job failed: %s" % e)
         sys.exit(1)
-        
+
     if not job.get('directories', None):
         return
 
