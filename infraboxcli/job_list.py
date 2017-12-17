@@ -1,12 +1,22 @@
 import os
 import json
 import uuid
+import sys
 
 from builtins import range
 from pyinfrabox.infrabox import validate_json
+from infraboxcli.log import logger
 from infraboxcli.execute import execute
 
+LOADED_FILES = {}
+
 def load_infrabox_json(path):
+    if path in LOADED_FILES:
+        logger.error('Recursive included detected with %s' % path)
+        sys.exit(1)
+
+    LOADED_FILES[path] = path
+
     with open(path) as f:
         data = json.load(f)
         validate_json(data)
