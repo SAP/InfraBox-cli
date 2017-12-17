@@ -40,26 +40,27 @@ It outputs the names of all available jobs. An example output may look like this
 ## Run a Job
 InfraBox CLI may be used to run you jobs on your local machine. It will also respect all the dependencies and run the jobs in the correct order. Available options are:
 
-    usage: infrabox run [-h] [--job-name JOB_NAME] [--clean] [-e ENVIRONMENT]
+	usage: infrabox run [-h] [--no-rm] [-t TAG] [--local-cache LOCAL_CACHE]
+						[job_name]
 
-    optional arguments:
-      -h, --help           show this help message and exit
-      --job-name JOB_NAME  Job name to execute
-      --clean              Runs 'docker-compose rm' before building
-      -e ENVIRONMENT       Add environment variable to jobs
+	positional arguments:
+	  job_name              Job name to execute
+
+	optional arguments:
+	  -h, --help            show this help message and exit
+	  --no-rm               Does not run 'docker-compose rm' before building
+	  -t TAG                Docker image tag
+	  --local-cache LOCAL_CACHE
+							Path to the local cache
 
 To run all jobs defined in your _infrabox.json_ file simply do:
 
     infrabox run
 
 
-In case you have multiple jobs defined an want to run only one of them you can use the _--job-name_ option to specify which job you want to run.
+In case you have multiple jobs defined an want to run only one of them you can do:
 
-    infrabox run --job-name <job-name>
-
-Some of your job may require additional environment variables set from the outside. You can set as many environment varibles as you like with the _-e_ option.
-
-    infrabox run -e VARNAME=SomeValue -e ANOTHERVAR=123
+    infrabox run <job-name>
 
 ## Push a Job
 To be able to use infrabox push you have to [create a project](https://infrabox.ninja/docs/#create-upload-project) in the InfraBox Dashboard and [create an auth token](https://infrabox.ninja/docs/#create-auth-token) for it.
