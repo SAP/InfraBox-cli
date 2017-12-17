@@ -37,6 +37,7 @@ def recreate_sym_link(source, link_name):
 
 
 def create_infrabox_directories(args, job, service=None):
+    #pylint: disable=too-many-locals
     job_name = job['name'].replace('/', '_')
 
     if service:
@@ -197,7 +198,7 @@ def build_and_run_docker_compose(args, job):
             else:
                 env[name] = value
 
-    if args.clean:
+    if not args.no_rm:
         execute(['docker-compose', '-p', args.project_name,
                  '-f', compose_file_new, 'rm', '-f'], env=env, cwd=job['base_path'])
 
@@ -232,7 +233,9 @@ def build_and_run_docker(args, job):
 
     # Build the image
     logger.info("Build docker image")
-    execute(['docker', 'rm', container_name], cwd=args.project_root, ignore_error=True, ignore_output=True)
+
+    if not args.no_rm:
+        execute(['docker', 'rm', container_name], cwd=args.project_root, ignore_error=True, ignore_output=True)
 
     cmd = ['docker', 'build', '-t', image_name, '.', '-f', job['docker_file']]
     if 'build_arguments' in job:

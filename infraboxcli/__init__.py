@@ -80,15 +80,15 @@ def main():
     parser_run = sub_parser.add_parser('run', help='Run your jobs locally')
     parser_run.add_argument("job_name", nargs="?", type=str,
                             help="Job name to execute")
-    parser_run.add_argument("--clean", action='store_true', required=False,
-                            help="Runs 'docker-compose rm' before building")
+    parser_run.add_argument("--no-rm", action='store_true', required=False,
+                            help="Does not run 'docker-compose rm' before building")
     parser_run.add_argument("-t", dest='tag', required=False, type=str,
                             help="Docker image tag")
     parser_run.add_argument("--local-cache", required=False, type=str,
                             default="/tmp/{}/infrabox/local-cache".format(username),
                             help="Path to the local cache")
 
-    parser_run.set_defaults(clean=False)
+    parser_run.set_defaults(no_rm=False)
     parser_run.set_defaults(func=run)
 
     # Parse args
@@ -126,6 +126,10 @@ def main():
 
     if 'project_root' not in args and 'is_init' not in args:
         logger.error("infrabox.json not found in current or any parent directory")
+        sys.exit(1)
+
+    if not args.project_name:
+        logger.error("could not determin project name")
         sys.exit(1)
 
     if args.infrabox_json_file:
