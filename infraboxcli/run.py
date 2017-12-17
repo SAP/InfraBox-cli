@@ -52,6 +52,7 @@ def create_infrabox_directories(args, job, service=None):
     infrabox_inputs = os.path.join(infrabox, 'inputs')
     infrabox_upload = os.path.join(infrabox, 'upload')
     infrabox_testresult = os.path.join(infrabox_upload, 'testresult')
+    infrabox_coverage = os.path.join(infrabox_upload, 'coverage')
     infrabox_markup = os.path.join(infrabox_upload, 'markup')
     infrabox_badge = os.path.join(infrabox_upload, 'badge')
     infrabox_job_json = os.path.join(infrabox, 'job.json')
@@ -71,6 +72,7 @@ def create_infrabox_directories(args, job, service=None):
         infrabox_output,
         infrabox_inputs,
         infrabox_testresult,
+        infrabox_coverage,
         infrabox_markup,
         infrabox_badge
     ]
@@ -84,6 +86,7 @@ def create_infrabox_directories(args, job, service=None):
     job['directories'] = {
         "output": infrabox_output,
         "upload/testresult": infrabox_testresult,
+        "upload/coverage": infrabox_coverage,
         "upload/markup": infrabox_markup,
         "upload/badge": infrabox_badge,
         "cache": infrabox_cache,
