@@ -1,5 +1,4 @@
 import logging
-import time
 import sys
 
 from socketIO_client import SocketIO
@@ -7,7 +6,7 @@ from colorama import Fore
 
 from infraboxcli.log import logger
 
-logging.basicConfig(format='%(asctime)-15s %(message)s', level=logging.ERROR)
+logging.basicConfig(format='%(asctime)-15s %(message)s', level=logging.WARNING)
 
 colors = [
     Fore.RED,
@@ -38,9 +37,15 @@ def on_console_update(*args):
     for l in lines:
         print('%s%s:%s %s' % (color, f.format(job_name), Fore.RESET, l))
 
+def on_disconnect(*_args):
+    logger.info('Disconnected')
+    sys.exit(0)
+
 def show_console(build_id, args):
     logger.info("Starting console output for build %s" % build_id)
-    with SocketIO(args.api_url) as s:
+    cookies = {'token': args.token}
+
+    with SocketIO(args.api_url + '/v1', cookies=cookies, wait_for_connection=False) as s:
         def on_job_update(*args):
             u = args[0]['data']
             job = u['job']
@@ -82,22 +87,23 @@ def show_console(build_id, args):
                     elif state == 'scheduled' or state == 'queued' or state == 'running':
                         active = True
 
-                if not active:
-                    for job_id in jobs:
-                        state = jobs[job_id]['state']
-                        name = jobs[job_id]['name']
+                if active:
+                    return
 
-                        if state == 'finished':
-                            logger.info("Job %s finished successfully" % state)
-                        else:
-                            logger.error("Job %s failed with '%s'" % (name, state))
+                for job_id in jobs:
+                    state = jobs[job_id]['state']
+                    name = jobs[job_id]['name']
 
-                    sys.exit(rc)
+                    if state == 'finished':
+                        logger.info("Job %s finished successfully" % name)
+                    else:
+                        logger.error("Job %s failed with '%s'" % (name, state))
 
+                sys.exit(rc)
+
+        s.on('disconnect', on_disconnect)
         s.on('notify:job', on_job_update)
         s.on('notify:console', on_console_update)
-        s.emit('auth:token', args.token)
 
-        time.sleep(3)
         s.emit('listen:build', build_id)
         s.wait()

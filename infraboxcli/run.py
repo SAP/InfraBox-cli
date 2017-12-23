@@ -151,7 +151,6 @@ exec su --preserve-environment infrabox -c "$@"
         job['directories']['inputs/%s' % dep] = source_path
 
     # Create symlinks
-    # recreate_sym_link(infrabox_inputs, os.path.join(args.project_root, '.infrabox', 'inputs'))
     recreate_sym_link(infrabox_output, os.path.join(args.project_root, '.infrabox', 'output'))
     recreate_sym_link(infrabox_upload, os.path.join(args.project_root, '.infrabox', 'upload'))
     recreate_sym_link(infrabox_cache, os.path.join(args.project_root, '.infrabox', 'cache'))
@@ -172,6 +171,8 @@ def get_secret(args, name):
         return secrets[name]
 
 def build_and_run_docker_compose(args, job):
+    create_infrabox_directories(args, job)
+
     compose_file = os.path.join(job['base_path'], job['docker_compose_file'])
     compose_file_new = compose_file + ".infrabox"
 
@@ -181,6 +182,10 @@ def build_and_run_docker_compose(args, job):
         create_infrabox_directories(args, job, service=service)
 
         volumes = []
+        for v in compose_file_content['services'][service].get('volumes', []):
+            v = v.replace('/infrabox/context', args.project_root)
+            volumes.append(v)
+
         for name, path in job['directories'].items():
             volumes.append(str('%s:/infrabox/%s' % (path, name)))
 
