@@ -194,7 +194,10 @@ def build_and_run_docker_compose(args, job):
     with open(compose_file_new, "w+") as out:
         yaml.dump(compose_file_content, out, default_flow_style=False)
 
-    env = {"PATH": os.environ['PATH']}
+    env = {
+        'PATH': os.environ['PATH'],
+        'INFRABOX_CLI': 'true'
+    }
 
     if 'environment' in job:
         for name, value in job['environment'].iteritems():
@@ -272,6 +275,8 @@ def build_and_run_docker(args, job):
                 cmd += ['-e', '%s=%s' % (name, get_secret(args, value['$secret']))]
             else:
                 cmd += ['-e', '%s=%s' % (name, value)]
+
+    cmd += ['-e', 'INFRABOX_CLI=true']
 
     if os.name != 'nt':
         cmd += ['-e', 'INFRABOX_UID=%s' % os.geteuid()]
