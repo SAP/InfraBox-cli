@@ -78,18 +78,16 @@ def show_console(build_id, args):
                 if len(jobs) < 2:
                     return
 
-                rc = 0
                 active = False
                 for job_id in jobs:
                     state = jobs[job_id]['state']
-                    if  state == 'failure' or state == 'error':
-                        rc = 1
-                    elif state == 'scheduled' or state == 'queued' or state == 'running':
+                    if state in ('scheduled', 'queued', 'running'):
                         active = True
 
                 if active:
                     return
 
+                rc = 0
                 for job_id in jobs:
                     state = jobs[job_id]['state']
                     name = jobs[job_id]['name']
@@ -98,6 +96,7 @@ def show_console(build_id, args):
                         logger.info("Job %s finished successfully" % name)
                     else:
                         logger.error("Job %s failed with '%s'" % (name, state))
+                        rc = 1
 
                 sys.exit(rc)
 
