@@ -31,11 +31,6 @@ cd 3_testresult
 infrabox validate
 cd ..
 
-echo "## validate 5_keep"
-cd 5_keep
-infrabox validate
-cd ..
-
 echo "## validate 6_dependency_conditions"
 cd 6_dependency_conditions
 infrabox validate

@@ -36,7 +36,6 @@ def pull(args):
 
     if r.status_code != 200:
         logger.error("Failed to download job manifest")
-        logger.error("Validate your job id and make sure you used 'keep=true' in your job definition")
         sys.exit(1)
 
     manifest = r.json()
