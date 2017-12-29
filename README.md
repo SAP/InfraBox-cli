@@ -21,7 +21,7 @@ You can validate your installation by running:
 ## List Jobs
 If you have a more complex project it may be helpful to list all available jobs in it. For this you may use:
 
-    infrabox list
+    $ infrabox list
 
 It outputs the names of all available jobs. An example output may look like this:
 
