@@ -12,7 +12,7 @@ To install infraboxcli you need to have these requirements already installed:
 
 Then simply run:
 
-    pip install infraboxcli
+    $ pip install infraboxcli
 
 You can validate your installation by running:
 
