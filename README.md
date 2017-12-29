@@ -16,7 +16,7 @@ Then simply run:
 
 You can validate your installation by running:
 
-    infrabox version
+    $ infrabox version
 
 ## List Jobs
 If you have a more complex project it may be helpful to list all available jobs in it. For this you may use:
