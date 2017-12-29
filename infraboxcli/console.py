@@ -39,7 +39,6 @@ def on_console_update(*args):
 
 def on_disconnect(*_args):
     logger.info('Disconnected')
-    sys.exit(0)
 
 def show_console(build_id, args):
     logger.info("Starting console output for build %s" % build_id)
