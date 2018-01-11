@@ -63,7 +63,7 @@ def zipdir(args):
 
 def upload_zip(args, f):
     logger.info('Uploading ...')
-    url = '%s/v1/projects/%s/upload/' % (args.api_url, args.project_id)
+    url = '%s/api/v1/projects/%s/upload/' % (args.url, args.project_id)
     files = {'project.zip': f}
     headers = {'Authorization': 'bearer ' + args.token}
     r = requests.post(url, files=files, headers=headers, timeout=120, verify=args.ca_bundle)
@@ -83,8 +83,8 @@ def upload_zip(args, f):
 def push(args):
     infraboxcli.env.check_env_cli_token(args)
 
-    if not args.api_url:
-        logger.error('either --api-url or INFRABOX_API_URL must be set')
+    if not args.url:
+        logger.error('either --url or INFRABOX_URL must be set')
         sys.exit(1)
 
     if not os.path.isdir(args.project_root):

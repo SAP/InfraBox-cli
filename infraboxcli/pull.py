@@ -31,11 +31,12 @@ def pull(args):
     infraboxcli.env.check_env_cli_token(args)
 
     headers = {'Authorization': 'token ' + args.token}
-    url = '%s/v1/project/%s/job/%s/manifest' % (args.api_url, args.project_id, args.job_id)
+    url = '%s/api/v1/projects/%s/jobs/%s/manifest' % (args.url, args.project_id, args.job_id)
     r = requests.get(url, headers=headers, timeout=5, verify=args.ca_bundle)
 
     if r.status_code != 200:
         logger.error("Failed to download job manifest")
+        logger.error(r.text)
         sys.exit(1)
 
     manifest = r.json()

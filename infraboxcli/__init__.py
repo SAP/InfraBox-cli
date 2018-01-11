@@ -21,9 +21,9 @@ def main():
         username = pwd.getpwuid(os.getuid()).pw_name
 
     parser = argparse.ArgumentParser(prog="infrabox")
-    parser.add_argument("--api-url",
+    parser.add_argument("--url",
                         required=False,
-                        default=os.environ.get('INFRABOX_API_URL', None),
+                        default=os.environ.get('INFRABOX_URL', None),
                         help="Address of the API server")
     parser.add_argument("--ca-bundle",
                         required=False,

@@ -44,7 +44,7 @@ def show_console(build_id, args):
     logger.info("Starting console output for build %s" % build_id)
     cookies = {'token': args.token}
 
-    with SocketIO(args.api_url + '/v1', cookies=cookies, wait_for_connection=False) as s:
+    with SocketIO(args.url + '/api/v1/socket.io', cookies=cookies, wait_for_connection=False) as s:
         def on_job_update(*args):
             u = args[0]['data']
             job = u['job']
