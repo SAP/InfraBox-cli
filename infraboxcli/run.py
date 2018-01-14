@@ -173,7 +173,7 @@ def get_secret(args, name):
 def build_and_run_docker_compose(args, job):
     create_infrabox_directories(args, job)
 
-    compose_file = os.path.join(job['base_path'], job['docker_compose_file'])
+    compose_file = os.path.join(job['infrabox_context'], job['docker_compose_file'])
     compose_file_new = compose_file + ".infrabox"
 
     # rewrite compose file
@@ -208,14 +208,14 @@ def build_and_run_docker_compose(args, job):
 
     if not args.no_rm:
         execute(['docker-compose', '-p', args.project_name,
-                 '-f', compose_file_new, 'rm', '-f'], env=env, cwd=job['base_path'])
+                 '-f', compose_file_new, 'rm', '-f'], env=env, cwd=job['build_context'])
 
     execute(['docker-compose', '-p', args.project_name,
-             '-f', compose_file_new, 'build'], env=env, cwd=job['base_path'])
+             '-f', compose_file_new, 'build'], env=env, cwd=job['build_context'])
 
     def signal_handler(_, __):
         logger.info("Stopping docker containers")
-        execute(['docker-compose', '-f', compose_file_new, 'stop'], env=env, cwd=job['base_path'])
+        execute(['docker-compose', '-f', compose_file_new, 'stop'], env=env, cwd=job['build_context'])
         os.remove(compose_file_new)
         sys.exit(0)
 
@@ -228,6 +228,7 @@ def build_and_run_docker_compose(args, job):
     os.remove(compose_file_new)
 
 def build_and_run_docker(args, job):
+    logger.info(json.dumps(job, indent=4))
     create_infrabox_directories(args, job)
 
     if args.tag:
@@ -243,14 +244,17 @@ def build_and_run_docker(args, job):
     logger.info("Build docker image")
 
     if not args.no_rm:
-        execute(['docker', 'rm', container_name], cwd=args.project_root, ignore_error=True, ignore_output=True)
+        execute(['docker', 'rm', container_name],
+                cwd=args.project_root,
+                ignore_error=True,
+                ignore_output=True)
 
     cmd = ['docker', 'build', '-t', image_name, '.', '-f', job['docker_file']]
     if 'build_arguments' in job:
         for name, value in job['build_arguments'].iteritems():
             cmd += ['--build-arg', '%s=%s' %(name, value)]
 
-    execute(cmd, cwd=job['base_path'])
+    execute(cmd, cwd=job['build_context'])
 
     if 'build_only' not in job:
         return
@@ -353,7 +357,7 @@ def build_and_run(args, job, cache):
         logger.info("Loading generated jobs")
 
         data = load_infrabox_json(infrabox_json)
-        jobs = get_job_list(data, args, base_path=args.project_root)
+        jobs = get_job_list(data, args, infrabox_context=args.project_root)
 
     end_date = datetime.now()
 
@@ -389,7 +393,7 @@ def run(args):
 
     # validate infrabox.json
     data = load_infrabox_json(args.infrabox_json)
-    jobs = get_job_list(data, args, base_path=args.project_root)
+    jobs = get_job_list(data, args, infrabox_context=args.project_root)
 
     if args.job_name:
         cache.add_jobs(jobs)

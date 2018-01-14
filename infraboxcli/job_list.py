@@ -54,7 +54,7 @@ def rewrite_job_dependencies(job):
                     }
 
 
-def get_job_list(data, args, parents=None, base_path=None):
+def get_job_list(data, args, parents=None, infrabox_context=None):
     jobs = []
 
     if not parents:
@@ -66,7 +66,12 @@ def get_job_list(data, args, parents=None, base_path=None):
         job['id'] = str(uuid.uuid4())
         job['avg_duration'] = 0
         job['parents'] = parents
-        job['base_path'] = base_path
+        job['infrabox_context'] = infrabox_context
+
+        if 'build_context' in job:
+            job['build_context'] = os.path.normpath(os.path.join(infrabox_context, job['build_context']))
+        else:
+             job['build_context'] = os.path.normpath(infrabox_context)
 
         if parent_name != '':
             job['name'] = parent_name + "/" + job['name']
@@ -96,12 +101,23 @@ def get_job_list(data, args, parents=None, base_path=None):
             execute(['git', 'clone', '--depth=50', job['clone_url'], repo_path])
             execute(['git', 'checkout', job['commit']], cwd=repo_path)
 
-            data = load_infrabox_json(os.path.join(repo_path, 'infrabox.json'))
-            sub = get_job_list(data, args, new_parents, base_path=repo_path)
+            ib_path = job.get('infrabox_file', 'infrabox.json')
+            ib_path = os.path.join(repo_path, ib_path)
+            data = load_infrabox_json(ib_path)
+            sub = get_job_list(data, args, new_parents,
+                               infrabox_context=os.path.dirname(ib_path))
+
+            # Set the build context to dirname of the infrabox.json
+            # if not build context is specified
+            for s in sub:
+                if 'build_context' not in s:
+                    s['build_context'] = os.path.normpath(os.path.dirname(ib_path))
+
         else:
-            p = os.path.join(base_path, job['infrabox_file'])
+            p = os.path.join(infrabox_context, job['infrabox_file'])
             data = load_infrabox_json(p)
-            sub = get_job_list(data, args, new_parents, base_path=base_path)
+            sub = get_job_list(data, args, new_parents,
+                               infrabox_context=os.path.dirname(p))
 
         # every sub job which does not have a parent
         # should be a child of the current job
