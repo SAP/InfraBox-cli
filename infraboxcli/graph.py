@@ -4,7 +4,7 @@ from infraboxcli.job_list import load_infrabox_json, get_job_list, get_parent_na
 
 def graph(args):
     data = load_infrabox_json(args.infrabox_json)
-    jobs = get_job_list(data, args, base_path=args.project_root)
+    jobs = get_job_list(data, args, infrabox_context=args.project_root)
 
     d = 'digraph "%s" {' % args.project_name
 

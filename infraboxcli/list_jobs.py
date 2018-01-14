@@ -13,7 +13,7 @@ def list_jobs(args):
         sys.exit(1)
 
     data = load_infrabox_json(args.infrabox_json)
-    jobs = get_job_list(data, args, base_path=args.project_root)
+    jobs = get_job_list(data, args, infrabox_context=args.project_root)
 
     cache = WorkflowCache(args)
     cache.add_jobs(jobs)
