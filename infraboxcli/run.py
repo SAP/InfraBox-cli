@@ -58,7 +58,7 @@ def create_infrabox_directories(args, job, service=None):
     infrabox_badge = os.path.join(infrabox_upload, 'badge')
     infrabox_job_json = os.path.join(infrabox, 'job.json')
     infrabox_gosu = os.path.join(infrabox, 'gosu.sh')
-    infrabox_context = os.path.join(args.project_root)
+    infrabox_context = job['build_context']
     infrabox_local_cache = args.local_cache
 
     # If any directories used as volumes in docker do not exist prior to the docker run call,
