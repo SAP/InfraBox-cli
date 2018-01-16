@@ -228,7 +228,6 @@ def build_and_run_docker_compose(args, job):
     os.remove(compose_file_new)
 
 def build_and_run_docker(args, job):
-    logger.info(json.dumps(job, indent=4))
     create_infrabox_directories(args, job)
 
     if args.tag:
