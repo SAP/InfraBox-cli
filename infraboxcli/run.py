@@ -36,7 +36,7 @@ def recreate_sym_link(source, link_name):
         os.symlink(source, link_name)
 
 
-def create_infrabox_directories(args, job, service=None):
+def create_infrabox_directories(args, job, service=None, services=None, compose_file=None):
     #pylint: disable=too-many-locals
     job_name = job['name'].replace('/', '_')
 
@@ -58,7 +58,6 @@ def create_infrabox_directories(args, job, service=None):
     infrabox_badge = os.path.join(infrabox_upload, 'badge')
     infrabox_job_json = os.path.join(infrabox, 'job.json')
     infrabox_gosu = os.path.join(infrabox, 'gosu.sh')
-    infrabox_context = job['build_context']
     infrabox_local_cache = args.local_cache
 
     # If any directories used as volumes in docker do not exist prior to the docker run call,
@@ -92,10 +91,23 @@ def create_infrabox_directories(args, job, service=None):
         "upload/badge": infrabox_badge,
         "cache": infrabox_cache,
         "local-cache": args.local_cache,
-        "context": infrabox_context,
         "job.json:ro": infrabox_job_json,
         "gosu.sh:ro": infrabox_gosu
     }
+
+    infrabox_context = job['build_context']
+
+    if service:
+        service_build = services[service].get('build', None)
+
+        if service_build:
+            service_build_context = service_build.get('context', None)
+
+            if service_build_context:
+                infrabox_context = os.path.join(os.path.dirname(compose_file), service_build_context)
+
+    if infrabox_context:
+        job['directories']["context"] = infrabox_context
 
     # create job.json
     with open(infrabox_job_json, 'w') as out:
@@ -179,7 +191,7 @@ def build_and_run_docker_compose(args, job):
     # rewrite compose file
     compose_file_content = docker_compose.create_from(compose_file)
     for service in compose_file_content['services']:
-        create_infrabox_directories(args, job, service=service)
+        create_infrabox_directories(args, job, service=service, services=compose_file_content['services'], compose_file=compose_file)
 
         volumes = []
         for v in compose_file_content['services'][service].get('volumes', []):
