@@ -186,12 +186,16 @@ def build_and_run_docker_compose(args, job):
     create_infrabox_directories(args, job)
 
     compose_file = os.path.join(job['infrabox_context'], job['docker_compose_file'])
+    compose_file = os.path.normpath(compose_file)
     compose_file_new = compose_file + ".infrabox"
 
     # rewrite compose file
     compose_file_content = docker_compose.create_from(compose_file)
     for service in compose_file_content['services']:
-        create_infrabox_directories(args, job, service=service, services=compose_file_content['services'], compose_file=compose_file)
+        create_infrabox_directories(args, job,
+                                    service=service,
+                                    services=compose_file_content['services'],
+                                    compose_file=compose_file)
 
         volumes = []
         for v in compose_file_content['services'][service].get('volumes', []):
@@ -368,7 +372,7 @@ def build_and_run(args, job, cache):
         logger.info("Loading generated jobs")
 
         data = load_infrabox_json(infrabox_json)
-        jobs = get_job_list(data, args, infrabox_context=args.project_root)
+        jobs = get_job_list(data, args, infrabox_context=os.path.join(args.project_root, '.infrabox', 'output'))
 
     end_date = datetime.now()
 

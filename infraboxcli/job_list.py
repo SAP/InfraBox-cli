@@ -66,7 +66,7 @@ def get_job_list(data, args, parents=None, infrabox_context=None):
         job['id'] = str(uuid.uuid4())
         job['avg_duration'] = 0
         job['parents'] = parents
-        job['infrabox_context'] = infrabox_context
+        job['infrabox_context'] = os.path.normpath(infrabox_context)
 
         if 'build_context' in job:
             job['build_context'] = os.path.normpath(os.path.join(infrabox_context, job['build_context']))
@@ -115,6 +115,7 @@ def get_job_list(data, args, parents=None, infrabox_context=None):
 
         else:
             p = os.path.join(infrabox_context, job['infrabox_file'])
+            p = os.path.normpath(p)
             data = load_infrabox_json(p)
             sub = get_job_list(data, args, new_parents,
                                infrabox_context=os.path.dirname(p))
