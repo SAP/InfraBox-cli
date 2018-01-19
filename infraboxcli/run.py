@@ -35,6 +35,24 @@ def recreate_sym_link(source, link_name):
             os.remove(link_name)
         os.symlink(source, link_name)
 
+def get_build_context(job, args):
+    job_build_context = job.get('build_context', None)
+    job_infrabox_context = job['infrabox_context']
+
+    # Default build context is the infrabox context
+    build_context = job_infrabox_context
+
+    if job_build_context:
+        # job specified build context is alway relative to the infrabox context
+        build_context = os.path.join(job_infrabox_context, job_build_context)
+
+    build_context = os.path.join(args.project_root, build_context)
+
+    if not build_context.startswith(args.project_root):
+        raise Exception('Invalid build_context')
+
+    return os.path.normpath(build_context)
+
 
 def create_infrabox_directories(args, job, service=None, services=None, compose_file=None):
     #pylint: disable=too-many-locals
@@ -95,8 +113,6 @@ def create_infrabox_directories(args, job, service=None, services=None, compose_
         "gosu.sh:ro": infrabox_gosu
     }
 
-    infrabox_context = job['build_context']
-
     if service:
         service_build = services[service].get('build', None)
 
@@ -104,10 +120,10 @@ def create_infrabox_directories(args, job, service=None, services=None, compose_
             service_build_context = service_build.get('context', None)
 
             if service_build_context:
-                infrabox_context = os.path.join(os.path.dirname(compose_file), service_build_context)
-
-    if infrabox_context:
-        job['directories']["context"] = infrabox_context
+                context = os.path.join(os.path.dirname(compose_file), service_build_context)
+                job['directories']['context'] = context
+    else:
+        job['directories']['context'] = get_build_context(job, args)
 
     # create job.json
     with open(infrabox_job_json, 'w') as out:
@@ -244,6 +260,7 @@ def build_and_run_docker_compose(args, job):
     os.remove(compose_file_new)
 
 def build_and_run_docker(args, job):
+    logger.info(json.dumps(job, indent=4))
     create_infrabox_directories(args, job)
 
     if args.tag:
@@ -264,12 +281,15 @@ def build_and_run_docker(args, job):
                 ignore_error=True,
                 ignore_output=True)
 
-    cmd = ['docker', 'build', '-t', image_name, '.', '-f', job['docker_file']]
+    docker_file = os.path.normpath(os.path.join(get_build_context(job, args),
+                                                job['docker_file']))
+
+    cmd = ['docker', 'build', '-t', image_name, '.', '-f', docker_file]
     if 'build_arguments' in job:
         for name, value in job['build_arguments'].iteritems():
             cmd += ['--build-arg', '%s=%s' %(name, value)]
 
-    execute(cmd, cwd=job['build_context'])
+    execute(cmd, cwd=get_build_context(job, args))
 
     if 'build_only' not in job:
         return
