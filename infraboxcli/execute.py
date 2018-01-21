@@ -3,12 +3,18 @@ import subprocess
 from infraboxcli.log import logger
 
 def execute(command, cwd=None, env=None, ignore_error=False, ignore_output=False):
-    logger.info('Running external process: ' + ' '.join(command))
+    logger.info('Running external process (cwd=%s): %s' % (cwd, ' '.join(command)))
 
     if env is None:
         env = os.environ
 
-    process = subprocess.Popen(command, shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd, env=env, universal_newlines=True)
+    process = subprocess.Popen(command,
+                               shell=False,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT,
+                               cwd=cwd,
+                               env=env,
+                               universal_newlines=True)
 
     # Poll process for new output until finished
     while True:

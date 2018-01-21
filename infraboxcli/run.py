@@ -140,26 +140,6 @@ def create_infrabox_directories(args, job, service=None, services=None, compose_
 
         json.dump(o, out)
 
-    with open(infrabox_gosu, 'w') as out:
-        out.write('''
-#!/bin/sh
-set -x
-
-USER_ID=${INFRABOX_UID:-9001}
-GROUP_ID=${INFRABOX_GID:-9001}
-
-echo "Starting with UID:GID: $USER_ID:$GROUP_ID"
-cat /etc/group
-groupadd --gid $GROUP_ID infrabox
-useradd --no-user-group --no-create-home --non-unique --uid $USER_ID --groups infrabox infrabox
-export HOME=/home/infrabox
-
-# Note you need to preserve PATH as well, usually - but this cannot be achived with su!?
-exec su --preserve-environment infrabox -c "$@"
-''')
-        st = os.stat(infrabox_gosu)
-        os.chmod(infrabox_gosu, st.st_mode | stat.S_IEXEC)
-
 
     if os.path.exists(os.path.join(args.project_root, '.infrabox', 'inputs')):
         shutil.rmtree(os.path.join(args.project_root, '.infrabox', 'inputs'))
@@ -416,13 +396,12 @@ def build_and_run(args, job, cache):
 
         cache.add_job(j)
 
-    if job['name'] == args.job_name:
-        return
-
-    for j in jobs:
-        build_and_run(args, j, cache)
+    if args.children:
+        for j in jobs:
+            build_and_run(args, j, cache)
 
 def run(args):
+    logger.info('run')
     # Init workflow cache
     cache = WorkflowCache(args)
 
@@ -430,17 +409,12 @@ def run(args):
     data = load_infrabox_json(args.infrabox_json)
     jobs = get_job_list(data, args, infrabox_context=args.project_root)
 
-    if args.job_name:
-        cache.add_jobs(jobs)
-        job = cache.get_job(args.job_name)
-
-        if not job:
-            logger.error("job %s not found in infrabox.json" % args.job_name)
-            sys.exit(1)
-
-        build_and_run(args, job, cache)
-    else:
+    if not args.job_name:
+        # We run all jobs, so clear all cached jobs
         cache.clear()
-        cache.add_jobs(jobs)
-        for j in jobs:
-            build_and_run(args, j, cache)
+
+    # Cache all jobs
+    cache.add_jobs(jobs)
+
+    for j in cache.get_jobs(job_name=args.job_name, children=args.children):
+        build_and_run(args, j, cache)

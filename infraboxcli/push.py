@@ -99,5 +99,7 @@ def push(args):
     zip_file = zipdir(args)
     result = upload_zip(args, zip_file)
 
+    logger.info(result['url'])
+
     if args.show_console:
         show_console(result['build']['id'], args)

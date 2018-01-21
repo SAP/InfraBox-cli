@@ -84,6 +84,8 @@ def main():
                             help="Does not run 'docker-compose rm' before building")
     parser_run.add_argument("-t", dest='tag', required=False, type=str,
                             help="Docker image tag")
+    parser_run.add_argument("-c", "--children", action='store_true',
+                            help="Also run children of a job")
     parser_run.add_argument("--local-cache", required=False, type=str,
                             default="/tmp/{}/infrabox/local-cache".format(username),
                             help="Path to the local cache")
@@ -124,12 +126,11 @@ def main():
             args.project_name = os.path.basename(p)
             break
 
+    if 'job_name' not in args:
+        args.children = True
+
     if 'project_root' not in args and 'is_init' not in args:
         logger.error("infrabox.json not found in current or any parent directory")
-        sys.exit(1)
-
-    if not args.project_name:
-        logger.error("could not determin project name")
         sys.exit(1)
 
     if args.infrabox_json_file:

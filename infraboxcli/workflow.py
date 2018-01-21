@@ -1,5 +1,8 @@
 import os
 import json
+import sys
+
+from infraboxcli.log import logger
 
 class WorkflowCache(object):
     def __init__(self, args):
@@ -31,12 +34,24 @@ class WorkflowCache(object):
 
         self.jobs = []
 
-    def get_job(self, job_name):
+    def get_jobs(self, job_name=None, children=False):
+        if not job_name:
+            return self.jobs
+
+        jobs = []
         for j in self.jobs:
             if j['name'] == job_name:
-                return j
+                jobs.append(j)
 
-        return None
+                if children:
+                    for p in j.get('depends_on', []):
+                        jobs += self.get_jobs(p['name'], children)
+
+        if not jobs:
+            logger.error("job %s not found in infrabox.json" % job_name)
+            sys.exit(1)
+
+        return jobs
 
     def add_jobs(self, jobs):
         for j in jobs:
@@ -44,6 +59,7 @@ class WorkflowCache(object):
 
     def add_job(self, job):
         updated = False
+
         for i in range(0, len(self.jobs)):
             if self.jobs[i]['name'] == job['name']:
                 updated = True

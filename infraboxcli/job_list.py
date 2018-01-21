@@ -64,7 +64,6 @@ def get_job_list(data, args, parents=None, infrabox_context=None):
 
     for job in data['jobs']:
         job['id'] = str(uuid.uuid4())
-        job['avg_duration'] = 0
         job['parents'] = parents
         job['infrabox_context'] = os.path.normpath(infrabox_context)
 
