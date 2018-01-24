@@ -212,7 +212,7 @@ def build_and_run_docker_compose(args, job):
     }
 
     if 'environment' in job:
-        for name, value in job['environment'].iteritems():
+        for name, value in job['environment'].items():
             if isinstance(value, dict):
                 env[name] = get_secret(args, value['$ref'])
             else:
@@ -266,7 +266,7 @@ def build_and_run_docker(args, job):
 
     cmd = ['docker', 'build', '-t', image_name, '.', '-f', docker_file]
     if 'build_arguments' in job:
-        for name, value in job['build_arguments'].iteritems():
+        for name, value in job['build_arguments'].items():
             cmd += ['--build-arg', '%s=%s' %(name, value)]
 
     execute(cmd, cwd=get_build_context(job, args))
@@ -289,7 +289,7 @@ def build_and_run_docker(args, job):
     cmd += ['-m', '%sm' % job['resources']['limits']['memory']]
 
     if 'environment' in job:
-        for name, value in job['environment'].iteritems():
+        for name, value in job['environment'].items():
             if isinstance(value, dict):
                 cmd += ['-e', '%s=%s' % (name, get_secret(args, value['$secret']))]
             else:
