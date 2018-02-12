@@ -47,10 +47,6 @@ def get_build_context(job, args):
         build_context = os.path.join(job_infrabox_context, job_build_context)
 
     build_context = os.path.join(args.project_root, build_context)
-
-    if not build_context.startswith(args.project_root):
-        raise Exception('Invalid build_context')
-
     return os.path.normpath(build_context)
 
 
