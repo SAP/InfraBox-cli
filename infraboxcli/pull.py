@@ -64,6 +64,7 @@ def pull(args):
         download_file(d['output']['url'], package_path, args)
 
         if not os.path.exists(package_path):
+            logger.info('No output found')
             continue
 
         # unpack

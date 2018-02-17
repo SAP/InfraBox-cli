@@ -52,6 +52,7 @@ def main():
 
     # pull
     parser_pull = sub_parser.add_parser('pull', help='Pull a remote job')
+    parser_pull.set_defaults(is_pull=True)
     parser_pull.add_argument("--job-id", required=True)
     parser_pull.add_argument("--no-container", required=False, dest='pull_container', action='store_false',
                              help="Only the inputs will be downloaded but not the actual container. Implies --no-run.")
@@ -129,7 +130,7 @@ def main():
     if 'job_name' not in args:
         args.children = True
 
-    if 'project_root' not in args and 'is_init' not in args:
+    if 'project_root' not in args and 'is_init' not in args and 'is_pull' not in args:
         logger.error("infrabox.json not found in current or any parent directory")
         sys.exit(1)
 

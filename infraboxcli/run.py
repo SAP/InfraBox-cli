@@ -265,6 +265,9 @@ def build_and_run_docker(args, job):
         for name, value in job['build_arguments'].items():
             cmd += ['--build-arg', '%s=%s' %(name, value)]
 
+    # memory limit
+    cmd += ['-m', '%sm' % job['resources']['limits']['memory']]
+
     execute(cmd, cwd=get_build_context(job, args))
 
     if 'build_only' not in job:
@@ -273,6 +276,7 @@ def build_and_run_docker(args, job):
     if job['build_only']:
         return
 
+    # Run the continer
     cmd = ['docker', 'run', '--name', container_name]
     caps = job.get('security_context', {}).get('capabilities', {}).get('add', [])
     if caps:
@@ -297,9 +301,14 @@ def build_and_run_docker(args, job):
         cmd += ['-e', 'INFRABOX_UID=%s' % os.geteuid()]
         cmd += ['-e', 'INFRABOX_GID=%s' % os.getegid()]
 
-    cmd.append(image_name)
+    # memory limit
+    cmd += ['-m', '%sm' % job['resources']['limits']['memory']]
+
+    # CPU limit
+    cmd += ['--cpus', str(job['resources']['limits']['cpu'])]
 
     logger.info("Run docker container")
+    cmd.append(image_name)
     execute(cmd, cwd=args.project_root)
 
     logger.info("Commiting Container")
