@@ -269,10 +269,14 @@ def build_and_run_docker(args, job):
 
     execute(cmd, cwd=get_build_context(job, args))
 
-    if 'build_only' not in job:
-        return
+    # Tag images if deployments are configured
+    deployments = job.get('deployments', [])
+    for d in deployments:
+        new_image_name = "%s/%s:%s" % (d['host'], d['repository'], d.get('tag', 'local'))
+        logger.info("Tagging image: %s" % new_image_name)
+        execute(['docker', 'tag', image_name, new_image_name])
 
-    if job['build_only']:
+    if job.get('build_only', True):
         return
 
     # Run the continer
