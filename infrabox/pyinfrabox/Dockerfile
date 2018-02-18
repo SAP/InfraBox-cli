@@ -1,7 +1,9 @@
 FROM stege/baseimage:1
 
 RUN apk add --no-cache py-pip py-yaml git
-RUN pip install coverage future
+RUN pip install coverage future xmlrunner
+
+ENV PYTHONPATH=/
 
 RUN adduser -S tester
 
