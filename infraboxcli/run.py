@@ -210,7 +210,7 @@ def build_and_run_docker_compose(args, job):
     if 'environment' in job:
         for name, value in job['environment'].items():
             if isinstance(value, dict):
-                env[name] = get_secret(args, value['$ref'])
+                env[name] = get_secret(args, value['$secret'])
             else:
                 env[name] = value
 
@@ -236,7 +236,6 @@ def build_and_run_docker_compose(args, job):
     os.remove(compose_file_new)
 
 def build_and_run_docker(args, job):
-    logger.info(json.dumps(job, indent=4))
     create_infrabox_directories(args, job)
 
     if args.tag:
@@ -328,7 +327,15 @@ def track_as_parent(job, state, start_date=datetime.now(), end_date=datetime.now
         "depends_on": job.get('depends_on', [])
     })
 
+def check_if_supported(job):
+    res_k8s = job['resources'].get('kubernetes', None)
+
+    if res_k8s:
+        logger.warn('Using kubernetes resources is not supported')
+
 def build_and_run(args, job, cache):
+    check_if_supported(job)
+
     # check if depedency conditions are met
     for dep in job.get("depends_on", []):
         on = dep['on']
@@ -406,7 +413,6 @@ def build_and_run(args, job, cache):
             build_and_run(args, j, cache)
 
 def run(args):
-    logger.info('run')
     # Init workflow cache
     cache = WorkflowCache(args)
 
