@@ -49,6 +49,19 @@ def get_build_context(job, args):
     build_context = os.path.join(args.project_root, build_context)
     return os.path.normpath(build_context)
 
+def recreate_directories(dirs):
+    for d in dirs:
+        if os.path.exists(d):
+            try:
+                shutil.rmtree(d)
+            except:
+                execute(['docker', 'run', '-v', '%s:/to_delete' % d, 'alpine', 'rm', '-rf', '/to_delete'],
+                        ignore_error=True,
+                        ignore_output=True)
+                shutil.rmtree(d)
+
+        makedirs(d)
+
 
 def create_infrabox_directories(args, job, service=None, services=None, compose_file=None):
     #pylint: disable=too-many-locals
@@ -61,7 +74,6 @@ def create_infrabox_directories(args, job, service=None, services=None, compose_
     work_dir = os.path.join(args.project_root, '.infrabox', 'work')
     job_dir = os.path.join(work_dir, 'jobs', job_name)
     infrabox = os.path.join(job_dir, 'infrabox')
-    infrabox_work = os.path.join(job_dir, 'work')
     infrabox_cache = os.path.join(infrabox, 'cache')
     infrabox_output = os.path.join(infrabox, 'output')
     infrabox_inputs = os.path.join(infrabox, 'inputs')
@@ -82,7 +94,6 @@ def create_infrabox_directories(args, job, service=None, services=None, compose_
     logger.info('Recreating directories')
 
     recreate_dirs = [
-        infrabox_work,
         infrabox_output,
         infrabox_inputs,
         infrabox_testresult,
@@ -91,11 +102,7 @@ def create_infrabox_directories(args, job, service=None, services=None, compose_
         infrabox_badge
     ]
 
-    for d in recreate_dirs:
-        if os.path.exists(d):
-            shutil.rmtree(d)
-
-        makedirs(d)
+    recreate_directories(recreate_dirs)
 
     job['directories'] = {
         "output": infrabox_output,
