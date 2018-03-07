@@ -88,7 +88,7 @@ In case you would like to run a job which has been already executed on InfraBox 
 You can find the exact command for each job on the job detail page of InfraBox under _Run local_
 
 ## Secrets
-If you reference secrets in your job definition (i.e. as environment variable) then you can add a _.infraboxsecrets.json_ file to your project right next to the_.infrabox.json_ file. This file should then contain all your secrets referenced in your job definition as a simple object:
+If you reference secrets in your job definition (i.e. as environment variable) then you can add a _.infraboxsecrets.json_ file to your project right next to the _.infrabox.json_ file. This file should then contain all your secrets referenced in your job definition as a simple object:
 
     {
         "SECRET_NAME1": "my secret value",
