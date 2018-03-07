@@ -65,7 +65,7 @@ In case you have multiple jobs defined an want to run only one of them you can d
 ## Push a Job
 To be able to use infrabox push you have to [create a project](https://infrabox.ninja/docs/#create-upload-project) in the InfraBox Dashboard and [create an auth token](https://infrabox.ninja/docs/#create-auth-token) for it.
 
-Auth Token and InfraBox API Host must be set as environment variables. If you want to use the infrabox.ninja playground use INFRABOX_URL=https://infrabox.ninja
+Auth Token and InfraBox API Host must be set as environment variables. If you want to use the infrabox.ninja playground use `INFRABOX_URL=https://infrabox.ninja`.
 
     export INFRABOX_CLI_TOKEN=<YOUR_ACCESS_TOKEN>
     export INFRABOX_URL=<INFRABOX_URL>
