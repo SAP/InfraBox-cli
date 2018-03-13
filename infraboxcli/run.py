@@ -4,7 +4,6 @@ import signal
 import shutil
 import sys
 import copy
-import stat
 from datetime import datetime
 import traceback
 import yaml
@@ -288,14 +287,21 @@ def build_and_run_docker(args, job):
 
     # Run the continer
     cmd = ['docker', 'run', '--name', container_name]
-    caps = job.get('security_context', {}).get('capabilities', {}).get('add', [])
+
+    # Security context
+    security_context = job.get('security_context', {})
+    caps = security_context.get('capabilities', {}).get('add', [])
+
     if caps:
         cmd += ['--cap-add=' + ','.join(caps)]
+
+    privileged = security_context.get('privileged', False)
+    if privileged:
+        cmd += ['--privileged', '-v', '/tmp/docker:/var/lib/docker']
 
     for name, path in job['directories'].items():
         cmd += ['-v', '%s:/infrabox/%s' % (path, name)]
 
-    cmd += ['-v', '/var/run/docker.sock:/var/run/docker.sock']
     cmd += ['-m', '%sm' % job['resources']['limits']['memory']]
 
     if 'environment' in job:

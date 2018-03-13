@@ -159,7 +159,10 @@ def parse_capabilities(d, path):
         parse_add_capabilities(d['add'], path + '.add')
 
 def parse_security_context(d, path):
-    check_allowed_properties(d, path, ('capabilities',))
+    check_allowed_properties(d, path, ('capabilities', 'privileged'))
+
+    if 'privileged' in d:
+        check_boolean(d['privileged'], path + ".privileged")
 
     if 'capabilities' in d:
         parse_capabilities(d['capabilities'], path + '.capabilities')
