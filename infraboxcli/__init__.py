@@ -9,7 +9,7 @@ from infraboxcli.log import logger
 from infraboxcli.pull import pull
 from infraboxcli.push import push
 from infraboxcli.run import run
-from infraboxcli.dashboard.account import login
+from infraboxcli.dashboard.user import login
 from infraboxcli.dashboard import project
 from infraboxcli.validate import validate
 
