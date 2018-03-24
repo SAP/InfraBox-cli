@@ -2,14 +2,16 @@ import argparse
 import os
 import sys
 
-from infraboxcli.push import push
-from infraboxcli.run import run
 from infraboxcli.graph import graph
-from infraboxcli.validate import validate
+from infraboxcli.init import init
 from infraboxcli.list_jobs import list_jobs
 from infraboxcli.log import logger
-from infraboxcli.init import init
 from infraboxcli.pull import pull
+from infraboxcli.push import push
+from infraboxcli.run import run
+from infraboxcli.dashboard.account import login
+from infraboxcli.dashboard import project
+from infraboxcli.validate import validate
 
 version = '0.6.0'
 
@@ -93,6 +95,50 @@ def main():
 
     parser_run.set_defaults(no_rm=False)
     parser_run.set_defaults(func=run)
+
+    # collaborators
+    parser_collab_add = sub_parser.add_parser('add-collaborator')
+    parser_collab_add.add_argument("--username", required=True,
+                            help="Collaborator username")
+    parser_collab_add.set_defaults(func=project.add_collaborator)
+
+    parser_collab_dl = sub_parser.add_parser('delete-collaborator')
+    parser_collab_dl.add_argument("--username", required=True,
+                            help="Collaborator username")
+    parser_collab_dl.set_defaults(func=project.delete_collaborator)
+
+    # secrets
+    parser_secret_add = sub_parser.add_parser('add-secret')
+    parser_secret_add.add_argument("--name", required=True,
+                                   help="Secret name")
+    parser_secret_add.add_argument("--value", required=True,
+                                   help="Secret value")
+    parser_secret_add.set_defaults(func=project.add_secret)
+
+    parser_secret_dl = sub_parser.add_parser('delete-secret')
+    parser_secret_dl.add_argument("--name", required=True,
+                                  help="Secret name")
+    parser_secret_dl.set_defaults(func=project.delete_secret)
+
+    # in-project tokens
+    parser_secret_add = sub_parser.add_parser('add-token')
+    parser_secret_add.add_argument("--d", required=True,
+                                   help="Token description")
+    parser_secret_add.add_argument("--scope_push", required=False, action='store_true',
+                                   help="Scope push")
+    parser_secret_add.add_argument("--scope_pull", required=False, action='store_true',
+                                   help="Scope pull")
+    parser_secret_add.set_defaults(func=project.add_token)
+
+    parser_secret_dl = sub_parser.add_parser('delete-token')
+    parser_secret_dl.add_argument("--id", required=True,
+                                  help="Token id")
+    parser_secret_dl.set_defaults(func=project.delete_token)
+
+    # user
+    parser_login = sub_parser.add_parser('login', help='Login to infrabox')
+    parser_login.set_defaults(func=login)
+
 
     # Parse args
     args = parser.parse_args()
