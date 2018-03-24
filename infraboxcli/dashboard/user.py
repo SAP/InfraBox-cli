@@ -1,7 +1,7 @@
 import getpass
 
-from cli_client import post, get
-from external import load_current_user_token, save_user_token
+from infraboxcli.dashboard.cli_client import post, get
+from infraboxcli.dashboard.external import load_current_user_token, save_user_token
 
 url_base = 'http://localhost:8080/api/v1/user/'
 

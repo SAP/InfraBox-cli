@@ -1,5 +1,5 @@
 from infraboxcli.dashboard.cli_client import get, post, delete
-from user import id_by_neme, get_user_headers
+from infraboxcli.dashboard.user import id_by_neme, get_user_headers
 import infraboxcli.env
 
 url_base = 'http://localhost:8080/api/v1/projects/'

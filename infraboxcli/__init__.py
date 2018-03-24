@@ -9,9 +9,10 @@ from infraboxcli.log import logger
 from infraboxcli.pull import pull
 from infraboxcli.push import push
 from infraboxcli.run import run
-from infraboxcli.dashboard.user import login
-from infraboxcli.dashboard import project
 from infraboxcli.validate import validate
+
+from infraboxcli.dashboard import user
+from infraboxcli.dashboard import project
 
 version = '0.6.0'
 
@@ -137,7 +138,7 @@ def main():
 
     # user
     parser_login = sub_parser.add_parser('login', help='Login to infrabox')
-    parser_login.set_defaults(func=login)
+    parser_login.set_defaults(func=user.login)
 
 
     # Parse args
