@@ -244,36 +244,41 @@ def build_and_run_docker_compose(args, job):
 def build_and_run_docker(args, job):
     create_infrabox_directories(args, job)
 
-    if args.tag:
-        image_name = args.tag
-    else:
-        image_name = args.project_name + '_' + job['name']
-        image_name = image_name.replace("/", "-")
-        image_name = image_name.lower()
-
     container_name = 'ib_' + job['name'].replace("/", "-")
 
-    # Build the image
-    logger.info("Build docker image")
+    image_name = None
+    if job['type'] == 'docker':
+        if args.tag:
+            image_name = args.tag
+        else:
+            image_name = args.project_name + '_' + job['name']
+            image_name = image_name.replace("/", "-")
+            image_name = image_name.lower()
 
-    if not args.no_rm:
-        execute(['docker', 'rm', container_name],
-                cwd=args.project_root,
-                ignore_error=True,
-                ignore_output=True)
 
-    docker_file = os.path.normpath(os.path.join(get_build_context(job, args),
-                                                job['docker_file']))
+        # Build the image
+        logger.info("Build docker image")
 
-    cmd = ['docker', 'build', '-t', image_name, '.', '-f', docker_file]
-    if 'build_arguments' in job:
-        for name, value in job['build_arguments'].items():
-            cmd += ['--build-arg', '%s=%s' %(name, value)]
+        if not args.no_rm:
+            execute(['docker', 'rm', container_name],
+                    cwd=args.project_root,
+                    ignore_error=True,
+                    ignore_output=True)
 
-    # memory limit
-    cmd += ['-m', '%sm' % job['resources']['limits']['memory']]
+        docker_file = os.path.normpath(os.path.join(get_build_context(job, args),
+                                                    job['docker_file']))
 
-    execute(cmd, cwd=get_build_context(job, args))
+        cmd = ['docker', 'build', '-t', image_name, '.', '-f', docker_file]
+        if 'build_arguments' in job:
+            for name, value in job['build_arguments'].items():
+                cmd += ['--build-arg', '%s=%s' %(name, value)]
+
+        # memory limit
+        cmd += ['-m', '%sm' % job['resources']['limits']['memory']]
+
+        execute(cmd, cwd=get_build_context(job, args))
+    elif job['type'] == 'docker-image':
+        image_name = job['image']
 
     # Tag images if deployments are configured
     deployments = job.get('deployments', [])
@@ -282,8 +287,9 @@ def build_and_run_docker(args, job):
         logger.info("Tagging image: %s" % new_image_name)
         execute(['docker', 'tag', image_name, new_image_name])
 
-    if job.get('build_only', True):
-        return
+    if job['type'] == 'docker':
+        if job.get('build_only', True):
+            return
 
     # Run the continer
     cmd = ['docker', 'run', '--name', container_name]
@@ -323,8 +329,12 @@ def build_and_run_docker(args, job):
     # CPU limit
     cmd += ['--cpus', str(job['resources']['limits']['cpu'])]
 
-    logger.info("Run docker container")
     cmd.append(image_name)
+
+    if job['type'] == 'docker-image':
+        cmd += job['command']
+
+    logger.info("Run docker container")
     execute(cmd, cwd=args.project_root)
 
     logger.info("Commiting Container")
@@ -334,6 +344,8 @@ def get_parent_job(name):
     for job in parent_jobs:
         if job['name'] == name:
             return job
+
+    return None
 
 def track_as_parent(job, state, start_date=datetime.now(), end_date=datetime.now()):
     parent_jobs.append({
@@ -376,7 +388,7 @@ def build_and_run(args, job, cache):
     try:
         if job_type == "docker-compose":
             build_and_run_docker_compose(args, job)
-        elif job_type == "docker":
+        elif job_type in ("docker", "docker-image"):
             build_and_run_docker(args, job)
         elif job_type == "wait":
             # do nothing
