@@ -31,7 +31,7 @@ def add_collaborator(args):
     return response
 
 
-def delete_collaborator(args):
+def remove_collaborator(args):
     infraboxcli.env.check_env_cli_token(args)
     collaborator_id = id_by_neme(args.username)
 
