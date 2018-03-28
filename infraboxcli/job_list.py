@@ -98,6 +98,10 @@ def get_job_list(data, args, parents=None, infrabox_context=None):
             repo_path = os.path.join('/tmp', job_name)
             execute(['rm', '-rf', repo_path])
             execute(['git', 'clone', '--depth=50', job['clone_url'], repo_path])
+            execute(['git', 'config', 'remote.origin.url', job['clone_url']], cwd=repo_path)
+            execute(['git', 'config', 'remote.origin.fetch', '+refs/heads/*:refs/remotes/origin/*'], cwd=repo_path)
+            execute(['git', 'fetch', 'origin', job['commit']], cwd=repo_path)
+
             execute(['git', 'checkout', job['commit']], cwd=repo_path)
 
             ib_path = job.get('infrabox_file', 'infrabox.json')
