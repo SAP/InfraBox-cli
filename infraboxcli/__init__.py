@@ -14,7 +14,7 @@ from infraboxcli.validate import validate
 from infraboxcli.dashboard import user
 from infraboxcli.dashboard import project
 
-version = '0.6.2'
+version = '0.6.3'
 
 def main():
     username = 'unknown'

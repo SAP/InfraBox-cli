@@ -1,7 +1,7 @@
 # InfraBox CLI
-[![Build Status](https://infrabox.ninja/api/v1/projects/6055cd3b-f37f-48a1-bc04-010b2e2aeb68/state.svg)](https://infrabox.ninja/dashboard/#/project/ib-cli)
-[![coverage](https://infrabox.ninja/api/v1/projects/6055cd3b-f37f-48a1-bc04-010b2e2aeb68/badge.svg?subject=coverage&job_name=pyinfrabox)](https://infrabox.ninja/dashboard/#/project/ib-cli)
-[![Test Status](https://infrabox.ninja/api/v1/projects/6055cd3b-f37f-48a1-bc04-010b2e2aeb68/tests.svg)](https://infrabox.ninja/dashboard/#/project/ib-cli)
+[![Build Status](https://infrabox.ninja/api/v1/projects/e2a803f3-55da-4683-8993-c3c6306d9a77/state.svg)](https://infrabox.ninja/dashboard/#/project/infrabox-cli)
+[![coverage](https://infrabox.ninja/api/v1/projects/e2a803f3-55da-4683-8993-c3c6306d9a77/badge.svg?subject=coverage&job_name=pyinfrabox)](https://infrabox.ninja/dashboard/#/project/infrabox-cli)
+[![Test Status](https://infrabox.ninja/api/v1/projects/e2a803f3-55da-4683-8993-c3c6306d9a77/tests.svg)](https://infrabox.ninja/dashboard/#/project/infrabox-cli)
 
 ## Install
 To install infraboxcli you need to have these requirements already installed:
