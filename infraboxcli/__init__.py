@@ -101,6 +101,9 @@ def main():
     parser_collaborators = sub_parser.add_parser('collaborators', help='Add or remove collaborators for your project')
     sub_collaborators = parser_collaborators.add_subparsers()
 
+    parser_list_collaborators = sub_collaborators.add_parser('list', help='Show collaborators list')
+    parser_list_collaborators.set_defaults(func=project.list_collaborators)
+
     parser_add_collaborator = sub_collaborators.add_parser('add', help='Add collaborator')
     parser_add_collaborator.add_argument('--username', required=True, type=str,
                                          help='Username of collaborator you want to add')
@@ -128,6 +131,9 @@ def main():
     parsers_project_tokens = sub_parser.add_parser('project-token', help='Manage your project tokens')
     sub_project_tokens = parsers_project_tokens.add_subparsers()
 
+    parser_list_project_tokens = sub_project_tokens.add_parser('list', help='Show your all project tokens')
+    parser_list_project_tokens.set_defaults(func=project.list_project_tokens)
+
     parser_add_project_token = sub_project_tokens.add_parser('add', help='Add project token')
     parser_add_project_token.add_argument('--d', required=True, type=str,
                                           help='Description of project token you want to add')
@@ -135,12 +141,12 @@ def main():
                                           help='Scope push')
     parser_add_project_token.add_argument('--scope_pull', required=False, action='store_true',
                                           help='Scope pull')
-    parser_add_project_token.set_defaults(func=project.add_token)
+    parser_add_project_token.set_defaults(func=project.add_project_token)
 
     parser_remove_project_token = sub_project_tokens.add_parser('remove', help='Remove project token')
     parser_remove_project_token.add_argument('--id', required=True, type=str,
                                              help='Id of project token you want to remove')
-    parser_remove_project_token.set_defaults(func=project.delete_token)
+    parser_remove_project_token.set_defaults(func=project.delete_project_token)
 
     # User
     parser_login = sub_parser.add_parser('login', help='Login to infrabox')
