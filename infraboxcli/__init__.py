@@ -104,46 +104,46 @@ def main():
     parser_list_collaborators = sub_collaborators.add_parser('list', help='Show collaborators list')
     parser_list_collaborators.set_defaults(func=project.list_collaborators)
 
-    parser_add_collaborator = sub_collaborators.add_parser('add', help='Add collaborator')
+    parser_add_collaborator = sub_collaborators.add_parser('add', help='Add a collaborator')
     parser_add_collaborator.add_argument('--username', required=True, type=str,
-                                         help='Username of collaborator you want to add')
+                                         help='Username of the collaborator you want to add')
     parser_add_collaborator.set_defaults(func=project.add_collaborator)
 
-    parser_remove_collaborator = sub_collaborators.add_parser('remove', help='Remove collaborator')
+    parser_remove_collaborator = sub_collaborators.add_parser('remove', help='Remove a collaborator')
     parser_remove_collaborator.add_argument('--username', required=True, type=str,
-                                         help='Username of collaborator you want to remove')
+                                         help='Username of the collaborator you want to remove')
     parser_remove_collaborator.set_defaults(func=project.remove_collaborator)
 
     # Secrets
     parser_secrets = sub_parser.add_parser('secrets', help='Create or delete secrets')
     sub_secrets = parser_secrets.add_subparsers()
 
-    parser_create_secret = sub_secrets.add_parser('create', help='Create secret')
-    parser_create_secret.add_argument('--name', required=True, type=str, help='Name of your new secret')
-    parser_create_secret.add_argument('--value', required=True, type=str, help='Value of your new secret')
+    parser_create_secret = sub_secrets.add_parser('create', help='Create a secret')
+    parser_create_secret.add_argument('--name', required=True, type=str, help='Name of the secret')
+    parser_create_secret.add_argument('--value', required=True, type=str, help='Value of the secret')
     parser_create_secret.set_defaults(func=project.add_secret)
 
-    parser_delete_secret = sub_secrets.add_parser('delete', help='Delete secret')
-    parser_delete_secret.add_argument('--name', required=True, type=str, help='Name of secret you want to delete')
+    parser_delete_secret = sub_secrets.add_parser('delete', help='Delete a secret')
+    parser_delete_secret.add_argument('--name', required=True, type=str, help='Name of the secret you want to delete')
     parser_delete_secret.set_defaults(func=project.delete_secret)
 
     # Tokens
     parsers_project_tokens = sub_parser.add_parser('project-token', help='Manage your project tokens')
     sub_project_tokens = parsers_project_tokens.add_subparsers()
 
-    parser_list_project_tokens = sub_project_tokens.add_parser('list', help='Show your all project tokens')
+    parser_list_project_tokens = sub_project_tokens.add_parser('list', help='Show all your project tokens')
     parser_list_project_tokens.set_defaults(func=project.list_project_tokens)
 
-    parser_add_project_token = sub_project_tokens.add_parser('add', help='Add project token')
+    parser_add_project_token = sub_project_tokens.add_parser('create', help='Create a project token')
     parser_add_project_token.add_argument('--d', required=True, type=str,
-                                          help='Description of project token you want to add')
+                                          help='Description of the project token you want to create')
     parser_add_project_token.add_argument('--scope_push', required=False, default=True, type=str2bool, help='Scope push')
     parser_add_project_token.add_argument('--scope_pull', required=False, default=True, type=str2bool, help='Scope pull')
     parser_add_project_token.set_defaults(func=project.add_project_token)
 
-    parser_remove_project_token = sub_project_tokens.add_parser('remove', help='Remove project token')
+    parser_remove_project_token = sub_project_tokens.add_parser('delete', help='Delete a project token')
     parser_remove_project_token.add_argument('--id', required=True, type=str,
-                                             help='Id of project token you want to remove')
+                                             help='Id of the project token you want to delete')
     parser_remove_project_token.set_defaults(func=project.delete_project_token)
 
     # User

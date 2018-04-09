@@ -20,9 +20,9 @@ def list_collaborators(args):
 
     print('=== Collaborators ===')
     for collaborator in response.json():
-        print('---')
         print('Username: %s' % collaborator['username'])
         print('E-mail: %s' % collaborator['email'])
+        print('---')
 
     return response
 
@@ -74,11 +74,11 @@ def list_project_tokens(args):
     response = get(url, get_user_headers())
     print('=== Project tokens ===')
     for project_token in response.json():
-        print('---')
         print('Description: %s' % project_token['description'])
         print('Id: %s' % project_token['id'])
         print('Scope push: %s' % project_token['scope_push'])
         print('Scope pull: %s' % project_token['scope_pull'])
+        print('---')
 
     return response
 
