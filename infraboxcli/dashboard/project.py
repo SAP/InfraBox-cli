@@ -86,6 +86,7 @@ def list_project_tokens(args):
 def add_project_token(args):
     infraboxcli.env.check_env_cli_token(args)
     url = url_base + args.project_id + '/tokens'
+
     data = {
         'description': args.d,
         'scope_push': args.scope_push,
@@ -106,5 +107,7 @@ def delete_project_token(args):
     infraboxcli.env.check_env_cli_token(args)
     url = url_base + args.project_id + '/tokens/' + args.id
     response = delete(url, get_user_headers())
+
+    print(response.json()['message'])
 
     return response

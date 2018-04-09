@@ -137,10 +137,8 @@ def main():
     parser_add_project_token = sub_project_tokens.add_parser('add', help='Add project token')
     parser_add_project_token.add_argument('--d', required=True, type=str,
                                           help='Description of project token you want to add')
-    parser_add_project_token.add_argument('--scope_push', required=False, action='store_true',
-                                          help='Scope push')
-    parser_add_project_token.add_argument('--scope_pull', required=False, action='store_true',
-                                          help='Scope pull')
+    parser_add_project_token.add_argument('--scope_push', required=False, default=True, type=str2bool, help='Scope push')
+    parser_add_project_token.add_argument('--scope_pull', required=False, default=True, type=str2bool, help='Scope pull')
     parser_add_project_token.set_defaults(func=project.add_project_token)
 
     parser_remove_project_token = sub_project_tokens.add_parser('remove', help='Remove project token')
@@ -197,3 +195,12 @@ def main():
 
     # Run command
     args.func(args)
+
+
+def str2bool(v):
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
