@@ -1,4 +1,5 @@
 import getpass
+import json
 
 from infraboxcli.dashboard.cli_client import post, get
 from infraboxcli.dashboard.external import load_current_user_token, save_user_token
@@ -22,8 +23,15 @@ def login(args):
 
     return response
 
-def id_by_neme(username):
+def get_id_by_name(username):
     url = url_base + "id/" + username
     response = get(url, headers=get_user_headers())
 
-    return response.text
+    if response.status_code != 200:
+        print(response.json()['message'])
+        raise Exception(response.status_code)
+
+    # remove quotes
+    user_id = response.json()['data']['user_id']
+
+    return user_id

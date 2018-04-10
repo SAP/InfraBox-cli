@@ -1,5 +1,5 @@
 from infraboxcli.dashboard.cli_client import get, post, delete
-from infraboxcli.dashboard.user import id_by_neme, get_user_headers
+from infraboxcli.dashboard.user import get_id_by_name, get_user_headers
 import infraboxcli.env
 
 url_base = 'http://localhost:8080/api/v1/projects/'
@@ -40,9 +40,13 @@ def add_collaborator(args):
 
 def remove_collaborator(args):
     infraboxcli.env.check_env_cli_token(args)
-    collaborator_id = id_by_neme(args.username)
 
-    url = url_base + args.project_id + '/collaborators/' + collaborator_id[1:-2]
+    try:
+        collaborator_id = get_id_by_name(args.username)
+    except:
+        return
+
+    url = url_base + args.project_id + '/collaborators/' +  collaborator_id
     response = delete(url, get_user_headers())
     print(response.json()['message'])
 
