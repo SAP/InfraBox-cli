@@ -87,6 +87,18 @@ def list_project_tokens(args):
     return response
 
 
+def get_project_token_id_by_description(args):
+    url = url_base + args.project_id + '/tokens/' + args.d
+
+    response = get(url, get_user_headers())
+
+    if response.status_code != 200:
+        print(response.json()['message'])
+        return
+
+    return response.json()['data']['token_id']
+
+
 def add_project_token(args):
     infraboxcli.env.check_env_cli_token(args)
     url = url_base + args.project_id + '/tokens'
@@ -99,15 +111,39 @@ def add_project_token(args):
 
     response = post(url, data, get_user_headers())
 
+    if response.status_code != 200:
+        print(response.json()['message'])
+        return
+
     # Print project token to the CLI
-    print("=== Authentication Token ===")
-    print("Please save your token at a secure place. We will not show it to you again.\n\n")
+    print('=== Authentication Token ===')
+    print('Please save your token at a secure place. We will not show it to you again.\n\n')
     print(response.json()['data']['token'])
 
     return response
 
 
 def delete_project_token(args):
+    if args.id:
+        delete_project_token_by_id(args)
+    elif args.d:
+        delete_project_token_by_description(args)
+    else:
+        print('Please, provide either token id or description.')
+
+
+def delete_project_token_by_description(args):
+    infraboxcli.env.check_env_cli_token(args)
+    token_id = get_project_token_id_by_description(args)
+
+    if not token_id:
+        return
+
+    args.id = token_id
+    return delete_project_token_by_id(args)
+
+
+def delete_project_token_by_id(args):
     infraboxcli.env.check_env_cli_token(args)
     url = url_base + args.project_id + '/tokens/' + args.id
     response = delete(url, get_user_headers())

@@ -142,8 +142,10 @@ def main():
     parser_add_project_token.set_defaults(func=project.add_project_token)
 
     parser_remove_project_token = sub_project_tokens.add_parser('delete', help='Delete a project token')
-    parser_remove_project_token.add_argument('--id', required=True, type=str,
+    parser_remove_project_token.add_argument('--id', required=False, type=str,
                                              help='Id of the project token you want to delete')
+    parser_remove_project_token.add_argument('--d', required=False, type=str,
+                                             help='Description of the project token you want to delete')
     parser_remove_project_token.set_defaults(func=project.delete_project_token)
 
     # User
