@@ -2,12 +2,12 @@ from infraboxcli.dashboard.cli_client import get, post, delete
 from infraboxcli.dashboard.user import get_id_by_name, get_user_headers
 import infraboxcli.env
 
-url_base = 'http://localhost:8080/api/v1/projects/'
+api_projects_endpoint_url = '/api/v1/projects/'
 
 
 def delete_project(args):
     infraboxcli.env.check_env_cli_token(args)
-    url = url_base + args.project_id
+    url = args.url + api_projects_endpoint_url + args.project_id
     response = get(url, get_user_headers())
 
     return response
@@ -15,7 +15,7 @@ def delete_project(args):
 
 def list_collaborators(args):
     infraboxcli.env.check_env_cli_token(args)
-    url = url_base + args.project_id + '/collaborators'
+    url = args.url + api_projects_endpoint_url + args.project_id + '/collaborators'
     response = get(url, get_user_headers())
 
     print('=== Collaborators ===')
@@ -29,7 +29,7 @@ def list_collaborators(args):
 
 def add_collaborator(args):
     infraboxcli.env.check_env_cli_token(args)
-    url = url_base + args.project_id + '/collaborators'
+    url = args.url + api_projects_endpoint_url + args.project_id + '/collaborators'
     data = {'username': args.username}
 
     response = post(url, data, get_user_headers())
@@ -46,7 +46,7 @@ def remove_collaborator(args):
     except:
         return
 
-    url = url_base + args.project_id + '/collaborators/' +  collaborator_id
+    url = args.url + api_projects_endpoint_url + args.project_id + '/collaborators/' +  collaborator_id
     response = delete(url, get_user_headers())
     print(response.json()['message'])
 
@@ -55,7 +55,7 @@ def remove_collaborator(args):
 
 def add_secret(args):
     infraboxcli.env.check_env_cli_token(args)
-    url = url_base + args.project_id + '/secrets'
+    url = args.url + api_projects_endpoint_url + args.project_id + '/secrets'
     data = {'name': args.name, 'value': args.value}
 
     response = post(url, data, get_user_headers())
@@ -65,7 +65,7 @@ def add_secret(args):
 
 def delete_secret(args):
     infraboxcli.env.check_env_cli_token(args)
-    url = url_base + args.project_id + '/secrets/' + args.name
+    url = args.url + api_projects_endpoint_url + args.project_id + '/secrets/' + args.name
     response = delete(url, get_user_headers())
 
     return response
@@ -73,7 +73,7 @@ def delete_secret(args):
 
 def list_project_tokens(args):
     infraboxcli.env.check_env_cli_token(args)
-    url = url_base + args.project_id + '/tokens'
+    url = args.url + api_projects_endpoint_url + args.project_id + '/tokens'
 
     response = get(url, get_user_headers())
     print('=== Project tokens ===')
@@ -88,7 +88,7 @@ def list_project_tokens(args):
 
 
 def get_project_token_id_by_description(args):
-    url = url_base + args.project_id + '/tokens/' + args.d
+    url = args.url + api_projects_endpoint_url + args.project_id + '/tokens/' + args.d
 
     response = get(url, get_user_headers())
 
@@ -101,7 +101,7 @@ def get_project_token_id_by_description(args):
 
 def add_project_token(args):
     infraboxcli.env.check_env_cli_token(args)
-    url = url_base + args.project_id + '/tokens'
+    url = args.url + api_projects_endpoint_url + args.project_id + '/tokens'
 
     data = {
         'description': args.d,
@@ -145,7 +145,7 @@ def delete_project_token_by_description(args):
 
 def delete_project_token_by_id(args):
     infraboxcli.env.check_env_cli_token(args)
-    url = url_base + args.project_id + '/tokens/' + args.id
+    url = args.url + api_projects_endpoint_url + args.project_id + '/tokens/' + args.id
     response = delete(url, get_user_headers())
 
     print(response.json()['message'])
