@@ -95,7 +95,7 @@ If you reference secrets in your job definition (i.e. as environment variable) t
 
 ## How to get support
 If you need help please post your questions to [Stack Overflow](https://stackoverflow.com/questions/tagged/infrabox).
-In case you found a bug please open a [Github Issue](https://github.com/InfraBox/infrabox/issues).
+In case you found a bug please open a [Github Issue](https://github.com/SAP/InfraBox-cli/issues).
 Follow us on Twitter: [@Infra_Box](https://twitter.com/Infra_Box) or have look at our Slack channel [infrabox.slack.com](https://infrabox.slack.com/).
 
 ## License
