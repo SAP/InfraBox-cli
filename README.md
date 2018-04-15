@@ -38,18 +38,18 @@ It outputs the names of all available jobs. An example output may look like this
 ## Run a Job
 InfraBox CLI may be used to run you jobs on your local machine. It will also respect all the dependencies and run the jobs in the correct order. Available options are:
 
-	usage: infrabox run [-h] [--no-rm] [-t TAG] [--local-cache LOCAL_CACHE]
-						[job_name]
+    usage: infrabox run [-h] [--no-rm] [-t TAG] [--local-cache LOCAL_CACHE]
+                        [job_name]
 
-	positional arguments:
-	  job_name              Job name to execute
+    positional arguments:
+      job_name              Job name to execute
 
-	optional arguments:
-	  -h, --help            show this help message and exit
-	  --no-rm               Does not run 'docker-compose rm' before building
-	  -t TAG                Docker image tag
-	  --local-cache LOCAL_CACHE
-							Path to the local cache
+    optional arguments:
+      -h, --help            show this help message and exit
+      --no-rm               Does not run 'docker-compose rm' before building
+      -t TAG                Docker image tag
+      --local-cache LOCAL_CACHE
+                            Path to the local cache
 
 To run all jobs defined in your _infrabox.json_ file simply do:
 
