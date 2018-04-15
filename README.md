@@ -1,7 +1,5 @@
 # InfraBox CLI
-[![Build Status](https://infrabox.ninja/api/v1/projects/e2a803f3-55da-4683-8993-c3c6306d9a77/state.svg)](https://infrabox.ninja/dashboard/#/project/infrabox-cli)
-[![coverage](https://infrabox.ninja/api/v1/projects/e2a803f3-55da-4683-8993-c3c6306d9a77/badge.svg?subject=coverage&job_name=pyinfrabox)](https://infrabox.ninja/dashboard/#/project/infrabox-cli)
-[![Test Status](https://infrabox.ninja/api/v1/projects/e2a803f3-55da-4683-8993-c3c6306d9a77/tests.svg)](https://infrabox.ninja/dashboard/#/project/infrabox-cli)
+With the InfraBox CLI you can run your InfraBox jobs on you local machine and configure your project.
 
 ## Install
 To install infraboxcli you need to have these requirements already installed:
@@ -12,16 +10,16 @@ To install infraboxcli you need to have these requirements already installed:
 
 Then simply run:
 
-    $ pip install infraboxcli
+    pip install infraboxcli
 
 You can validate your installation by running:
 
-    $ infrabox version
+    infrabox version
 
 ## List Jobs
 If you have a more complex project it may be helpful to list all available jobs in it. For this you may use:
 
-    $ infrabox list
+    infrabox list
 
 It outputs the names of all available jobs. An example output may look like this:
 
@@ -63,9 +61,9 @@ In case you have multiple jobs defined an want to run only one of them you can d
     infrabox run <job-name>
 
 ## Push a Job
-To be able to use infrabox push you have to [create a project](https://infrabox.ninja/docs/#create-upload-project) in the InfraBox Dashboard and [create an auth token](https://infrabox.ninja/docs/#create-auth-token) for it.
+To be able to use infrabox push you have to create a project in the InfraBox Dashboard and create an auth token for it.
 
-Auth Token and InfraBox API Host must be set as environment variables. If you want to use the infrabox.ninja playground use `INFRABOX_URL=https://infrabox.ninja`.
+Auth Token and InfraBox API Host must be set as environment variables.
 
     export INFRABOX_CLI_TOKEN=<YOUR_ACCESS_TOKEN>
     export INFRABOX_URL=<INFRABOX_URL>
@@ -94,3 +92,12 @@ If you reference secrets in your job definition (i.e. as environment variable) t
         "SECRET_NAME1": "my secret value",
         "Another secret": "another value"
     }
+
+## How to get support
+If you need help please post your questions to [Stack Overflow](https://stackoverflow.com/questions/tagged/infrabox).
+In case you found a bug please open a [Github Issue](https://github.com/InfraBox/infrabox/issues).
+Follow us on Twitter: [@Infra_Box](https://twitter.com/Infra_Box) or have look at our Slack channel [infrabox.slack.com](https://infrabox.slack.com/).
+
+## License
+Copyright (c) 2018 SAP SE or an SAP affiliate company. All rights reserved.
+This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the [LICENSE file](LICENSE).
