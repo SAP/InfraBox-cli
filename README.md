@@ -1,5 +1,5 @@
 # InfraBox CLI
-With the InfraBox CLI you can run your InfraBox jobs on you local machine and configure your project.
+With the InfraBox CLI you can run your InfraBox jobs on your local machine and configure your project.
 
 ## Install
 To install infraboxcli you need to have these requirements already installed:
