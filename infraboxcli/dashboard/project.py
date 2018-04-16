@@ -76,27 +76,27 @@ def list_project_tokens(args):
     url = args.url + api_projects_endpoint_url + args.project_id + '/tokens'
 
     response = get(url, get_user_headers())
-    print('=== Project tokens ===')
-    for project_token in response.json():
-        print('Description: %s' % project_token['description'])
-        print('Id: %s' % project_token['id'])
-        print('Scope push: %s' % project_token['scope_push'])
-        print('Scope pull: %s' % project_token['scope_pull'])
-        print('---')
+    if args.verbose:
+        print('=== Project tokens ===')
+        for project_token in response.json():
+            print('Description: %s' % project_token['description'])
+            print('Id: %s' % project_token['id'])
+            print('Scope push: %s' % project_token['scope_push'])
+            print('Scope pull: %s' % project_token['scope_pull'])
+            print('---')
 
     return response
 
 
 def get_project_token_id_by_description(args):
-    url = args.url + api_projects_endpoint_url + args.project_id + '/tokens/' + args.d
+    args.verbose = False
+    all_project_tokens = list_project_tokens(args).json()
 
-    response = get(url, get_user_headers())
+    for project_token in all_project_tokens:
+        if args.description == project_token['description']:
+            return project_token['id']
 
-    if response.status_code != 200:
-        print(response.json()['message'])
-        return
-
-    return response.json()['data']['token_id']
+    return None
 
 
 def add_project_token(args):
@@ -126,7 +126,7 @@ def add_project_token(args):
 def delete_project_token(args):
     if args.id:
         delete_project_token_by_id(args)
-    elif args.d:
+    elif args.description:
         delete_project_token_by_description(args)
     else:
         print('Please, provide either token id or description.')
@@ -137,6 +137,7 @@ def delete_project_token_by_description(args):
     token_id = get_project_token_id_by_description(args)
 
     if not token_id:
+        print('Token with such a description does not exist.')
         return
 
     args.id = token_id

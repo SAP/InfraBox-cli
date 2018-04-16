@@ -135,6 +135,7 @@ def main():
     sub_project_tokens = parsers_project_tokens.add_subparsers()
 
     parser_list_project_tokens = sub_project_tokens.add_parser('list', help='Show all your project tokens')
+    parser_list_project_tokens.add_argument('--verbose', required=False, default=True, type=str2bool)
     parser_list_project_tokens.set_defaults(func=project.list_project_tokens)
 
     parser_add_project_token = sub_project_tokens.add_parser('create', help='Create a project token')
@@ -147,7 +148,7 @@ def main():
     parser_remove_project_token = sub_project_tokens.add_parser('delete', help='Delete a project token')
     parser_remove_project_token.add_argument('--id', required=False, type=str,
                                              help='Id of the project token you want to delete')
-    parser_remove_project_token.add_argument('--d', required=False, type=str,
+    parser_remove_project_token.add_argument('--description', required=False, type=str,
                                              help='Description of the project token you want to delete')
     parser_remove_project_token.set_defaults(func=project.delete_project_token)
 
