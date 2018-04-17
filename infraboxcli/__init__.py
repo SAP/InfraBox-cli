@@ -156,6 +156,8 @@ def main():
 
     # User
     parser_login = sub_parser.add_parser('login', help='Login to infrabox')
+    parser_login.add_argument('--email', required=False, default=None, type=str, help='Email of the user')
+    parser_login.add_argument('--password', required=False, default=None, type=str, help='Password of the user')
     parser_login.set_defaults(func=user.login)
 
     # Parse args

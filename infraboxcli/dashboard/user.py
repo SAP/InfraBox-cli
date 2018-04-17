@@ -13,10 +13,18 @@ def get_user_headers():
     return {'Authorization': 'token %s' % get_user_token()}
 
 def login(args):
-    email = raw_input("Email: ")
-    password = getpass.getpass('Password: ')
+    email = args.email
+    password = args.password
 
-    data = {"email": email, "password": password}
+    if email is None:
+        email = raw_input("Email: ")
+        # Don't allow to pass password without email
+        password = None
+
+    if password is None:
+        password = getpass.getpass('Password: ')
+
+    data = { "email": email, "password": password}
 
     url = args.url + api_endpoint_url + 'account/login'
     response = post(url, data, cookies_handler=save_user_token)
