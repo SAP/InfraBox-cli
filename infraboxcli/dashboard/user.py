@@ -4,7 +4,7 @@ import json
 from infraboxcli.dashboard.cli_client import post, get
 from infraboxcli.dashboard.external import load_current_user_token, save_user_token
 
-url_base = 'http://localhost:8080/api/v1/user/'
+api_endpoint_url = '/api/v1/'
 
 def get_user_token():
     return load_current_user_token()
@@ -18,13 +18,13 @@ def login(args):
 
     data = {"email": email, "password": password}
 
-    url = 'http://localhost:8080/api/v1/account/login'
+    url = args.url + api_endpoint_url + 'account/login'
     response = post(url, data, cookies_handler=save_user_token)
 
     return response
 
 def get_id_by_name(username):
-    url = url_base + "id/" + username
+    url = args.url + api_endpoint_url + "user/id/" + username
     response = get(url, headers=get_user_headers())
 
     if response.status_code != 200:
