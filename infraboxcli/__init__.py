@@ -105,6 +105,7 @@ def main():
     sub_collaborators = parser_collaborators.add_subparsers()
 
     parser_list_collaborators = sub_collaborators.add_parser('list', help='Show collaborators list')
+    parser_list_collaborators.add_argument('--verbose', required=False, default=True, type=str2bool)
     parser_list_collaborators.set_defaults(func=project.list_collaborators)
 
     parser_add_collaborator = sub_collaborators.add_parser('add', help='Add a collaborator')

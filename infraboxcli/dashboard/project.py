@@ -18,11 +18,12 @@ def list_collaborators(args):
     url = args.url + api_projects_endpoint_url + args.project_id + '/collaborators'
     response = get(url, get_user_headers())
 
-    print('=== Collaborators ===')
-    for collaborator in response.json():
-        print('Username: %s' % collaborator['username'])
-        print('E-mail: %s' % collaborator['email'])
-        print('---')
+    if args.verbose:
+        print('=== Collaborators ===')
+        for collaborator in response.json():
+            print('Username: %s' % collaborator['username'])
+            print('E-mail: %s' % collaborator['email'])
+            print('---')
 
     return response
 
@@ -30,7 +31,7 @@ def list_collaborators(args):
 def add_collaborator(args):
     infraboxcli.env.check_env_cli_token(args)
     url = args.url + api_projects_endpoint_url + args.project_id + '/collaborators'
-    data = {'username': args.username}
+    data = { 'username': args.username }
 
     response = post(url, data, get_user_headers())
     print(response.json()['message'])
@@ -41,9 +42,16 @@ def add_collaborator(args):
 def remove_collaborator(args):
     infraboxcli.env.check_env_cli_token(args)
 
-    try:
-        collaborator_id = get_id_by_name(args.username)
-    except:
+    args.verbose = False
+    all_project_collaborators = list_collaborators(args).json()
+    collaborator_id = None
+    for collaborator in all_project_collaborators:
+        if collaborator['username'] == args.username:
+            collaborator_id = collaborator['id']
+            break
+
+    if collaborator_id is None:
+        print('Specified user is not in collaborators list.')
         return
 
     url = args.url + api_projects_endpoint_url + args.project_id + '/collaborators/' +  collaborator_id
