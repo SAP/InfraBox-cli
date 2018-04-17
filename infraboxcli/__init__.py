@@ -140,10 +140,11 @@ def main():
     parser_list_project_tokens.set_defaults(func=project.list_project_tokens)
 
     parser_add_project_token = sub_project_tokens.add_parser('create', help='Create a project token')
-    parser_add_project_token.add_argument('--d', required=True, type=str,
+    parser_add_project_token.add_argument('--description', required=True, type=str,
                                           help='Description of the project token you want to create')
-    parser_add_project_token.add_argument('--scope_push', required=False, default=True, type=str2bool, help='Scope push')
-    parser_add_project_token.add_argument('--scope_pull', required=False, default=True, type=str2bool, help='Scope pull')
+    #TODO<Steffen> when scope push/pull functionality is implemented, uncomment following 2 lines
+    #parser_add_project_token.add_argument('--scope_push', required=False, default=True, type=str2bool, help='Scope push')
+    #parser_add_project_token.add_argument('--scope_pull', required=False, default=True, type=str2bool, help='Scope pull')
     parser_add_project_token.set_defaults(func=project.add_project_token)
 
     parser_remove_project_token = sub_project_tokens.add_parser('delete', help='Delete a project token')

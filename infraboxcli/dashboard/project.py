@@ -112,9 +112,13 @@ def add_project_token(args):
     url = args.url + api_projects_endpoint_url + args.project_id + '/tokens'
 
     data = {
-        'description': args.d,
-        'scope_push': args.scope_push,
-        'scope_pull': args.scope_pull
+        'description': args.description,
+        #TODO<Steffen> when scope push/pull functionality is implemented,
+        # delete following 2 lines and uncomment next 2 lines
+        'scope_push': True,
+        'scope_pull': True
+        #'scope_push': args.scope_push,
+        #'scope_pull': args.scope_pull
     }
 
     response = post(url, data, get_user_headers())
