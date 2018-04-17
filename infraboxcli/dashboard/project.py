@@ -1,5 +1,5 @@
 from infraboxcli.dashboard.cli_client import get, post, delete
-from infraboxcli.dashboard.user import get_id_by_name, get_user_headers
+from infraboxcli.dashboard.user import get_user_headers
 import infraboxcli.env
 
 api_projects_endpoint_url = '/api/v1/projects/'

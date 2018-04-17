@@ -22,16 +22,3 @@ def login(args):
     response = post(url, data, cookies_handler=save_user_token)
 
     return response
-
-def get_id_by_name(username):
-    url = args.url + api_endpoint_url + "user/id/" + username
-    response = get(url, headers=get_user_headers())
-
-    if response.status_code != 200:
-        print(response.json()['message'])
-        raise Exception(response.status_code)
-
-    # remove quotes
-    user_id = response.json()['data']['user_id']
-
-    return user_id
