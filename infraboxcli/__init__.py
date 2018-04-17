@@ -94,9 +94,9 @@ def main():
                             default="/tmp/{}/infrabox/local-cache".format(username),
                             help="Path to the local cache")
     parser_run.add_argument("--memory", required=False, type=float,
-                            help="Override a memory consumption for your job")
+                            help="Override a memory limit for your job")
     parser_run.add_argument("--cpu", required=False, type=float,
-                            help="Override a cpu consumption for your job")
+                            help="Override a cpu limit for your job")
     parser_run.set_defaults(no_rm=False)
     parser_run.set_defaults(func=run)
 
