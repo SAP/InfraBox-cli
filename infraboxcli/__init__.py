@@ -114,18 +114,29 @@ def main():
                 logger.error("INFRABOX_CA_BUNDLE: %s not found" % args.ca_bundle)
                 sys.exit(1)
 
-    # Find infrabox.json
-    p = os.getcwd()
+    if args.infrabox_json_file:
+        if not os.path.exists(args.infrabox_json_file):
+            logger.error('%s does not exist' % args.infrabox_json_file)
+            sys.exit(1)
 
-    while p:
-        tb = os.path.join(p, 'infrabox.json')
-        if not os.path.exists(tb):
-            p = p[0:p.rfind('/')]
-        else:
-            args.project_root = p
-            args.infrabox_json = tb
-            args.project_name = os.path.basename(p)
-            break
+        p = os.path.abspath(args.infrabox_json_file)
+
+        args.project_root = p[0:p.rfind('/')]
+        args.infrabox_json = p
+        args.project_name = os.path.basename(p)
+    else:
+        # Find infrabox.json
+        p = os.getcwd()
+
+        while p:
+            tb = os.path.join(p, 'infrabox.json')
+            if not os.path.exists(tb):
+                p = p[0:p.rfind('/')]
+            else:
+                args.project_root = p
+                args.infrabox_json = tb
+                args.project_name = os.path.basename(p)
+                break
 
     if 'job_name' not in args:
         args.children = True
@@ -133,9 +144,6 @@ def main():
     if 'project_root' not in args and 'is_init' not in args and 'is_pull' not in args:
         logger.error("infrabox.json not found in current or any parent directory")
         sys.exit(1)
-
-    if args.infrabox_json_file:
-        args.infrabox_json = args.infrabox_json_file
 
     # Run command
     args.func(args)
