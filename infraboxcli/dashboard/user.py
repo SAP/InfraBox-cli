@@ -3,6 +3,8 @@ import json
 
 from infraboxcli.dashboard.cli_client import post, get
 from infraboxcli.dashboard.external import load_current_user_token, save_user_token
+import infraboxcli.env
+
 
 api_endpoint_url = '/api/v1/'
 
@@ -13,6 +15,7 @@ def get_user_headers():
     return {'Authorization': 'token %s' % get_user_token()}
 
 def login(args):
+    infraboxcli.env.check_env_url(args)
     email = args.email
     password = args.password
 

@@ -1,7 +1,11 @@
+import os
 import pickle
 from os.path import expanduser
 
+from infraboxcli.log import logger
+
 home = expanduser("~")
+
 
 def save_user_token(dict):
     try:
@@ -11,6 +15,10 @@ def save_user_token(dict):
 
     except:
         obj = {}
+
+    if 'token' not in dict.keys():
+        logger.error('Unauthorized: invalid username and/or password.')
+        exit(1)
 
     obj['current_user_token'] = dict['token']
 
