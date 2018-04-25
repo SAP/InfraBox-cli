@@ -83,6 +83,10 @@ def main():
                             help="Job name to execute")
     parser_run.add_argument("--no-rm", action='store_true', required=False,
                             help="Does not run 'docker-compose rm' before building")
+    parser_run.add_argument("--env", required=False, type=str, nargs='+',
+                            help="Override environment variables")
+    parser_run.add_argument("--env-file", required=False, type=str, default=None,
+                            help="Environment file to override environment values")
     parser_run.add_argument("-t", dest='tag', required=False, type=str,
                             help="Docker image tag")
     parser_run.add_argument("-c", "--children", action='store_true',
