@@ -6,8 +6,6 @@ __pycache__/
 
 *.swp
 
-.idea/
-
 # C extensions
 *.so
 
@@ -104,6 +102,3 @@ ENV/
 
 # mypy
 .mypy_cache/
-
-# exuberant ctags
-tags
