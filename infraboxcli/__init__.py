@@ -11,7 +11,7 @@ from infraboxcli.log import logger
 from infraboxcli.init import init
 from infraboxcli.pull import pull
 
-version = '0.6.4'
+version = '0.6.5'
 
 def main():
     username = 'unknown'
