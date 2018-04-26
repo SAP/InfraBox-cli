@@ -2,6 +2,8 @@ from infraboxcli.dashboard.cli_client import get, post, delete
 from infraboxcli.dashboard.user import get_user_headers
 import infraboxcli.env
 
+from infraboxcli.log import logger
+
 api_projects_endpoint_url = '/api/v1/projects/'
 
 
@@ -19,11 +21,13 @@ def list_collaborators(args):
     response = get(url, get_user_headers())
 
     if args.verbose:
-        print('=== Collaborators ===')
+        logger.info('Collaborators:')
+        msg = ""
         for collaborator in response.json():
-            print('Username: %s' % collaborator['username'])
-            print('E-mail: %s' % collaborator['email'])
-            print('---')
+            msg += 'Username: %s' % collaborator['username']\
+                   + '\nE-mail: %s' % collaborator['email']\
+                   + '\n---\n'
+        logger.log(msg, print_header=False)
 
     return response
 
@@ -34,7 +38,7 @@ def add_collaborator(args):
     data = { 'username': args.username }
 
     response = post(url, data, get_user_headers())
-    print(response.json()['message'])
+    logger.info(response.json()['message'])
 
     return response
 
@@ -51,12 +55,12 @@ def remove_collaborator(args):
             break
 
     if collaborator_id is None:
-        print('Specified user is not in collaborators list.')
+        logger.info('Specified user is not in collaborators list.')
         return
 
     url = args.url + api_projects_endpoint_url + args.project_id + '/collaborators/' +  collaborator_id
     response = delete(url, get_user_headers())
-    print(response.json()['message'])
+    logger.info(response.json()['message'])
 
     return response
 
@@ -67,6 +71,7 @@ def add_secret(args):
     data = {'name': args.name, 'value': args.value}
 
     response = post(url, data, get_user_headers())
+    logger.info(response.json()['message'])
 
     return response
 
@@ -75,6 +80,7 @@ def delete_secret(args):
     infraboxcli.env.check_env_cli_token(args)
     url = args.url + api_projects_endpoint_url + args.project_id + '/secrets/' + args.name
     response = delete(url, get_user_headers())
+    logger.info(response.json()['message'])
 
     return response
 
@@ -85,13 +91,15 @@ def list_project_tokens(args):
 
     response = get(url, get_user_headers())
     if args.verbose:
-        print('=== Project tokens ===')
+        logger.info('Project tokens:')
+        msg = ""
         for project_token in response.json():
-            print('Description: %s' % project_token['description'])
-            print('Id: %s' % project_token['id'])
-            print('Scope push: %s' % project_token['scope_push'])
-            print('Scope pull: %s' % project_token['scope_pull'])
-            print('---')
+            msg += 'Description: %s' % project_token['description']\
+                   + '\nId: %s' % project_token['id']\
+                   + '\nScope push: %s' % project_token['scope_push']\
+                   + '\nScope pull: %s' % project_token['scope_pull']\
+                   + '\n---\n'
+        logger.log(msg, print_header=False)
 
     return response
 
@@ -124,13 +132,13 @@ def add_project_token(args):
     response = post(url, data, get_user_headers())
 
     if response.status_code != 200:
-        print(response.json()['message'])
+        logger.error(response.json()['message'])
         return
 
     # Print project token to the CLI
-    print('=== Authentication Token ===')
-    print('Please save your token at a secure place. We will not show it to you again.\n\n')
-    print(response.json()['data']['token'])
+    logger.info('Authentication Token:'
+                + '\nPlease save your token at a secure place. We will not show it to you again.\n\n\n')
+    logger.log(response.json()['data']['token'])
 
     return response
 
@@ -141,7 +149,7 @@ def delete_project_token(args):
     elif args.description:
         delete_project_token_by_description(args)
     else:
-        print('Please, provide either token id or description.')
+        logger.error('Please, provide either token id or description.')
 
 
 def delete_project_token_by_description(args):
@@ -149,7 +157,7 @@ def delete_project_token_by_description(args):
     token_id = get_project_token_id_by_description(args)
 
     if not token_id:
-        print('Token with such a description does not exist.')
+        logger.info('Token with such a description does not exist.')
         return
 
     args.id = token_id
@@ -161,6 +169,6 @@ def delete_project_token_by_id(args):
     url = args.url + api_projects_endpoint_url + args.project_id + '/tokens/' + args.id
     response = delete(url, get_user_headers())
 
-    print(response.json()['message'])
+    logger.info(response.json()['message'])
 
     return response
