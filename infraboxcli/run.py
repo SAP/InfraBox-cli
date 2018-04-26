@@ -273,6 +273,10 @@ def build_and_run_docker(args, job):
             for name, value in job['build_arguments'].items():
                 cmd += ['--build-arg', '%s=%s' %(name, value)]
 
+        if args.build_arg:
+            for a in args.build_arg:
+                cmd += ['--build-arg', a]
+
         # memory limit
         cmd += ['-m', '%sm' % job['resources']['limits']['memory']]
 
