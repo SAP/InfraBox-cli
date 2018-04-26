@@ -104,8 +104,12 @@ def main():
     parser_run.set_defaults(no_rm=False)
     parser_run.set_defaults(func=run)
 
+    # Project
+    parser_project = sub_parser.add_parser('project', help='Manage your project')
+    sub_project = parser_project.add_subparsers()
+
     # Collaborators
-    parser_collaborators = sub_parser.add_parser('collaborators', help='Add or remove collaborators for your project')
+    parser_collaborators = sub_project.add_parser('collaborators', help='Add or remove collaborators for your project')
     sub_collaborators = parser_collaborators.add_subparsers()
 
     parser_list_collaborators = sub_collaborators.add_parser('list', help='Show collaborators list')
@@ -123,7 +127,7 @@ def main():
     parser_remove_collaborator.set_defaults(func=project.remove_collaborator)
 
     # Secrets
-    parser_secrets = sub_parser.add_parser('secrets', help='Create or delete secrets')
+    parser_secrets = sub_project.add_parser('secrets', help='Create or delete secrets')
     sub_secrets = parser_secrets.add_subparsers()
 
     parser_list_secrets = sub_secrets.add_parser('list', help='Show all your secrets')
@@ -143,7 +147,7 @@ def main():
     parser_delete_secret.set_defaults(func=project.delete_secret)
 
     # Tokens
-    parsers_project_tokens = sub_parser.add_parser('project-token', help='Manage your project tokens')
+    parsers_project_tokens = sub_project.add_parser('tokens', help='Manage your project tokens')
     sub_project_tokens = parsers_project_tokens.add_subparsers()
 
     parser_list_project_tokens = sub_project_tokens.add_parser('list', help='Show all your project tokens')
