@@ -108,6 +108,10 @@ def main():
     parser_project = sub_parser.add_parser('project', help='Manage your project')
     sub_project = parser_project.add_subparsers()
 
+    parser_projects_list = sub_project.add_parser('list', help='Get a list of all your projects')
+    parser_projects_list.add_argument('--verbose', required=False, default=True, type=str2bool)
+    parser_projects_list.set_defaults(func=project.list_projects)
+
     # Collaborators
     parser_collaborators = sub_project.add_parser('collaborators', help='Add or remove collaborators for your project')
     sub_collaborators = parser_collaborators.add_subparsers()
