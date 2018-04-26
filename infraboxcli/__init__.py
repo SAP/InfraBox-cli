@@ -126,13 +126,20 @@ def main():
     parser_secrets = sub_parser.add_parser('secrets', help='Create or delete secrets')
     sub_secrets = parser_secrets.add_subparsers()
 
+    parser_list_secrets = sub_secrets.add_parser('list', help='Show all your secrets')
+    parser_list_secrets.add_argument('--verbose', required=False, default=True, type=str2bool)
+    parser_list_secrets.set_defaults(func=project.list_secrets)
+
     parser_create_secret = sub_secrets.add_parser('create', help='Create a secret')
     parser_create_secret.add_argument('--name', required=True, type=str, help='Name of the secret')
     parser_create_secret.add_argument('--value', required=True, type=str, help='Value of the secret')
     parser_create_secret.set_defaults(func=project.add_secret)
 
     parser_delete_secret = sub_secrets.add_parser('delete', help='Delete a secret')
-    parser_delete_secret.add_argument('--name', required=True, type=str, help='Name of the secret you want to delete')
+    parser_delete_secret.add_argument('--name', required=False, type=str,
+                                      help='Name of the secret you want to delete')
+    parser_delete_secret.add_argument('--id', required=False, type=str,
+                                      help='Id of the secret you want to delete')
     parser_delete_secret.set_defaults(func=project.delete_secret)
 
     # Tokens

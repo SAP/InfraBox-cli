@@ -65,6 +65,34 @@ def remove_collaborator(args):
     return response
 
 
+def list_secrets(args):
+    infraboxcli.env.check_env_cli_token(args)
+    url = args.url + api_projects_endpoint_url + args.project_id + '/secrets'
+
+    response = get(url, get_user_headers())
+    if args.verbose:
+        logger.info('Secrects:')
+        msg = ""
+        for secret in response.json():
+            msg += 'Name: %s' % secret['name']\
+                   + '\nId: %s' % secret['id']\
+                   + '\n---\n'
+        logger.log(msg, print_header=False)
+
+    return response
+
+
+def get_secret_id_by_name(args):
+    args.verbose = False
+    all_secrets = list_secrets(args).json()
+
+    for secret in all_secrets:
+        if args.name == secret['name']:
+            return secret['id']
+
+    return None
+
+
 def add_secret(args):
     infraboxcli.env.check_env_cli_token(args)
     url = args.url + api_projects_endpoint_url + args.project_id + '/secrets'
@@ -77,8 +105,31 @@ def add_secret(args):
 
 
 def delete_secret(args):
+    if args.id:
+        delete_secret_by_id(args)
+    elif args.name:
+        delete_secret_by_name(args)
+    else:
+        logger.error('Please, provide either token id or description.')
+
+
+def delete_secret_by_name(args):
     infraboxcli.env.check_env_cli_token(args)
-    url = args.url + api_projects_endpoint_url + args.project_id + '/secrets/' + args.name
+
+    secret_id = get_secret_id_by_name(args)
+
+    if not secret_id:
+        logger.info('Secret with such a name does not exist.')
+        return
+
+    args.id = secret_id
+    return delete_secret_by_id(args)
+
+
+def delete_secret_by_id(args):
+    infraboxcli.env.check_env_cli_token(args)
+
+    url = args.url + api_projects_endpoint_url + args.project_id + '/secrets/' + args.id
     response = delete(url, get_user_headers())
     logger.info(response.json()['message'])
 
