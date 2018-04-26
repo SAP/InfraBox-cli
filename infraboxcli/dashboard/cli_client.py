@@ -3,22 +3,22 @@ import requests
 session = requests.Session()
 
 
-def get(url, headers=None, cookies_handler=None):
-    response = session.get(url, headers=headers)
+def get(url, headers=None, cookies_handler=None, verify=None, timeout=60):
+    response = session.get(url, headers=headers, verify=verify, timeout=timeout)
     if cookies_handler:
         cookies_handler(session.cookies.get_dict())
     return response
 
 
-def post(url, data, headers=None, cookies_handler=None):
-    response = session.post(url, json=data, headers=headers)
+def post(url, data, headers=None, cookies_handler=None, verify=None, timeout=60):
+    response = session.post(url, json=data, headers=headers, verify=verify, timeout=timeout)
     if cookies_handler:
         cookies_handler(session.cookies.get_dict())
     return response
 
 
-def delete(url, headers=None, cookies_handler=None):
-    response = session.delete(url, headers=headers)
+def delete(url, headers=None, cookies_handler=None, verify=None, timeout=60):
+    response = session.delete(url, headers=headers, verify=verify, timeout=timeout)
     if cookies_handler:
         cookies_handler(session.cookies.get_dict())
     return response

@@ -10,7 +10,7 @@ api_projects_endpoint_url = '/api/v1/projects/'
 def delete_project(args):
     infraboxcli.env.check_env_cli_token(args)
     url = args.url + api_projects_endpoint_url + args.project_id
-    response = get(url, get_user_headers())
+    response = get(url, get_user_headers(), verify=args.ca_bundle, timeout=60)
 
     return response
 
@@ -18,7 +18,7 @@ def delete_project(args):
 def list_collaborators(args):
     infraboxcli.env.check_env_cli_token(args)
     url = args.url + api_projects_endpoint_url + args.project_id + '/collaborators'
-    response = get(url, get_user_headers())
+    response = get(url, get_user_headers(), verify=args.ca_bundle, timeout=60)
 
     if args.verbose:
         logger.info('Collaborators:')
@@ -37,7 +37,7 @@ def add_collaborator(args):
     url = args.url + api_projects_endpoint_url + args.project_id + '/collaborators'
     data = { 'username': args.username }
 
-    response = post(url, data, get_user_headers())
+    response = post(url, data, get_user_headers(), verify=args.ca_bundle, timeout=60)
     logger.info(response.json()['message'])
 
     return response
@@ -59,7 +59,8 @@ def remove_collaborator(args):
         return
 
     url = args.url + api_projects_endpoint_url + args.project_id + '/collaborators/' +  collaborator_id
-    response = delete(url, get_user_headers())
+    response = delete(url, get_user_headers(), verify=args.ca_bundle, timeout=60)
+
     logger.info(response.json()['message'])
 
     return response
@@ -69,7 +70,7 @@ def list_secrets(args):
     infraboxcli.env.check_env_cli_token(args)
     url = args.url + api_projects_endpoint_url + args.project_id + '/secrets'
 
-    response = get(url, get_user_headers())
+    response = get(url, get_user_headers(), verify=args.ca_bundle, timeout=60)
     if args.verbose:
         logger.info('Secrects:')
         msg = ""
@@ -98,7 +99,7 @@ def add_secret(args):
     url = args.url + api_projects_endpoint_url + args.project_id + '/secrets'
     data = {'name': args.name, 'value': args.value}
 
-    response = post(url, data, get_user_headers())
+    response = post(url, data, get_user_headers(), verify=args.ca_bundle, timeout=60)
     logger.info(response.json()['message'])
 
     return response
@@ -130,7 +131,7 @@ def delete_secret_by_id(args):
     infraboxcli.env.check_env_cli_token(args)
 
     url = args.url + api_projects_endpoint_url + args.project_id + '/secrets/' + args.id
-    response = delete(url, get_user_headers())
+    response = delete(url, get_user_headers(), verify=args.ca_bundle, timeout=60)
     logger.info(response.json()['message'])
 
     return response
@@ -140,7 +141,7 @@ def list_project_tokens(args):
     infraboxcli.env.check_env_cli_token(args)
     url = args.url + api_projects_endpoint_url + args.project_id + '/tokens'
 
-    response = get(url, get_user_headers())
+    response = get(url, get_user_headers(), verify=args.ca_bundle, timeout=60)
     if args.verbose:
         logger.info('Project tokens:')
         msg = ""
@@ -180,7 +181,7 @@ def add_project_token(args):
         #'scope_pull': args.scope_pull
     }
 
-    response = post(url, data, get_user_headers())
+    response = post(url, data, get_user_headers(), verify=args.ca_bundle, timeout=60)
 
     if response.status_code != 200:
         logger.error(response.json()['message'])
@@ -188,8 +189,8 @@ def add_project_token(args):
 
     # Print project token to the CLI
     logger.info('Authentication Token:'
-                + '\nPlease save your token at a secure place. We will not show it to you again.\n\n\n')
-    logger.log(response.json()['data']['token'])
+                + '\nPlease save your token at a secure place. We will not show it to you again.\n')
+    logger.log(response.json()['data']['token'], print_header=False)
 
     return response
 
@@ -218,7 +219,7 @@ def delete_project_token_by_description(args):
 def delete_project_token_by_id(args):
     infraboxcli.env.check_env_cli_token(args)
     url = args.url + api_projects_endpoint_url + args.project_id + '/tokens/' + args.id
-    response = delete(url, get_user_headers())
+    response = delete(url, get_user_headers(), verify=args.ca_bundle, timeout=60)
 
     logger.info(response.json()['message'])
 
