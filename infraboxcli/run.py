@@ -319,8 +319,9 @@ def build_and_run_docker(args, job):
 
     cmd += ['-e', 'INFRABOX_CLI=true']
 
-    for e in args.env:
-        cmd += ['-e', e]
+    if args.env:
+        for e in args.env:
+            cmd += ['-e', e]
 
     if args.env_file:
         cmd += ['--env-file', args.env_file]
