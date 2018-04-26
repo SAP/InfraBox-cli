@@ -319,8 +319,9 @@ def build_and_run_docker(args, job):
 
     cmd += ['-e', 'INFRABOX_CLI=true']
 
-    for e in args.env:
-        cmd += ['-e', e]
+    if args.env:
+        for e in args.env:
+            cmd += ['-e', e]
 
     if args.env_file:
         cmd += ['--env-file', args.env_file]
@@ -454,11 +455,11 @@ def run(args):
     # validate infrabox.json
     data = load_infrabox_json(args.infrabox_json)
     if args.memory:
-        print('WARNING: only int resource limits are supported right now. Using rounded int instead of provided value.')
+        logger.warn('WARNING: only int resource limits are supported right now. Using rounded int instead of provided value.')
         for job in data['jobs']:
             job['resources']['limits']['memory'] = int(args.memory)
     if args.cpu:
-        print('WARNING: only int resource limits are supported right now. Using rounded int instead of provided value.')
+        logger.warn('WARNING: only int resource limits are supported right now. Using rounded int instead of provided value.')
         for job in data['jobs']:
             job['resources']['limits']['cpu'] = int(args.cpu)
 
