@@ -5,11 +5,12 @@ import infraboxcli.env
 from infraboxcli.log import logger
 
 api_projects_endpoint_url = '/api/v1/projects/'
+allowed_project_types = ['upload'] #TODO: add ['github', 'gitlab', 'gerrit']
 
 
 def list_projects(args):
     infraboxcli.env.check_env_url(args)
-    url = args.url + api_projects_endpoint_url[:-1]
+    url = args.url + api_projects_endpoint_url
     response = get(url, get_user_headers(), verify=args.ca_bundle, timeout=60)
 
     if args.verbose:
@@ -23,10 +24,87 @@ def list_projects(args):
     return response
 
 
+def create_project(args):
+    infraboxcli.env.check_env_url(args)
+
+    if not args.private and not args.public:
+        logger.error('Specify if your project is going to be public or private, please.')
+        return
+
+    if args.private and args.public:
+        logger.error('Project can\'t be public and private simultaneously. '
+                     + 'Choose only one option, please.')
+        return
+
+    is_private_project = True
+    if args.public:
+        is_private_project = False
+
+    if args.type not in allowed_project_types:
+        logger.error('Provided project type is not supported.'
+                     + '\nAllowed project types are: [{allowed_types}]'
+                        .format(allowed_types=', '.join(allowed_project_types)))
+        return
+
+    url = args.url + api_projects_endpoint_url
+
+    data = {
+        'name': args.name,
+        'type': args.type,
+        'private': is_private_project
+    }
+    response = post(url, data=data, headers=get_user_headers(), verify=args.ca_bundle, timeout=60)
+
+    if response.status_code != 200:
+        logger.error(response.json()['message'])
+    else:
+        logger.info(response.json()['message'])
+
+    return response
+
+
+def get_project_id_by_name(args):
+    args.verbose = False
+    all_projects = list_projects(args).json()
+
+    for project in all_projects:
+        if args.name == project['name']:
+            return project['id']
+
+    return None
+
+
 def delete_project(args):
-    infraboxcli.env.check_env_cli_token(args)
-    url = args.url + api_projects_endpoint_url + args.project_id
-    response = get(url, get_user_headers(), verify=args.ca_bundle, timeout=60)
+    if args.id:
+        delete_project_by_id(args)
+    elif args.name:
+        delete_project_by_name(args)
+    else:
+        logger.error('Please, provide either token id or name.')
+
+
+def delete_project_by_name(args):
+    infraboxcli.env.check_env_url(args)
+
+    project_id = get_project_id_by_name(args)
+
+    if not project_id:
+        logger.info('Project with such a name does not exist.')
+        return
+
+    args.id = project_id
+    return delete_project_by_id(args)
+
+
+def delete_project_by_id(args):
+    infraboxcli.env.check_env_url(args)
+    url = args.url + api_projects_endpoint_url + args.id
+    response = delete(url, headers=get_user_headers(), verify=args.ca_bundle, timeout=60)
+
+    if response.status_code != 200:
+        logger.error(response.json()['message'])
+    else:
+        logger.info(response.json()['message'])
 
     return response
 

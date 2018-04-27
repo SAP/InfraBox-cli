@@ -112,6 +112,25 @@ def main():
     parser_projects_list.add_argument('--verbose', required=False, default=True, type=str2bool)
     parser_projects_list.set_defaults(func=project.list_projects)
 
+    parser_project_create = sub_project.add_parser('create', help='Create a new project')
+    parser_project_create.add_argument('--name', required=True, type=str,
+                                       help='Name of the project you want to create')
+    parser_project_create.add_argument('--type', required=True, type=str,
+                                       help='Name of the project { upload, github, gerrit } you want to create')
+    parser_project_create.add_argument('--public', required=False, default=False, action='store_true',
+                                       help='Make your project public')
+    parser_project_create.add_argument('--private', required=False, default=False, action='store_true',
+                                       help='Make your project private')
+    parser_project_create.set_defaults(func=project.create_project)
+
+    parser_project_delete = sub_project.add_parser('delete', help='Delete a project')
+    parser_project_delete.add_argument('--name', required=False, type=str,
+                                       help='Name of the project you want to delete')
+    parser_project_delete.add_argument('--id', required=False, type=str,
+                                       help='Id of the project you want to delete')
+    parser_project_delete.set_defaults(func=project.delete_project)
+
+
     # Collaborators
     parser_collaborators = sub_project.add_parser('collaborators', help='Add or remove collaborators for your project')
     sub_collaborators = parser_collaborators.add_subparsers()
