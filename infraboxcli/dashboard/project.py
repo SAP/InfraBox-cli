@@ -9,16 +9,15 @@ api_projects_endpoint_url = '/api/v1/projects/'
 
 def list_projects(args):
     infraboxcli.env.check_env_url(args)
-    url = args.url + api_projects_endpoint_url[:len(api_projects_endpoint_url) - 1]
+    url = args.url + api_projects_endpoint_url[:-1]
     response = get(url, get_user_headers(), verify=args.ca_bundle, timeout=60)
 
     if args.verbose:
         logger.info('Projects:')
         msg = ""
         for project in response.json():
-            #TODO: display if project is public or not
-            msg += 'Name: {}\nId: {}\nType: {}\n---\n'\
-                        .format(project['name'], project['id'], project['type'])
+            msg += 'Name: {}\nId: {}\nType: {}\nPublic: {}\n---\n'\
+                        .format(project['name'], project['id'], project['type'], project['public'])
         logger.log(msg, print_header=False)
 
     return response
