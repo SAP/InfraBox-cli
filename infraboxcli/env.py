@@ -16,6 +16,12 @@ def check_env_url(args):
 
 def check_env_cli_token(args):
     check_env_url(args)
+
+    # If we provided project name and enter this function for some reasons
+    # just return from it
+    if args.proj_name:
+        exit(1)
+
     token = os.environ.get('INFRABOX_CLI_TOKEN', None)
     if not token:
         logger.error('INFRABOX_CLI_TOKEN env var must be set')
