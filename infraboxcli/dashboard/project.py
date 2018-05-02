@@ -10,14 +10,12 @@ allowed_project_types = ['upload'] #TODO: add ['github', 'gitlab', 'gerrit']
 
 def check_project_name_set(args):
     infraboxcli.env.check_env_url(args)
-    if args.proj_name:
-        args.name = args.proj_name
-
+    if args.project_name:
         args.project_id = get_project_id_by_name(args)
 
         if args.project_id is not None:
             if 'project_name_printed' not in args:
-                logger.info('Project: {project_name}'.format(project_name=args.proj_name))
+                logger.info('Project: {project_name}'.format(project_name=args.project_name))
                 args.project_name_printed = True
 
             return True
@@ -89,7 +87,7 @@ def get_project_id_by_name(args):
     all_projects = get_projects(args).json()
 
     for project in all_projects:
-        if args.name == project['name']:
+        if args.project_name == project['name']:
             return project['id']
 
     logger.info('Project with such a name does not exist.')
@@ -108,6 +106,7 @@ def delete_project(args):
 def delete_project_by_name(args):
     infraboxcli.env.check_env_url(args)
 
+    args.project_name = args.name
     project_id = get_project_id_by_name(args)
 
     if not project_id:

@@ -106,8 +106,9 @@ def main():
 
     # Project
     parser_project = sub_parser.add_parser('project', help='Manage your project')
-    parser_project.add_argument('--proj-name', required=False, type=str)
-    sub_project = parser_project.add_subparsers()
+    parser_project.add_argument('--project-name', required=False, type=str)
+    parser_project.set_defaults(project_command=True)
+    sub_project = parser_project.add_subparsers(dest='project')
 
     parser_projects_list = sub_project.add_parser('list', help='Get a list of all your projects')
     parser_projects_list.add_argument('--verbose', required=False, default=True, type=str2bool)
@@ -201,6 +202,12 @@ def main():
 
     # Parse args
     args = parser.parse_args()
+
+    # Prevent collision on `project-name` argument with `run`, `pull`, `push` commands
+    if 'project' in args:
+        # Run command
+        args.func(args)
+        return
 
     if 'version' in args:
         print('infraboxcli %s' % version)

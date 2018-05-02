@@ -19,7 +19,10 @@ def check_env_cli_token(args):
 
     # If we provided project name and enter this function for some reasons
     # just return from it
-    if args.proj_name:
+    if 'project_name' in args \
+            and args.project_name \
+            and 'project_command' in args \
+            and args.project_command:
         exit(1)
 
     token = os.environ.get('INFRABOX_CLI_TOKEN', None)
