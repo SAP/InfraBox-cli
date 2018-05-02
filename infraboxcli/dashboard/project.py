@@ -71,6 +71,7 @@ def get_project_id_by_name(args):
         if args.name == project['name']:
             return project['id']
 
+    logger.info('Project with such a name does not exist.')
     return None
 
 
@@ -89,7 +90,6 @@ def delete_project_by_name(args):
     project_id = get_project_id_by_name(args)
 
     if not project_id:
-        logger.info('Project with such a name does not exist.')
         return
 
     args.id = project_id
@@ -185,6 +185,7 @@ def get_secret_id_by_name(args):
         if args.name == secret['name']:
             return secret['id']
 
+    logger.info('Secret with such a name does not exist.')
     return None
 
 
@@ -214,7 +215,6 @@ def delete_secret_by_name(args):
     secret_id = get_secret_id_by_name(args)
 
     if not secret_id:
-        logger.info('Secret with such a name does not exist.')
         return
 
     args.id = secret_id
@@ -258,6 +258,7 @@ def get_project_token_id_by_description(args):
         if args.description == project_token['description']:
             return project_token['id']
 
+    logger.info('Token with such a description does not exist.')
     return None
 
 
@@ -303,7 +304,6 @@ def delete_project_token_by_description(args):
     token_id = get_project_token_id_by_description(args)
 
     if not token_id:
-        logger.info('Token with such a description does not exist.')
         return
 
     args.id = token_id

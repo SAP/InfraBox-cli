@@ -13,6 +13,7 @@ def check_env_url(args):
         logger.error(error_msg)
         exit(1)
 
+
 def check_env_cli_token(args):
     check_env_url(args)
     token = os.environ.get('INFRABOX_CLI_TOKEN', None)
