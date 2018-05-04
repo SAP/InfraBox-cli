@@ -2,20 +2,24 @@ import getpass
 import json
 
 from infraboxcli.dashboard.cli_client import post, get
-from infraboxcli.dashboard.external import load_current_user_token, save_user_token
+from infraboxcli.dashboard.external import get_current_user_token, save_user_token
 import infraboxcli.env
 
 
 api_endpoint_url = '/api/v1/'
 
 def get_user_token():
-    return load_current_user_token()
+    return get_current_user_token()
 
 def get_user_headers():
     return {'Authorization': 'token %s' % get_user_token()}
 
 def login(args):
+    if args.remote_url:
+        args.url = args.remote_url
+
     infraboxcli.env.check_env_url(args)
+
     email = args.email
     password = args.password
 

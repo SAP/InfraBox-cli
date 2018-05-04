@@ -1,7 +1,16 @@
+import os
+import errno
+
 from builtins import int, range, str
 from past.builtins import basestring
 
 from pyinfrabox import ValidationError
+
+#python3
+#from urllib.parse.urlparse import urlparse
+#python2
+from urlparse import urlparse
+
 
 def check_text(t, path, allowEmpty=False):
     if not isinstance(t, basestring):
@@ -49,3 +58,26 @@ def check_number(d, path):
 def check_color(d, path):
     if d not in ("red", "green", "blue", "yellow", "orange", "white", "black", "grey"):
         raise ValidationError(path, "not a valid value")
+
+def get_remote_url(url):
+    parsed_url = urlparse(url)
+    return parsed_url.scheme + '://' + parsed_url.netloc
+
+def mkdir_p(path):
+    """
+    An implementation of `mkdir -p` UNIX command.
+    """
+    try:
+        os.makedirs(path)
+    except OSError as e:
+        if e.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+
+def safe_open_w(path):
+    """
+    Open 'path' variable for writing with creating all parent directories if needed.
+    """
+    mkdir_p(os.path.dirname(path))
+    return open(path, 'w')

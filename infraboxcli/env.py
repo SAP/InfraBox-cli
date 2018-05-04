@@ -3,10 +3,16 @@ import jwt
 import textwrap
 
 from infraboxcli.log import logger
+from infraboxcli.dashboard.external import get_current_remote
 
 
 def check_env_url(args):
     if not args.url:
+        current_remote = get_current_remote()
+        if current_remote:
+            args.url = current_remote
+            return
+
         error_msg = textwrap.dedent("\
             Remote URL is not specified. Either set INFRABOX_URL env var "
             + "or specify an url via `--url` argument.")
