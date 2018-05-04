@@ -56,7 +56,7 @@ def get_config():
         #logger.info('Config file does not exist or invalid.')
 
 
-def get_current_remote():
+def get_current_remote_url():
     try:
         return get_config()['current_remote']
     except:

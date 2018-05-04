@@ -3,14 +3,14 @@ import jwt
 import textwrap
 
 from infraboxcli.log import logger
-from infraboxcli.dashboard.external import get_current_remote
+from infraboxcli.dashboard.external import get_current_remote_url
 
 
 def check_env_url(args):
     if not args.url:
-        current_remote = get_current_remote()
-        if current_remote:
-            args.url = current_remote
+        current_remote_url = get_current_remote_url()
+        if current_remote_url:
+            args.url = current_remote_url
             return
 
         error_msg = textwrap.dedent("\
