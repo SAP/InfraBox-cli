@@ -78,3 +78,18 @@ def get_current_user_token():
         return current_user_token
     except:
         logger.error('Could not load current user token. Please, log in.')
+        exit(1)
+
+
+def get_all_remotes():
+    try:
+        config = get_config()
+
+        remotes = config['remotes'].keys()
+        if not remotes:
+            raise
+
+        return remotes
+    except:
+        logger.error('No available remotes. Please, log in.')
+        exit(1)

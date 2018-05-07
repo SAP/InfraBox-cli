@@ -13,6 +13,7 @@ from infraboxcli.validate import validate
 
 from infraboxcli.dashboard import user
 from infraboxcli.dashboard import project
+from infraboxcli.dashboard import remotes
 
 version = '0.6.4'
 
@@ -200,6 +201,13 @@ def main():
     parser_login.add_argument('--email', required=False, default=None, type=str, help='Email of the user')
     parser_login.add_argument('--password', required=False, default=None, type=str, help='Password of the user')
     parser_login.set_defaults(func=user.login)
+
+    # Remotes
+    parser_remotes = sub_parser.add_parser('remotes', help='Current remotes')
+    sub_remotes = parser_remotes.add_subparsers()
+    parser_remotes_list = sub_remotes.add_parser('list', help='Show your all remotes')
+    parser_remotes_list.add_argument('--verbose', required=False, default=True, type=str2bool)
+    parser_remotes_list.set_defaults(func=remotes.list_remotes)
 
     # Parse args
     args = parser.parse_args()
