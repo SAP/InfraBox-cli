@@ -14,6 +14,7 @@ from infraboxcli.validate import validate
 from infraboxcli.dashboard import user
 from infraboxcli.dashboard import project
 from infraboxcli.dashboard import remotes
+from infraboxcli.dashboard import external
 
 version = '0.6.4'
 
@@ -133,7 +134,6 @@ def main():
                                        help='Id of the project you want to delete')
     parser_project_delete.set_defaults(func=project.delete_project)
 
-
     # Collaborators
     parser_collaborators = sub_project.add_parser('collaborators', help='Add or remove collaborators for your project')
     sub_collaborators = parser_collaborators.add_subparsers()
@@ -202,6 +202,14 @@ def main():
     parser_login.add_argument('--password', required=False, default=None, type=str, help='Password of the user')
     parser_login.set_defaults(func=user.login)
 
+    # Config
+    parser_config = sub_parser.add_parser('config', help='Configure your infrabox')
+    sub_config = parser_config.add_subparsers(dest='config')
+
+    parser_config_current_project = sub_config.add_parser('set-current-project', help='Set new current project')
+    parser_config_current_project.add_argument('project_name', nargs='?', type=str, help='Name of the project')
+    parser_config_current_project.set_defaults(func=external.set_current_project_name)
+
     # Remotes
     parser_remotes = sub_parser.add_parser('remotes', help='Current remotes')
     sub_remotes = parser_remotes.add_subparsers()
@@ -213,7 +221,7 @@ def main():
     args = parser.parse_args()
 
     # Prevent collision on `project-name` argument with `run`, `pull`, `push` commands
-    if 'project' in args:
+    if 'project' in args or 'config' in args:
         # Run command
         args.func(args)
         return

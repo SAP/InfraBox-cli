@@ -1,5 +1,6 @@
 from infraboxcli.dashboard.cli_client import get, post, delete
 from infraboxcli.dashboard.user import get_user_headers
+from infraboxcli.dashboard.external import get_current_project_name
 import infraboxcli.env
 
 from infraboxcli.log import logger
@@ -10,6 +11,14 @@ allowed_project_types = ['upload'] #TODO: add ['github', 'gitlab', 'gerrit']
 
 def check_project_name_set(args):
     infraboxcli.env.check_env_url(args)
+
+    # Use project name from config only if no extra project name was provided
+    if not args.project_name:
+        current_config_project_name = get_current_project_name(args)
+        if current_config_project_name:
+            args.project_name = current_config_project_name
+            args.project_name_printed = True
+
     if args.project_name:
         args.project_id = get_project_id_by_name(args)
 

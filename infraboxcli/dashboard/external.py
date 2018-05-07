@@ -4,6 +4,7 @@ from os.path import expanduser
 
 from infraboxcli.log import logger
 from pyinfrabox.utils import get_remote_url, safe_open_w
+#from infraboxcli.dashboard import project
 
 home = expanduser("~")
 config_file_path = '/.infrabox/config.json'
@@ -40,9 +41,41 @@ def save_user_token(url, cookies_dict):
     config['remotes'].setdefault(remote_url, {})
     config['remotes'][remote_url]['current_user_token'] = user_token
 
-    with safe_open_w(home + config_file_path) as config_file:
-        json.dump(config, config_file)
-        logger.info('Logged in successfully.')
+    save_config(config)
+    logger.info('Logged in successfully.')
+
+
+def set_current_project_name(args):
+    #infraboxcli.env.check_env_url(args)
+    #all_projects = project.get_projects(args).json()
+
+    #project_exists = False
+    #for project in all_projects:
+    #    if args.project_name == project['name']:
+    #        project_exists = True
+    #        break
+
+    #if not project_exists:
+    #    logger.error('Project with such a name does not exist.')
+    #    exit(1)
+
+    try:
+        config = get_config()
+
+        config['remotes'][get_current_remote_url()]['current_project'] = args.project_name
+        save_config(config)
+
+        return True
+    except:
+        return False
+
+
+def get_current_project_name(args):
+    #infraboxcli.env.check_env_url(args)
+    try:
+        return get_config()['remotes'][get_current_remote_url()]['current_project']
+    except:
+        return None
 
 
 def get_config():
@@ -53,7 +86,16 @@ def get_config():
         return config
     except:
         return None
-        #logger.info('Config file does not exist or invalid.')
+
+
+def save_config(config):
+    try:
+        with safe_open_w(home + config_file_path) as config_file:
+            json.dump(config, config_file)
+
+        return True
+    except:
+        return False
 
 
 def get_current_remote_url():

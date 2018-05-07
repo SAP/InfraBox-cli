@@ -3,7 +3,7 @@ import jwt
 import textwrap
 
 from infraboxcli.log import logger
-from infraboxcli.dashboard.external import get_current_remote_url
+from infraboxcli.dashboard.external import get_current_remote_url, get_current_project_name
 
 
 def check_env_url(args):
@@ -11,7 +11,7 @@ def check_env_url(args):
         current_remote_url = get_current_remote_url()
         if current_remote_url:
             args.url = current_remote_url
-            return
+            return True
 
         error_msg = textwrap.dedent("\
             Remote URL is not specified. Either set INFRABOX_URL env var "
