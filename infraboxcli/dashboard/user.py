@@ -1,8 +1,9 @@
 import getpass
 import json
 
+from infraboxcli.log import logger
 from infraboxcli.dashboard.cli_client import post, get
-from infraboxcli.dashboard.external import get_current_user_token, save_user_token
+from infraboxcli.dashboard.external import get_current_user_token, save_user_token, delete_current_user_token
 import infraboxcli.env
 
 
@@ -37,3 +38,12 @@ def login(args):
     response = post(url, data, cookies_handler=save_user_token)
 
     return response
+
+
+def logout(args):
+    token_deleted = delete_current_user_token(args)
+
+    if token_deleted:
+        logger.info('Successfully logged out.')
+    else:
+        logger.info('Already logged out.')

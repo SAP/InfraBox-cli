@@ -195,12 +195,16 @@ def main():
                                              help='Description of the project token you want to delete')
     parser_remove_project_token.set_defaults(func=project.delete_project_token)
 
-    # User
+    # Login
     parser_login = sub_parser.add_parser('login', help='Login to infrabox')
     parser_login.add_argument('remote_url', nargs='?', type=str, help='Name of remote')
     parser_login.add_argument('--email', required=False, default=None, type=str, help='Email of the user')
     parser_login.add_argument('--password', required=False, default=None, type=str, help='Password of the user')
     parser_login.set_defaults(func=user.login)
+
+    # Logout
+    parser_logout = sub_parser.add_parser('logout', help='Logout from current remote')
+    parser_logout.set_defaults(func=user.logout)
 
     # Config
     parser_config = sub_parser.add_parser('config', help='Configure your infrabox')

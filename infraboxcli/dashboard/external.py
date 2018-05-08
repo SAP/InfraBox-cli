@@ -47,7 +47,7 @@ def get_current_user_token():
             raise
 
         current_user_token = config['remotes'][current_remote]['current_user_token']
-        if current_user_token is None:
+        if current_user_token is None or not current_user_token:
             raise
 
         return current_user_token
@@ -56,3 +56,20 @@ def get_current_user_token():
         exit(1)
 
 
+def delete_current_user_token(args=None):
+    try:
+        config = local_config.get_config()
+
+        current_remote = config['current_remote']
+        if not current_remote:
+            raise
+
+        if not config['remotes'][current_remote]['current_user_token']:
+            return False
+
+        config['remotes'][current_remote]['current_user_token'] = ""
+        local_config.save_config(config)
+
+        return True
+    except:
+        return False
