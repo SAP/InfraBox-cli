@@ -1,6 +1,5 @@
 from infraboxcli.dashboard.cli_client import get, post, delete
 from infraboxcli.dashboard.user import get_user_headers
-from infraboxcli.dashboard.external import get_current_project_name
 import infraboxcli.env
 
 from infraboxcli.log import logger
@@ -9,27 +8,21 @@ api_projects_endpoint_url = '/api/v1/projects/'
 allowed_project_types = ['upload'] #TODO: add ['github', 'gitlab', 'gerrit']
 
 
-def check_project_name_set(args):
-    infraboxcli.env.check_env_url(args)
-
-    # Use project name from config only if no extra project name was provided
-    if not args.project_name:
-        current_config_project_name = get_current_project_name(args)
-        if current_config_project_name:
-            args.project_name = current_config_project_name
-            args.project_name_printed = True
+def check_project_is_set(args):
+    infraboxcli.env.check_env_cli_token(args)
 
     if args.project_name:
         args.project_id = get_project_id_by_name(args)
 
         if args.project_id is not None:
-            if 'project_name_printed' not in args:
+            if 'project_name_printed' not in args \
+                    and 'using_default_project' not in args:
                 logger.info('Project: {project_name}'.format(project_name=args.project_name))
                 args.project_name_printed = True
 
             return True
 
-    return False
+    exit(1)
 
 
 def get_projects(args):
@@ -139,8 +132,7 @@ def delete_project_by_id(args):
 
 
 def get_collaborators(args):
-    if not check_project_name_set(args):
-        infraboxcli.env.check_env_cli_token(args)
+    check_project_is_set(args)
 
     url = args.url + api_projects_endpoint_url + args.project_id + '/collaborators'
     response = get(url, get_user_headers(), verify=args.ca_bundle, timeout=60)
@@ -161,8 +153,7 @@ def list_collaborators(args):
 
 
 def add_collaborator(args):
-    if not check_project_name_set(args):
-        infraboxcli.env.check_env_cli_token(args)
+    check_project_is_set(args)
 
     url = args.url + api_projects_endpoint_url + args.project_id + '/collaborators'
     data = { 'username': args.username }
@@ -173,8 +164,7 @@ def add_collaborator(args):
 
 
 def remove_collaborator(args):
-    if not check_project_name_set(args):
-        infraboxcli.env.check_env_cli_token(args)
+    check_project_is_set(args)
 
     all_project_collaborators = get_collaborators(args).json()
     collaborator_id = None
@@ -195,8 +185,7 @@ def remove_collaborator(args):
 
 
 def get_secrets(args):
-    if not check_project_name_set(args):
-        infraboxcli.env.check_env_cli_token(args)
+    check_project_is_set(args)
 
     url = args.url + api_projects_endpoint_url + args.project_id + '/secrets'
     response = get(url, get_user_headers(), verify=args.ca_bundle, timeout=60)
@@ -229,8 +218,7 @@ def get_secret_id_by_name(args):
 
 
 def add_secret(args):
-    if not check_project_name_set(args):
-        infraboxcli.env.check_env_cli_token(args)
+    check_project_is_set(args)
 
     url = args.url + api_projects_endpoint_url + args.project_id + '/secrets'
     data = {'name': args.name, 'value': args.value}
@@ -250,8 +238,7 @@ def delete_secret(args):
 
 
 def delete_secret_by_name(args):
-    if not check_project_name_set(args):
-        infraboxcli.env.check_env_cli_token(args)
+    check_project_is_set(args)
 
     secret_id = get_secret_id_by_name(args)
 
@@ -263,8 +250,7 @@ def delete_secret_by_name(args):
 
 
 def delete_secret_by_id(args):
-    if not check_project_name_set(args):
-        infraboxcli.env.check_env_cli_token(args)
+    check_project_is_set(args)
 
     url = args.url + api_projects_endpoint_url + args.project_id + '/secrets/' + args.id
     response = delete(url, get_user_headers(), verify=args.ca_bundle, timeout=60)
@@ -274,8 +260,7 @@ def delete_secret_by_id(args):
 
 
 def get_project_tokens(args):
-    if not check_project_name_set(args):
-        infraboxcli.env.check_env_cli_token(args)
+    check_project_is_set(args)
 
     url = args.url + api_projects_endpoint_url + args.project_id + '/tokens'
     response = get(url, get_user_headers(), verify=args.ca_bundle, timeout=60)
@@ -310,8 +295,7 @@ def get_project_token_id_by_description(args):
 
 
 def add_project_token(args):
-    if not check_project_name_set(args):
-        infraboxcli.env.check_env_cli_token(args)
+    check_project_is_set(args)
 
     url = args.url + api_projects_endpoint_url + args.project_id + '/tokens'
 
@@ -349,8 +333,7 @@ def delete_project_token(args):
 
 
 def delete_project_token_by_description(args):
-    if not check_project_name_set(args):
-        infraboxcli.env.check_env_cli_token(args)
+    check_project_is_set(args)
 
     token_id = get_project_token_id_by_description(args)
 
@@ -362,8 +345,7 @@ def delete_project_token_by_description(args):
 
 
 def delete_project_token_by_id(args):
-    if not check_project_name_set(args):
-        infraboxcli.env.check_env_cli_token(args)
+    check_project_is_set(args)
 
     url = args.url + api_projects_endpoint_url + args.project_id + '/tokens/' + args.id
     response = delete(url, get_user_headers(), verify=args.ca_bundle, timeout=60)

@@ -3,7 +3,7 @@ import jwt
 import textwrap
 
 from infraboxcli.log import logger
-from infraboxcli.dashboard.external import get_current_remote_url, get_current_project_name
+from infraboxcli.dashboard.local_config import get_current_remote_url, get_current_project_name
 
 
 def check_env_url(args):
@@ -22,14 +22,8 @@ def check_env_url(args):
 
 def check_env_cli_token(args):
     check_env_url(args)
-
-    # If we provided project name and enter this function for some reasons
-    # just return from it
-    if 'project_name' in args \
-            and args.project_name \
-            and 'project_command' in args \
-            and args.project_command:
-        exit(1)
+    if __check_project_name_set(args):
+        return True
 
     token = os.environ.get('INFRABOX_CLI_TOKEN', None)
     if not token:
@@ -40,3 +34,18 @@ def check_env_cli_token(args):
 
     t = jwt.decode(token, verify=False)
     args.project_id = t['project']['id']
+
+    return True
+
+
+def __check_project_name_set(args):
+    # Use project name from config only if no extra project name was provided
+    if not args.project_name:
+        current_config_project_name = get_current_project_name(args)
+        if current_config_project_name:
+            args.project_name = current_config_project_name
+            args.using_default_project = True
+
+    return args.project_name
+
+

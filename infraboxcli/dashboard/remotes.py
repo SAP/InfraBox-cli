@@ -1,10 +1,10 @@
-from infraboxcli.dashboard import external
+from infraboxcli.dashboard import local_config
 from infraboxcli.log import logger
 
 
 def list_remotes(args):
     if args.verbose:
-        remotes = external.get_all_remotes()
+        remotes = local_config.get_all_remotes()
 
         msg = ': '
         msg += '\n: '.join(remotes)

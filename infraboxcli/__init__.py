@@ -14,7 +14,7 @@ from infraboxcli.validate import validate
 from infraboxcli.dashboard import user
 from infraboxcli.dashboard import project
 from infraboxcli.dashboard import remotes
-from infraboxcli.dashboard import external
+from infraboxcli.dashboard import local_config
 
 version = '0.6.4'
 
@@ -208,7 +208,7 @@ def main():
 
     parser_config_current_project = sub_config.add_parser('set-current-project', help='Set new current project')
     parser_config_current_project.add_argument('project_name', nargs='?', type=str, help='Name of the project')
-    parser_config_current_project.set_defaults(func=external.set_current_project_name)
+    parser_config_current_project.set_defaults(func=local_config.set_current_project_name)
 
     # Remotes
     parser_remotes = sub_parser.add_parser('remotes', help='Current remotes')
