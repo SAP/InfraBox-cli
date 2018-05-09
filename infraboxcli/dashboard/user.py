@@ -4,6 +4,7 @@ import json
 from infraboxcli.log import logger
 from infraboxcli.dashboard.cli_client import post, get
 from infraboxcli.dashboard.external import get_current_user_token, save_user_token, delete_current_user_token
+from pyinfrabox.utils import validate_url
 import infraboxcli.env
 
 
@@ -18,6 +19,10 @@ def get_user_headers():
 def login(args):
     if args.remote_url:
         args.url = args.remote_url
+
+    if args.remote_url and not validate_url(args.remote_url):
+        logger.error('Invalid url.')
+        exit(1)
 
     infraboxcli.env.check_env_url(args)
 

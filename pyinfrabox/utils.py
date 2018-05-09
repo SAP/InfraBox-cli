@@ -65,6 +65,13 @@ def get_remote_url(url):
     parsed_url = urlparse(url)
     return parsed_url.scheme + '://' + parsed_url.netloc
 
+def validate_url(url):
+    try:
+        result = urlparse(url)
+        return result.scheme and result.netloc
+    except:
+        return False
+
 def mkdir_p(path):
     """
     An implementation of `mkdir -p` UNIX command.
