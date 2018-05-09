@@ -62,9 +62,10 @@ def create_project(args):
     if args.public:
         is_private_project = False
 
+    args.type = args.type.lower()
     if args.type not in allowed_project_types:
         logger.error('Provided project type is not supported.'
-                     + '\nAllowed project types are: [{allowed_types}]'
+                     + '\nAllowed project types are: [ {allowed_types} ]'
                         .format(allowed_types=', '.join(allowed_project_types)))
         return
 
