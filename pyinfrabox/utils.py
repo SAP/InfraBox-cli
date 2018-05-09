@@ -6,10 +6,12 @@ from past.builtins import basestring
 
 from pyinfrabox import ValidationError
 
-#python3
-#from urllib.parse.urlparse import urlparse
-#python2
-from urlparse import urlparse
+try:
+    #python2
+    from urlparse import urlparse
+except:
+    #python3
+    from urllib.parse import urlparse
 
 
 def check_text(t, path, allowEmpty=False):
