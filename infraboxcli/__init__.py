@@ -112,10 +112,17 @@ def main():
     parser_project.set_defaults(project_command=True)
     sub_project = parser_project.add_subparsers(dest='project')
 
+    # Project list
     parser_projects_list = sub_project.add_parser('list', help='Get a list of all your projects')
     parser_projects_list.add_argument('--verbose', required=False, default=True, type=str2bool)
     parser_projects_list.set_defaults(func=project.list_projects)
 
+    # Project status
+    parser_projects_list = sub_project.add_parser('status', help='Get some info about your current project')
+    parser_projects_list.add_argument('--verbose', required=False, default=True, type=str2bool)
+    parser_projects_list.set_defaults(func=project.print_status)
+
+    # Create project
     parser_project_create = sub_project.add_parser('create', help='Create a new project')
     parser_project_create.add_argument('--name', required=True, type=str,
                                        help='Name of the project you want to create')

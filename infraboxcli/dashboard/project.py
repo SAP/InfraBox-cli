@@ -46,6 +46,30 @@ def list_projects(args):
         logger.log(msg, print_header=False)
 
 
+def print_status(args):
+    if args.verbose:
+        infraboxcli.env.check_env_cli_token(args)
+
+        if args.project_name:
+            project = get_project_by_name(args)
+        elif args.project_id:
+            project = get_project_by_id(args)
+
+        if project is None:
+            logger.error('Current project is not set.')
+            exit(1)
+
+        num_collaborators = len(get_collaborators(args).json())
+        num_tokens = len(get_project_tokens(args).json())
+        num_secrets = len(get_secrets(args).json())
+
+        logger.info('Project status:')
+        msg = 'Name: {}\nId: {}\nType: {}\nPublic: {}\n---\n' \
+                + 'Total collaborators: {}\nTotal tokens: {}\nTotal secrets: {}\n---\n'
+        logger.log(msg.format(project['name'], project['id'], project['type'], project['public'],
+                              num_collaborators, num_tokens, num_secrets), print_header=False)
+
+
 def create_project(args):
     infraboxcli.env.check_env_url(args)
 
@@ -95,6 +119,31 @@ def get_project_id_by_name(args):
 
     logger.info('Project with such a name does not exist.')
     return None
+
+
+def get_project_name_by_id(args):
+    project = get_project_by_id(args)
+    if project:
+        return project['name']
+
+
+def get_project_by_id(args):
+    all_projects = get_projects(args).json()
+
+    for project in all_projects:
+        if args.project_id == project['id']:
+            return project
+
+    logger.info('Project with such an id does not exist.')
+    return None
+
+
+def get_project_by_name(args):
+    project_id = get_project_id_by_name(args)
+
+    if project_id:
+        args.project_id = project_id
+        return get_project_by_id(args)
 
 
 def delete_project(args):
