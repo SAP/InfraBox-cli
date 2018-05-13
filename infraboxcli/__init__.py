@@ -11,7 +11,7 @@ from infraboxcli.log import logger
 from infraboxcli.init import init
 from infraboxcli.pull import pull
 
-version = '0.6.3'
+version = '0.6.5'
 
 def main():
     username = 'unknown'
@@ -83,6 +83,12 @@ def main():
                             help="Job name to execute")
     parser_run.add_argument("--no-rm", action='store_true', required=False,
                             help="Does not run 'docker-compose rm' before building")
+    parser_run.add_argument("--build-arg", required=False, type=str, nargs='+',
+                            help="Set docker build arguments")
+    parser_run.add_argument("--env", required=False, type=str, nargs='+',
+                            help="Override environment variables")
+    parser_run.add_argument("--env-file", required=False, type=str, default=None,
+                            help="Environment file to override environment values")
     parser_run.add_argument("-t", dest='tag', required=False, type=str,
                             help="Docker image tag")
     parser_run.add_argument("-c", "--children", action='store_true',
@@ -114,18 +120,29 @@ def main():
                 logger.error("INFRABOX_CA_BUNDLE: %s not found" % args.ca_bundle)
                 sys.exit(1)
 
-    # Find infrabox.json
-    p = os.getcwd()
+    if args.infrabox_json_file:
+        if not os.path.exists(args.infrabox_json_file):
+            logger.error('%s does not exist' % args.infrabox_json_file)
+            sys.exit(1)
 
-    while p:
-        tb = os.path.join(p, 'infrabox.json')
-        if not os.path.exists(tb):
-            p = p[0:p.rfind('/')]
-        else:
-            args.project_root = p
-            args.infrabox_json = tb
-            args.project_name = os.path.basename(p)
-            break
+        p = os.path.abspath(args.infrabox_json_file)
+
+        args.project_root = p[0:p.rfind('/')]
+        args.infrabox_json = p
+        args.project_name = os.path.basename(p)
+    else:
+        # Find infrabox.json
+        p = os.getcwd()
+
+        while p:
+            tb = os.path.join(p, 'infrabox.json')
+            if not os.path.exists(tb):
+                p = p[0:p.rfind('/')]
+            else:
+                args.project_root = p
+                args.infrabox_json = tb
+                args.project_name = os.path.basename(p)
+                break
 
     if 'job_name' not in args:
         args.children = True
@@ -133,9 +150,6 @@ def main():
     if 'project_root' not in args and 'is_init' not in args and 'is_pull' not in args:
         logger.error("infrabox.json not found in current or any parent directory")
         sys.exit(1)
-
-    if args.infrabox_json_file:
-        args.infrabox_json = args.infrabox_json_file
 
     # Run command
     args.func(args)

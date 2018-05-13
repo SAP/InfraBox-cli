@@ -273,6 +273,10 @@ def build_and_run_docker(args, job):
             for name, value in job['build_arguments'].items():
                 cmd += ['--build-arg', '%s=%s' %(name, value)]
 
+        if args.build_arg:
+            for a in args.build_arg:
+                cmd += ['--build-arg', a]
+
         # memory limit
         cmd += ['-m', '%sm' % job['resources']['limits']['memory']]
 
@@ -318,6 +322,13 @@ def build_and_run_docker(args, job):
                 cmd += ['-e', '%s=%s' % (name, value)]
 
     cmd += ['-e', 'INFRABOX_CLI=true']
+
+    if args.env:
+        for e in args.env:
+            cmd += ['-e', e]
+
+    if args.env_file:
+        cmd += ['--env-file', args.env_file]
 
     if os.name != 'nt':
         cmd += ['-e', 'INFRABOX_UID=%s' % os.geteuid()]
