@@ -210,7 +210,8 @@ def build_and_run_docker_compose(args, job):
 
     env = {
         'PATH': os.environ['PATH'],
-        'INFRABOX_CLI': 'true'
+        'INFRABOX_CLI': 'true',
+        'INFRABOX_BUILD_NUMBER': 'local'
     }
 
     if 'environment' in job:
@@ -246,6 +247,13 @@ def build_and_run_docker(args, job):
 
     container_name = 'ib_' + job['name'].replace("/", "-")
 
+    if not args.no_rm:
+        execute(['docker', 'rm', container_name],
+                cwd=args.project_root,
+                ignore_error=True,
+                ignore_output=True)
+
+
     image_name = None
     if job['type'] == 'docker':
         if args.tag:
@@ -259,12 +267,6 @@ def build_and_run_docker(args, job):
         # Build the image
         logger.info("Build docker image")
 
-        if not args.no_rm:
-            execute(['docker', 'rm', container_name],
-                    cwd=args.project_root,
-                    ignore_error=True,
-                    ignore_output=True)
-
         docker_file = os.path.normpath(os.path.join(get_build_context(job, args),
                                                     job['docker_file']))
 
@@ -277,17 +279,19 @@ def build_and_run_docker(args, job):
             for a in args.build_arg:
                 cmd += ['--build-arg', a]
 
+        cmd += ['--build-arg', 'INFRABOX_BUILD_NUMBER=local']
+
         # memory limit
         cmd += ['-m', '%sm' % job['resources']['limits']['memory']]
 
         execute(cmd, cwd=get_build_context(job, args))
     elif job['type'] == 'docker-image':
-        image_name = job['image']
+        image_name = job['image'].replace('$INFRABOX_BUILD_NUMBER', 'local')
 
     # Tag images if deployments are configured
     deployments = job.get('deployments', [])
     for d in deployments:
-        new_image_name = "%s/%s:%s" % (d['host'], d['repository'], d.get('tag', 'local'))
+        new_image_name = "%s/%s:%s" % (d['host'], d['repository'], d.get('tag', 'build_local'))
         logger.info("Tagging image: %s" % new_image_name)
         execute(['docker', 'tag', image_name, new_image_name])
 
@@ -342,7 +346,7 @@ def build_and_run_docker(args, job):
 
     cmd.append(image_name)
 
-    if job['type'] == 'docker-image':
+    if job['type'] == 'docker-image' and job.get('command', None):
         cmd += job['command']
 
     logger.info("Run docker container")
