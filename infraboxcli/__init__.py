@@ -115,6 +115,9 @@ def main():
     if args.ca_bundle:
         if args.ca_bundle.lower() == "false":
             args.ca_bundle = False
+            # according to: https://stackoverflow.com/a/28002687/131120
+            import requests.packages.urllib3 as urllib3
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         else:
             if not os.path.exists(args.ca_bundle):
                 logger.error("INFRABOX_CA_BUNDLE: %s not found" % args.ca_bundle)
