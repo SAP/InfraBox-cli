@@ -10,6 +10,7 @@ from infraboxcli.list_jobs import list_jobs
 from infraboxcli.log import logger
 from infraboxcli.init import init
 from infraboxcli.pull import pull
+from infraboxcli.install import install_infrabox
 
 version = '0.6.8'
 
@@ -76,6 +77,10 @@ def main():
     # list
     list_job = sub_parser.add_parser('list', help='List all available jobs')
     list_job.set_defaults(func=list_jobs)
+
+    # list
+    install = sub_parser.add_parser('install', help='Setup InfraBox')
+    install.set_defaults(func=install_infrabox)
 
     # run
     parser_run = sub_parser.add_parser('run', help='Run your jobs locally')
