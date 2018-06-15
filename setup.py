@@ -19,7 +19,16 @@ setup(name='infraboxcli',
                 'pyinfrabox.markup',
                 'pyinfrabox.testresult'],
       install_requires=[
-          'future', 'jsonschema', 'requests', 'colorama', 'socketIO_client', 'pyyaml', 'PyJWT', 'cryptography'
+          'future',
+          'jsonschema',
+          'requests',
+          'colorama',
+          'socketIO_client',
+          'pyyaml',
+          'PyJWT',
+          'cryptography',
+          'halo',
+          'inquirer'
       ],
       classifiers=[
 	         'Development Status :: 4 - Beta',
