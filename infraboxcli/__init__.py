@@ -78,8 +78,9 @@ def main():
     list_job = sub_parser.add_parser('list', help='List all available jobs')
     list_job.set_defaults(func=list_jobs)
 
-    # list
+    # install
     install = sub_parser.add_parser('install', help='Setup InfraBox')
+    install.set_defaults(is_install=True)
     install.set_defaults(func=install_infrabox)
 
     # run
@@ -155,7 +156,7 @@ def main():
     if 'job_name' not in args:
         args.children = True
 
-    if 'project_root' not in args and 'is_init' not in args and 'is_pull' not in args:
+    if 'project_root' not in args and 'is_init' not in args and 'is_pull' not in args and 'is_install' not in args:
         logger.error("infrabox.json not found in current or any parent directory")
         sys.exit(1)
 
