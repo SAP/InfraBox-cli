@@ -65,7 +65,7 @@ def install_postgres():
         pass
 
     execute(['helm', 'install', '--name', 'postgres', 'stable/postgresql',
-             '--set', 'imageTag=9.6.2,postgresPassword=postgres',
+             '--set', 'imageTag=9.6.2,postgresPassword=postgres,probes.readiness.periodSeconds=5',
              '--namespace', 'infrabox-system'])
 
 @Halo(text='Installing Minio', spinner='dots')
