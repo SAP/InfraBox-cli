@@ -12,7 +12,7 @@ from infraboxcli.init import init
 from infraboxcli.pull import pull
 from infraboxcli.install import install_infrabox
 
-version = '0.6.8'
+version = '0.7.0'
 
 def main():
     username = 'unknown'

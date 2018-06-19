@@ -22,7 +22,7 @@ def execute(cmd, cwd=None, shell=False, ignore_error=False):
         if ignore_error:
             raise
         else:
-            print e.output
+            print(e.output)
             sys.exit(1)
 
 @Halo(text='Creating GKE Cluster', spinner='dots')
@@ -266,16 +266,16 @@ def install():
     generate_keys(config)
     helm_install_infrabox(config)
 
-    print "Your InfraBox is ready: https://%s" % config['host']
-    print
+    print("Your InfraBox is ready: https://%s" % config['host'])
+    print()
 
     if 'Github' in config['components']:
-        print "IMPORTANT: Update your Github callback url to: https://%s/github/auth/callback" % config['host']
-        print
+        print("IMPORTANT: Update your Github callback url to: https://%s/github/auth/callback" % config['host'])
+        print()
 
-    print "The configuration has been stored here: %s" % config['workdir']
-    print "Please keep a backup of it at a secure place."
-    print "It contains secret data like the encryption key and your admin password."
+    print("The configuration has been stored here: %s" % config['workdir'])
+    print("Please keep a backup of it at a secure place.")
+    print("It contains secret data like the encryption key and your admin password.")
 
 def install_infrabox(_):
     install()
