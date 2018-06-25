@@ -316,8 +316,6 @@ def build_and_run_docker(args, job):
     for name, path in job['directories'].items():
         cmd += ['-v', '%s:/infrabox/%s' % (path, name)]
 
-    cmd += ['-m', '%sm' % job['resources']['limits']['memory']]
-
     if 'environment' in job:
         for name, value in job['environment'].items():
             if isinstance(value, dict):
@@ -338,11 +336,12 @@ def build_and_run_docker(args, job):
         cmd += ['-e', 'INFRABOX_UID=%s' % os.geteuid()]
         cmd += ['-e', 'INFRABOX_GID=%s' % os.getegid()]
 
-    # memory limit
-    cmd += ['-m', '%sm' % job['resources']['limits']['memory']]
+    if not args.unlimited:
+        # memory limit
+        cmd += ['-m', '%sm' % job['resources']['limits']['memory']]
 
-    # CPU limit
-    cmd += ['--cpus', str(job['resources']['limits']['cpu'])]
+        # CPU limit
+        cmd += ['--cpus', str(job['resources']['limits']['cpu'])]
 
     cmd.append(image_name)
 
@@ -350,7 +349,14 @@ def build_and_run_docker(args, job):
         cmd += job['command']
 
     logger.info("Run docker container")
-    execute(cmd, cwd=args.project_root)
+    try:
+        execute(cmd, cwd=args.project_root)
+    except:
+        try:
+            execute(['docker', 'stop', container_name])
+        except:
+            pass
+        raise
 
     logger.info("Commiting Container")
     execute(['docker', 'commit', container_name, image_name], cwd=args.project_root)

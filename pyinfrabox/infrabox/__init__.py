@@ -123,7 +123,8 @@ def parse_cache(d, path):
 
 def parse_git(d, path):
     check_allowed_properties(d, path, ("type", "name", "commit", "clone_url",
-                                       "depends_on", "environment", "infrabox_file"))
+                                       "depends_on", "environment", "infrabox_file",
+                                       "repository"))
     check_required_properties(d, path, ("type", "name", "commit", "clone_url"))
     check_name(d['name'], path + ".name")
     check_text(d['commit'], path + ".commit")
@@ -139,7 +140,8 @@ def parse_git(d, path):
         check_text(d['infrabox_file'], path + ".infrabox_file")
 
 def parse_workflow(d, path):
-    check_allowed_properties(d, path, ("type", "name", "infrabox_file", "depends_on"))
+    check_allowed_properties(d, path, ("type", "name", "infrabox_file", "depends_on",
+                                       "repository"))
     check_required_properties(d, path, ("type", "name", "infrabox_file"))
     check_name(d['name'], path + ".name")
     check_text(d['infrabox_file'], path + ".infrabox_file")
