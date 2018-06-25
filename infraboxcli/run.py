@@ -378,6 +378,9 @@ def track_as_parent(job, state, start_date=datetime.now(), end_date=datetime.now
     })
 
 def check_if_supported(job):
+    if 'resources' not in job:
+        return
+
     res_k8s = job['resources'].get('kubernetes', None)
 
     if res_k8s:

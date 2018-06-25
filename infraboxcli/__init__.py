@@ -10,8 +10,9 @@ from infraboxcli.list_jobs import list_jobs
 from infraboxcli.log import logger
 from infraboxcli.init import init
 from infraboxcli.pull import pull
+from infraboxcli.install import install_infrabox
 
-version = '0.6.8'
+version = '0.7.0'
 
 def main():
     username = 'unknown'
@@ -77,6 +78,11 @@ def main():
     list_job = sub_parser.add_parser('list', help='List all available jobs')
     list_job.set_defaults(func=list_jobs)
 
+    # install
+    install = sub_parser.add_parser('install', help='Setup InfraBox')
+    install.set_defaults(is_install=True)
+    install.set_defaults(func=install_infrabox)
+
     # run
     parser_run = sub_parser.add_parser('run', help='Run your jobs locally')
     parser_run.add_argument("job_name", nargs="?", type=str,
@@ -117,6 +123,9 @@ def main():
     if args.ca_bundle:
         if args.ca_bundle.lower() == "false":
             args.ca_bundle = False
+            # according to: https://stackoverflow.com/a/28002687/131120
+            import requests.packages.urllib3 as urllib3
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         else:
             if not os.path.exists(args.ca_bundle):
                 logger.error("INFRABOX_CA_BUNDLE: %s not found" % args.ca_bundle)
@@ -149,7 +158,7 @@ def main():
     if 'job_name' not in args:
         args.children = True
 
-    if 'project_root' not in args and 'is_init' not in args and 'is_pull' not in args:
+    if 'project_root' not in args and 'is_init' not in args and 'is_pull' not in args and 'is_install' not in args:
         logger.error("infrabox.json not found in current or any parent directory")
         sys.exit(1)
 
