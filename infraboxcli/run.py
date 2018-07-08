@@ -242,9 +242,33 @@ def build_and_run_docker_compose(args, job):
 
     os.remove(compose_file_new)
 
-def build_and_run_docker(args, job):
-    create_infrabox_directories(args, job)
+def build_docker_image(args, job, image_name, target=None):
+    # Build the image
+    logger.info("Build docker image")
 
+    docker_file = os.path.normpath(os.path.join(get_build_context(job, args),
+                                                job['docker_file']))
+
+    cmd = ['docker', 'build', '-t', image_name, '.', '-f', docker_file]
+    if 'build_arguments' in job:
+        for name, value in job['build_arguments'].items():
+            cmd += ['--build-arg', '%s=%s' %(name, value)]
+
+    if args.build_arg:
+        for a in args.build_arg:
+            cmd += ['--build-arg', a]
+
+    cmd += ['--build-arg', 'INFRABOX_BUILD_NUMBER=local']
+
+    # memory limit
+    cmd += ['-m', '%sm' % job['resources']['limits']['memory']]
+
+    if target:
+        cmd += ['--target', target]
+
+    execute(cmd, cwd=get_build_context(job, args))
+
+def run_container(args, job, image_name):
     container_name = 'ib_' + job['name'].replace("/", "-")
 
     if not args.no_rm:
@@ -252,52 +276,6 @@ def build_and_run_docker(args, job):
                 cwd=args.project_root,
                 ignore_error=True,
                 ignore_output=True)
-
-
-    image_name = None
-    if job['type'] == 'docker':
-        if args.tag:
-            image_name = args.tag
-        else:
-            image_name = args.project_name + '_' + job['name']
-            image_name = image_name.replace("/", "-")
-            image_name = image_name.lower()
-
-
-        # Build the image
-        logger.info("Build docker image")
-
-        docker_file = os.path.normpath(os.path.join(get_build_context(job, args),
-                                                    job['docker_file']))
-
-        cmd = ['docker', 'build', '-t', image_name, '.', '-f', docker_file]
-        if 'build_arguments' in job:
-            for name, value in job['build_arguments'].items():
-                cmd += ['--build-arg', '%s=%s' %(name, value)]
-
-        if args.build_arg:
-            for a in args.build_arg:
-                cmd += ['--build-arg', a]
-
-        cmd += ['--build-arg', 'INFRABOX_BUILD_NUMBER=local']
-
-        # memory limit
-        cmd += ['-m', '%sm' % job['resources']['limits']['memory']]
-
-        execute(cmd, cwd=get_build_context(job, args))
-    elif job['type'] == 'docker-image':
-        image_name = job['image'].replace('$INFRABOX_BUILD_NUMBER', 'local')
-
-    # Tag images if deployments are configured
-    deployments = job.get('deployments', [])
-    for d in deployments:
-        new_image_name = "%s/%s:%s" % (d['host'], d['repository'], d.get('tag', 'build_local'))
-        logger.info("Tagging image: %s" % new_image_name)
-        execute(['docker', 'tag', image_name, new_image_name])
-
-    if job['type'] == 'docker':
-        if job.get('build_only', True):
-            return
 
     # Run the continer
     cmd = ['docker', 'run', '--name', container_name]
@@ -361,6 +339,43 @@ def build_and_run_docker(args, job):
     logger.info("Commiting Container")
     execute(['docker', 'commit', container_name, image_name], cwd=args.project_root)
 
+
+def run_docker_image(args, job):
+    create_infrabox_directories(args, job)
+    image_name = job['image'].replace('$INFRABOX_BUILD_NUMBER', 'local')
+
+    if job.get('run', True):
+        run_container(args, job, image_name)
+
+    deployments = job.get('deployments', [])
+    for d in deployments:
+        new_image_name = "%s/%s:%s" % (d['host'], d['repository'], d.get('tag', 'build_local'))
+        logger.info("Tagging image: %s" % new_image_name)
+        execute(['docker', 'tag', image_name, new_image_name])
+
+def build_and_run_docker(args, job):
+    create_infrabox_directories(args, job)
+
+    image_name = None
+    if args.tag:
+        image_name = args.tag
+    else:
+        image_name = args.project_name + '_' + job['name']
+        image_name = image_name.replace("/", "-")
+        image_name = image_name.lower()
+
+    deployments = job.get('deployments', [])
+    if deployments:
+        for d in deployments:
+            new_image_name = "%s/%s:%s" % (d['host'], d['repository'], d.get('tag', 'build_local'))
+            build_docker_image(args, job, image_name, target=d.get('target', None))
+            logger.info("Tagging image: %s" % new_image_name)
+            execute(['docker', 'tag', image_name, new_image_name])
+
+    if not job.get('build_only', True):
+        build_docker_image(args, job, image_name)
+        run_container(args, job, image_name)
+
 def get_parent_job(name):
     for job in parent_jobs:
         if job['name'] == name:
@@ -412,8 +427,10 @@ def build_and_run(args, job, cache):
     try:
         if job_type == "docker-compose":
             build_and_run_docker_compose(args, job)
-        elif job_type in ("docker", "docker-image"):
+        elif job_type == "docker":
             build_and_run_docker(args, job)
+        elif job_type == "docker-image":
+            run_docker_image(args, job)
         elif job_type == "wait":
             # do nothing
             pass
