@@ -389,7 +389,7 @@ def check_if_supported(job):
 def build_and_run(args, job, cache):
     check_if_supported(job)
 
-    # check if depedency conditions are met
+    # check if dependency conditions are met
     for dep in job.get("depends_on", []):
         on = dep['on']
         parent = get_parent_job(dep['job'])
