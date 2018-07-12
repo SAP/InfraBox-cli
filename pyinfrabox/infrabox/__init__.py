@@ -120,8 +120,7 @@ def parse_cache(d, path):
 
 def parse_git(d, path):
     check_allowed_properties(d, path, ("type", "name", "commit", "clone_url",
-                                       "depends_on", "environment", "infrabox_file",
-                                       "repository"))
+                                       "depends_on", "environment", "infrabox_file"))
     check_required_properties(d, path, ("type", "name", "commit", "clone_url"))
     check_name(d['name'], path + ".name")
     check_text(d['commit'], path + ".commit")
@@ -137,8 +136,7 @@ def parse_git(d, path):
         check_text(d['infrabox_file'], path + ".infrabox_file")
 
 def parse_workflow(d, path):
-    check_allowed_properties(d, path, ("type", "name", "infrabox_file", "depends_on",
-                                       "repository"))
+    check_allowed_properties(d, path, ("type", "name", "infrabox_file", "depends_on", "repository"))
     check_required_properties(d, path, ("type", "name", "infrabox_file"))
     check_name(d['name'], path + ".name")
     check_text(d['infrabox_file'], path + ".infrabox_file")
@@ -249,7 +247,7 @@ def parse_docker(d, path):
     check_allowed_properties(d, path, ("type", "name", "docker_file", "depends_on", "resources",
                                        "build_only", "environment",
                                        "build_arguments", "deployments", "timeout", "security_context",
-                                       "build_context", "cache", "repository", "cluster", "services"))
+                                       "build_context", "cache", "repository", "cluster", "services", "registries"))
     check_required_properties(d, path, ("type", "name", "docker_file", "resources"))
     check_name(d['name'], path + ".name")
     check_text(d['docker_file'], path + ".docker_file")
@@ -290,6 +288,9 @@ def parse_docker(d, path):
 
     if 'build_context' in d:
         check_text(d['build_context'], path + ".build_context")
+
+    if 'registries' in d:
+        parse_registries(d['registries'], path + '.registries')
 
 def parse_docker_compose(d, path):
     check_allowed_properties(d, path, ("type", "name", "docker_compose_file", "depends_on",
