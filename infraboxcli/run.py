@@ -367,14 +367,23 @@ def build_and_run_docker(args, job):
     deployments = job.get('deployments', [])
     if deployments:
         for d in deployments:
+            target = d.get('target', None)
+
+            if not target and not job.get('build_only', True):
+                continue
+
+            build_docker_image(args, job, image_name, target=target)
+
             new_image_name = "%s/%s:%s" % (d['host'], d['repository'], d.get('tag', 'build_local'))
-            build_docker_image(args, job, image_name, target=d.get('target', None))
-            logger.info("Tagging image: %s" % new_image_name)
             execute(['docker', 'tag', image_name, new_image_name])
 
     if not job.get('build_only', True):
         build_docker_image(args, job, image_name)
         run_container(args, job, image_name)
+
+        for d in deployments:
+            new_image_name = "%s/%s:%s" % (d['host'], d['repository'], d.get('tag', 'build_local'))
+            execute(['docker', 'tag', image_name, new_image_name])
 
 def get_parent_job(name):
     for job in parent_jobs:
