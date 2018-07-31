@@ -377,8 +377,8 @@ def build_and_run_docker(args, job):
             new_image_name = "%s/%s:%s" % (d['host'], d['repository'], d.get('tag', 'build_local'))
             execute(['docker', 'tag', image_name, new_image_name])
 
+    build_docker_image(args, job, image_name)
     if not job.get('build_only', True):
-        build_docker_image(args, job, image_name)
         run_container(args, job, image_name)
 
         for d in deployments:
