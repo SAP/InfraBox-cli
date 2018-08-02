@@ -81,3 +81,59 @@ class WorkflowCache(object):
     def print_tree(self):
         for j in self.jobs:
             print (j['name'])
+
+    def print_graph(self):
+        index = {}
+        def place(index, name, job):
+            if name.startswith('/'):
+                name = name[1:]
+
+            if name == "":
+                index[""] = job
+                return
+
+            prefix = name.split('/')[0]
+            if prefix not in index:
+                index[prefix] = {}
+            place(index[prefix], name[len(prefix):], job)
+
+        for job in self.jobs:
+            place(index, job['name'], job)
+
+        print 'digraph "Jobs" {'
+
+        def print_cluster(name, cluster, indent='  '):
+            if 'name' in cluster:
+                # then this is a job and not a cluster
+                print '{indent}"{name}" [label="{label}" shape=box]'.format(
+                    name=cluster['name'],
+                    label=cluster['name'].split('/')[-1],
+                    indent=indent)
+            elif len(cluster) == 1:
+                for inner_name, inner_cluster in cluster.iteritems():
+                    print_cluster(inner_name, inner_cluster, indent)
+            else:
+                print '{indent}subgraph "cluster_{name}" {{'.format(name=name, indent=indent)
+
+                for inner_name, inner_cluster in cluster.iteritems():
+                    print_cluster(inner_name, inner_cluster, indent + '  ')
+
+                print '{indent}}}'.format(indent=indent)
+
+        for name, cluster in index.iteritems():
+            print_cluster(name, cluster)
+
+        for j in self.jobs:
+            name = j['name']
+            # print '  "{name}" [shape=box]'.format(name=name)
+
+            for dep in j.get('depends_on', []):
+                if isinstance(dep, str):
+                    print '  "{a}" -> "{b}"'.format(a=dep, b=name)
+                else:
+                    print '  "{a}" -> "{b}" [label="{on}"]'.format(
+                        a=dep['job'],
+                        b=name,
+                        on=", ".join(dep['on']))
+
+        print '}'

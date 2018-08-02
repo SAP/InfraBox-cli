@@ -66,8 +66,6 @@ def main():
 
     # graph
     parser_graph = sub_parser.add_parser('graph', help='Generate a graph of your local jobs')
-    parser_graph.add_argument("--output", required=True, type=str,
-                              help="Path to the output file")
     parser_graph.set_defaults(func=graph)
 
     # validate
