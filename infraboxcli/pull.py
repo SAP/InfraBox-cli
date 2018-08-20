@@ -30,6 +30,10 @@ def download_file(url, filename, args):
 def pull(args):
     infraboxcli.env.check_env_cli_token(args)
 
+    if not args.url:
+        logger.error('either --url or INFRABOX_URL must be set')
+        sys.exit(1)
+
     headers = {'Authorization': 'token ' + args.token}
     url = '%s/api/v1/projects/%s/jobs/%s/manifest' % (args.url, args.project_id, args.job_id)
     r = requests.get(url, headers=headers, timeout=5, verify=args.ca_bundle)

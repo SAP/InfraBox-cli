@@ -110,16 +110,13 @@ def parse_environment(e, path):
                 raise ValidationError(p, "must be a string or object")
 
 def parse_cache(d, path):
-    check_allowed_properties(d, path, ("data", "image", "after_image"))
+    check_allowed_properties(d, path, ("data", "image"))
 
     if 'data' in d:
         check_boolean(d['data'], path + ".data")
 
     if 'image' in d:
         check_boolean(d['image'], path + ".image")
-
-    if 'after_image' in d:
-        check_boolean(d['after_image'], path + ".after_image")
 
 def parse_git(d, path):
     check_allowed_properties(d, path, ("type", "name", "commit", "clone_url",
@@ -139,10 +136,13 @@ def parse_git(d, path):
         check_text(d['infrabox_file'], path + ".infrabox_file")
 
 def parse_workflow(d, path):
-    check_allowed_properties(d, path, ("type", "name", "infrabox_file", "depends_on"))
+    check_allowed_properties(d, path, ("type", "name", "infrabox_file", "depends_on", "repository"))
     check_required_properties(d, path, ("type", "name", "infrabox_file"))
     check_name(d['name'], path + ".name")
     check_text(d['infrabox_file'], path + ".infrabox_file")
+
+    if 'repository' in d:
+        parse_repository(d['repository'], path + ".repository")
 
     if 'depends_on' in d:
         parse_depends_on(d['depends_on'], path + ".depends_on")
@@ -160,45 +160,35 @@ def parse_limits(d, path):
     if d['memory'] <= 255:
         raise ValidationError(path + ".memory", "must be greater than 255")
 
-def parse_kubernetes_limits(d, path):
-    check_allowed_properties(d, path, ("memory", "cpu"))
-    check_required_properties(d, path, ("memory", "cpu"))
-
-    check_number(d['cpu'], path + ".cpu")
-    check_number(d['memory'], path + ".memory")
-
-    if d['cpu'] <= 0:
-        raise ValidationError(path + ".cpu", "must be greater than 0")
-
-    if d['memory'] <= 255:
-        raise ValidationError(path + ".memory", "must be greater than 255")
-
-def parse_add_capabilities(d, path):
-    check_string_array(d, path)
-
-def parse_capabilities(d, path):
-    check_allowed_properties(d, path, ('add',))
-
-    if 'add' in d:
-        parse_add_capabilities(d['add'], path + '.add')
-
 def parse_security_context(d, path):
     check_allowed_properties(d, path, ('capabilities', 'privileged'))
-
-    if 'capabilities' in d:
-        parse_capabilities(d['capabilities'], path + '.capabilities')
 
     if 'privileged' in d:
         check_boolean(d['privileged'], path + ".privileged")
 
-def parse_resources_kubernetes(d, path):
-    check_allowed_properties(d, path, ('limits',))
-    check_required_properties(d, path, ("limits",))
+def parse_services(d, path):
+    if not isinstance(d, list):
+        raise ValidationError(path, "must be an array")
 
-    parse_kubernetes_limits(d['limits'], path + ".limits")
+    names = []
+
+    for i in range(0, len(d)):
+        elem = d[i]
+        p = "%s[%s]" % (path, i)
+
+        check_allowed_properties(elem, p, ("apiVersion", "kind", "metadata", "spec"))
+        check_required_properties(elem, p, ("apiVersion", "kind", "metadata"))
+        check_required_properties(elem['metadata'], p + ".metadata", ("name", ))
+
+        name = elem['metadata']['name']
+
+        if name in names:
+            raise ValidationError(p, "duplicate service name found: %s" % name)
+
+        names.append(name)
 
 def parse_resources(d, path):
-    check_allowed_properties(d, path, ("limits", "kubernetes"))
+    check_allowed_properties(d, path, ("limits",))
     check_required_properties(d, path, ("limits",))
 
     parse_limits(d['limits'], path + ".limits")
@@ -207,11 +197,15 @@ def parse_docker_image(d, path):
     check_allowed_properties(d, path, ("type", "name", "image", "depends_on", "resources",
                                        "environment", "timeout", "security_context",
                                        "build_context", "cache", "repository", "command",
-                                       "cluster", "registries"))
+                                       "deployments", "run",
+                                       "cluster", "registries", "services"))
     check_required_properties(d, path, ("type", "name", "image", "resources"))
     check_name(d['name'], path + ".name")
     check_text(d['image'], path + ".image")
     parse_resources(d['resources'], path + ".resources")
+
+    if 'services' in d:
+        parse_services(d['services'], path + ".services")
 
     if 'cluster' in d:
         parse_cluster(d['cluster'], path + ".cluster")
@@ -243,15 +237,24 @@ def parse_docker_image(d, path):
     if 'build_context' in d:
         check_text(d['build_context'], path + ".build_context")
 
+    if 'deployments' in d:
+        parse_deployments(d['deployments'], path + ".deployments")
+
+    if 'run' in d:
+        check_boolean(d['run'], path + ".run")
+
 def parse_docker(d, path):
     check_allowed_properties(d, path, ("type", "name", "docker_file", "depends_on", "resources",
                                        "build_only", "environment",
                                        "build_arguments", "deployments", "timeout", "security_context",
-                                       "build_context", "cache", "repository", "cluster"))
+                                       "build_context", "cache", "repository", "cluster", "services", "registries"))
     check_required_properties(d, path, ("type", "name", "docker_file", "resources"))
     check_name(d['name'], path + ".name")
     check_text(d['docker_file'], path + ".docker_file")
     parse_resources(d['resources'], path + ".resources")
+
+    if 'services' in d:
+        parse_services(d['services'], path + ".services")
 
     if 'cluster' in d:
         parse_cluster(d['cluster'], path + ".cluster")
@@ -286,9 +289,12 @@ def parse_docker(d, path):
     if 'build_context' in d:
         check_text(d['build_context'], path + ".build_context")
 
+    if 'registries' in d:
+        parse_registries(d['registries'], path + '.registries')
+
 def parse_docker_compose(d, path):
     check_allowed_properties(d, path, ("type", "name", "docker_compose_file", "depends_on",
-                                       "environment", "resources", "cache", "timeout", "cluster"))
+                                       "environment", "resources", "cache", "timeout", "cluster", "repository"))
     check_required_properties(d, path, ("type", "name", "docker_compose_file", "resources"))
     check_name(d['name'], path + ".name")
     check_text(d['docker_compose_file'], path + ".docker_compose_file")
@@ -299,6 +305,9 @@ def parse_docker_compose(d, path):
 
     if 'timeout' in d:
         check_number(d['timeout'], path + ".timeout")
+
+    if 'repository' in d:
+        parse_repository(d['repository'], path + ".repository")
 
     if 'cache' in d:
         parse_cache(d['cache'], path + ".cache")
@@ -318,7 +327,7 @@ def parse_wait(d, path):
         parse_depends_on(d['depends_on'], path + ".depends_on")
 
 def parse_deployment_docker_registry(d, path):
-    check_allowed_properties(d, path, ("type", "host", "repository", "username", "password", "tag"))
+    check_allowed_properties(d, path, ("type", "host", "repository", "username", "password", "tag", "target"))
     check_required_properties(d, path, ("type", "host", "repository"))
     check_text(d['host'], path + ".host")
     check_text(d['repository'], path + ".repository")
@@ -328,6 +337,9 @@ def parse_deployment_docker_registry(d, path):
 
     if 'tag' in d:
         check_text(d['tag'], path + ".tag")
+
+    if 'target' in d:
+        check_text(d['target'], path + ".target")
 
     if 'password' in d:
         parse_secret_ref(d['password'], path + ".password")
@@ -349,7 +361,7 @@ def parse_registry_ecr(d, path):
 
 def parse_deployment_ecr(d, path):
     check_allowed_properties(d, path, ("type", "access_key_id", "secret_access_key",
-                                       "region", "repository", "host", "tag"))
+                                       "region", "repository", "host", "tag", "target"))
     check_required_properties(d, path, ("type", "access_key_id", "secret_access_key", "region", "repository", "host"))
 
     check_text(d['host'], path + ".host")
@@ -360,6 +372,24 @@ def parse_deployment_ecr(d, path):
 
     if 'tag' in d:
         check_text(d['tag'], path + ".tag")
+
+    if 'target' in d:
+        check_text(d['target'], path + ".target")
+
+def parse_deployment_gcr(d, path):
+    check_allowed_properties(d, path, ("type", "service_account", "repository", "host", "tag", "target"))
+    check_required_properties(d, path, ("type", "service_account", "repository", "host"))
+
+    check_text(d['host'], path + ".host")
+    check_text(d['repository'], path + ".repository")
+
+    parse_secret_ref(d['service_account'], path + ".service_account")
+
+    if 'tag' in d:
+        check_text(d['tag'], path + ".tag")
+
+    if 'target' in d:
+        check_text(d['target'], path + ".target")
 
 def parse_registries(e, path):
     if not isinstance(e, list):
@@ -405,6 +435,8 @@ def parse_deployments(e, path):
             parse_deployment_docker_registry(elem, p)
         elif t == 'ecr':
             parse_deployment_ecr(elem, p)
+        elif t == 'gcr':
+            parse_deployment_gcr(elem, p)
         else:
             raise ValidationError(p, "type '%s' not supported" % t)
 

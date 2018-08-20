@@ -15,8 +15,9 @@ from infraboxcli.dashboard import user
 from infraboxcli.dashboard import project
 from infraboxcli.dashboard import remotes
 from infraboxcli.dashboard import local_config
+from infraboxcli.install import install_infrabox
 
-version = '0.6.4'
+version = '0.7.3'
 
 def main():
     username = 'unknown'
@@ -70,8 +71,6 @@ def main():
 
     # graph
     parser_graph = sub_parser.add_parser('graph', help='Generate a graph of your local jobs')
-    parser_graph.add_argument("--output", required=True, type=str,
-                              help="Path to the output file")
     parser_graph.set_defaults(func=graph)
 
     # validate
@@ -82,14 +81,21 @@ def main():
     list_job = sub_parser.add_parser('list', help='List all available jobs')
     list_job.set_defaults(func=list_jobs)
 
+    # install
+    install = sub_parser.add_parser('install', help='Setup InfraBox')
+    install.set_defaults(is_install=True)
+    install.set_defaults(func=install_infrabox)
+
     # run
     parser_run = sub_parser.add_parser('run', help='Run your jobs locally')
     parser_run.add_argument("job_name", nargs="?", type=str,
                             help="Job name to execute")
     parser_run.add_argument("--no-rm", action='store_true', required=False,
                             help="Does not run 'docker-compose rm' before building")
-    parser_run.add_argument("--env", required=False, type=str, nargs='+',
-                            help="Override environment variables")
+    parser_run.add_argument("--build-arg", required=False, type=str, nargs='?',
+                            help="Set docker build arguments", action='append')
+    parser_run.add_argument("--env", required=False, type=str, nargs='?',
+                            help="Override environment variables", action='append')
     parser_run.add_argument("--env-file", required=False, type=str, default=None,
                             help="Environment file to override environment values")
     parser_run.add_argument("-t", dest='tag', required=False, type=str,
@@ -103,6 +109,8 @@ def main():
                             help="Override a memory limit for your job")
     parser_run.add_argument("--cpu", required=False, type=float,
                             help="Override a cpu limit for your job")
+    parser_run.add_argument("--unlimited", action='store_true', required=False,
+                            help="Do not apply cpu and mem limits.")
     parser_run.set_defaults(no_rm=False)
     parser_run.set_defaults(func=run)
 
@@ -249,6 +257,9 @@ def main():
     if args.ca_bundle:
         if args.ca_bundle.lower() == "false":
             args.ca_bundle = False
+            # according to: https://stackoverflow.com/a/28002687/131120
+            import requests.packages.urllib3 as urllib3
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         else:
             if not os.path.exists(args.ca_bundle):
                 logger.error("INFRABOX_CA_BUNDLE: %s not found" % args.ca_bundle)
@@ -281,7 +292,7 @@ def main():
     if 'job_name' not in args:
         args.children = True
 
-    if 'project_root' not in args and 'is_init' not in args and 'is_pull' not in args:
+    if 'project_root' not in args and 'is_init' not in args and 'is_pull' not in args and 'is_install' not in args:
         logger.error("infrabox.json not found in current or any parent directory")
         sys.exit(1)
 

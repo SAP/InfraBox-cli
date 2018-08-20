@@ -1,5 +1,6 @@
 import os
 import errno
+import uuid
 
 from builtins import int, range, str
 from past.builtins import basestring
@@ -90,3 +91,11 @@ def safe_open_w(path):
     """
     mkdir_p(os.path.dirname(path))
     return open(path, 'w')
+
+def validate_uuid4(uuid_string):
+    try:
+        val = uuid.UUID(uuid_string, version=4)
+    except ValueError:
+        return False
+
+    return val.hex == uuid_string.replace('-', '')
