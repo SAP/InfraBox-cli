@@ -185,11 +185,6 @@ def helm_install_infrabox(a):
              '-f', 'values.yaml', '--wait',
             ], cwd=a['workdir'])
 
-    execute(['helm', 'install', '-n', 'infrabox-function',
-             os.path.join(a['workdir'], 'InfraBox', 'deploy', 'infrabox-function'),
-             '-f', 'values.yaml', '--wait',
-            ], cwd=a['workdir'])
-
 
 @Halo(text='Install certificates', spinner='dots')
 def install_certificates(a):
@@ -215,7 +210,7 @@ def install():
                      ),
         inquirer.List('infrabox-version',
                       message="Which version of InfraBox do you want to install",
-                      choices=['1.0.0'],
+                      choices=['1.0.2'],
                      ),
         inquirer.Text('admin-email', message="Admin email"),
         inquirer.Checkbox('components',
