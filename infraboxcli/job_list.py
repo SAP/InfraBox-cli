@@ -22,6 +22,7 @@ def load_infrabox_file(path):
         try:
             data = json.load(f)
         except ValueError:
+            f.seek(0)
             data = yaml.load(f)
         validate_json(data)
         return data
