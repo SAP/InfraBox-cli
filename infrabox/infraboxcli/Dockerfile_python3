@@ -1,7 +1,7 @@
 FROM alpine:3.6
 
 RUN apk add --no-cache python3 py3-cryptography gcc python3-dev musl-dev g++
-RUN pip3 install coverage, pyyaml
+RUN pip3 install coverage pyyaml
 
 RUN adduser -S tester
 

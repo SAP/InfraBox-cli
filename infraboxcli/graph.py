@@ -10,9 +10,9 @@ from infraboxcli.env import check_project_root
 def graph(args):
     check_project_root(args)
     args.project_root = os.path.abspath(args.project_root)
-    infrabox_json_path = os.path.join(args.project_root, 'infrabox.json')
-    if not os.path.isfile(infrabox_json_path):
-        logger.error('%s does not exist' % infrabox_json_path)
+    infrabox_file_path = args.infrabox_file_path
+    if not os.path.isfile(infrabox_file_path):
+        logger.error('%s does not exist' % infrabox_file_path)
         sys.exit(1)
 
     data = load_infrabox_file(args.infrabox_file_path)

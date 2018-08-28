@@ -74,7 +74,7 @@ def main():
     parser_graph.set_defaults(func=graph)
 
     # validate
-    validate_graph = sub_parser.add_parser('validate', help='Validate infrabox.json')
+    validate_graph = sub_parser.add_parser('validate', help='Validate infrabox.json or infrabox.yaml')
     validate_graph.set_defaults(func=validate)
 
     # list
