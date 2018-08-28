@@ -4,9 +4,11 @@ import sys
 from infraboxcli.log import logger
 from infraboxcli.job_list import load_infrabox_json, get_job_list
 from infraboxcli.workflow import WorkflowCache
+from infraboxcli.env import check_project_root
 
 
 def graph(args):
+    check_project_root(args)
     args.project_root = os.path.abspath(args.project_root)
     infrabox_json_path = os.path.join(args.project_root, 'infrabox.json')
     if not os.path.isfile(infrabox_json_path):

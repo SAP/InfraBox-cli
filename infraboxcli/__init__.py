@@ -116,7 +116,7 @@ def main():
 
     # Project
     parser_project = sub_parser.add_parser('project', help='Manage your project')
-    parser_project.add_argument('--project-name', required=False, type=str)
+    parser_project.add_argument('--project-name', dest='remote_project_name', required=False, type=str)
     parser_project.set_defaults(project_command=True)
     sub_project = parser_project.add_subparsers(dest='project')
 
@@ -239,12 +239,6 @@ def main():
     # Parse args
     args = parser.parse_args()
 
-    # Prevent collision on `project-name` argument with `run`, `pull`, `push` commands
-    if 'project' in args or 'config' in args:
-        # Run command
-        args.func(args)
-        return
-
     if 'version' in args:
         print('infraboxcli %s' % version)
         return
@@ -291,10 +285,6 @@ def main():
 
     if 'job_name' not in args:
         args.children = True
-
-    if 'project_root' not in args and 'is_init' not in args and 'is_pull' not in args and 'is_install' not in args:
-        logger.error("infrabox.json not found in current or any parent directory")
-        sys.exit(1)
 
     # Run command
     args.func(args)

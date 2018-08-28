@@ -1,5 +1,8 @@
+import traceback
+
 from colorama import Fore, init
 init()
+
 
 class Logger(object):
     def __init__(self):
@@ -19,5 +22,11 @@ class Logger(object):
 
     def error(self, s):
         self._print(Fore.RED, s)
+
+    def exception(self):
+        msg = traceback.format_exc()
+        self.error(msg)
+
+
 
 logger = Logger()

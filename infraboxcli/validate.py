@@ -3,6 +3,7 @@ import os
 import json
 
 from pyinfrabox.infrabox import validate_json
+from infraboxcli.env import check_project_root
 from infraboxcli.log import logger
 
 def validate_infrabox_json(args):
@@ -17,10 +18,6 @@ def validate_infrabox_json(args):
         validate_json(data)
 
 def validate(args):
-    if not os.path.isdir(args.project_root):
-        logger.error('%s does not exist or is not a directory' % args.project_root)
-        sys.exit(1)
-
+    check_project_root(args)
     validate_infrabox_json(args)
-
     logger.info("No issues found infrabox.json")

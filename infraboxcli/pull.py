@@ -28,6 +28,7 @@ def download_file(url, filename, args):
                 f.write(chunk)
 
 def pull(args):
+    infraboxcli.env.check_project_root(args)
     infraboxcli.env.check_env_cli_token(args)
 
     if not args.url:

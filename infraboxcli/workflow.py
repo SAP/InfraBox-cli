@@ -100,40 +100,39 @@ class WorkflowCache(object):
         for job in self.jobs:
             place(index, job['name'], job)
 
-        print 'digraph "Jobs" {'
+        print('digraph "Jobs" {')
 
         def print_cluster(name, cluster, indent='  '):
             if 'name' in cluster:
                 # then this is a job and not a cluster
-                print '{indent}"{name}" [label="{label}" shape=box]'.format(
+                print('{indent}"{name}" [label="{label}" shape=box]'.format(
                     name=cluster['name'],
                     label=cluster['name'].split('/')[-1],
-                    indent=indent)
+                    indent=indent))
             elif len(cluster) == 1:
                 for inner_name, inner_cluster in cluster.iteritems():
                     print_cluster(inner_name, inner_cluster, indent)
             else:
-                print '{indent}subgraph "cluster_{name}" {{'.format(name=name, indent=indent)
+                print('{indent}subgraph "cluster_{name}" {{'.format(name=name, indent=indent))
 
                 for inner_name, inner_cluster in cluster.iteritems():
                     print_cluster(inner_name, inner_cluster, indent + '  ')
 
-                print '{indent}}}'.format(indent=indent)
+                print('{indent}}}'.format(indent=indent))
 
         for name, cluster in index.iteritems():
             print_cluster(name, cluster)
 
         for j in self.jobs:
             name = j['name']
-            # print '  "{name}" [shape=box]'.format(name=name)
 
             for dep in j.get('depends_on', []):
                 if isinstance(dep, str):
-                    print '  "{a}" -> "{b}"'.format(a=dep, b=name)
+                    print('  "{a}" -> "{b}"'.format(a=dep, b=name))
                 else:
-                    print '  "{a}" -> "{b}" [label="{on}"]'.format(
+                    print('  "{a}" -> "{b}" [label="{on}"]'.format(
                         a=dep['job'],
                         b=name,
-                        on=", ".join(dep['on']))
+                        on=", ".join(dep['on'])))
 
-        print '}'
+        print('}')

@@ -12,6 +12,7 @@ from infraboxcli.execute import execute
 from infraboxcli.job_list import get_job_list, load_infrabox_json
 from infraboxcli.log import logger
 from infraboxcli.workflow import WorkflowCache
+from infraboxcli.env import check_project_root
 from pyinfrabox import docker_compose
 
 parent_jobs = []
@@ -282,10 +283,6 @@ def run_container(args, job, image_name):
 
     # Security context
     security_context = job.get('security_context', {})
-    caps = security_context.get('capabilities', {}).get('add', [])
-
-    if caps:
-        cmd += ['--cap-add=' + ','.join(caps)]
 
     privileged = security_context.get('privileged', False)
     if privileged:
@@ -401,18 +398,7 @@ def track_as_parent(job, state, start_date=datetime.now(), end_date=datetime.now
         "depends_on": job.get('depends_on', [])
     })
 
-def check_if_supported(job):
-    if 'resources' not in job:
-        return
-
-    res_k8s = job['resources'].get('kubernetes', None)
-
-    if res_k8s:
-        logger.warn('Using kubernetes resources is not supported')
-
 def build_and_run(args, job, cache):
-    check_if_supported(job)
-
     # check if dependency conditions are met
     for dep in job.get("depends_on", []):
         on = dep['on']
@@ -492,6 +478,8 @@ def build_and_run(args, job, cache):
             build_and_run(args, j, cache)
 
 def run(args):
+    check_project_root(args)
+
     # Init workflow cache
     cache = WorkflowCache(args)
 

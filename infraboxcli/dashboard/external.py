@@ -1,6 +1,7 @@
 from infraboxcli.log import logger
-from pyinfrabox.utils import get_remote_url
 from infraboxcli.dashboard import local_config
+
+from pyinfrabox.utils import get_remote_url
 
 
 def save_user_token(url, cookies_dict):
@@ -44,11 +45,11 @@ def get_current_user_token():
 
         current_remote = config['current_remote']
         if not current_remote:
-            raise
+            raise Exception('Current remote not set')
 
         current_user_token = config['remotes'][current_remote]['current_user_token']
         if current_user_token is None or not current_user_token:
-            raise
+            raise Exception('Current user token not found')
 
         return current_user_token
     except:
@@ -56,13 +57,13 @@ def get_current_user_token():
         exit(1)
 
 
-def delete_current_user_token(args=None):
+def delete_current_user_token():
     try:
         config = local_config.get_config()
 
         current_remote = config['current_remote']
         if not current_remote:
-            raise
+            raise Exception('current remote not set')
 
         if not config['remotes'][current_remote]['current_user_token']:
             return False

@@ -1,12 +1,11 @@
 import json
+import os
 
 from os.path import expanduser
 from infraboxcli.log import logger
-from pyinfrabox.utils import safe_open_w
 
-config_file_path = '/.infrabox/config.json'
+config_file_path = '.infrabox/config.json'
 home = expanduser("~")
-
 
 def set_current_project_name(args):
     from infraboxcli.dashboard import project
@@ -33,7 +32,7 @@ def set_current_project_name(args):
         return False
 
 
-def get_current_project_name(args):
+def get_current_project_name():
     try:
         return get_config()['remotes'][get_current_remote_url()]['current_project']
     except:
@@ -53,7 +52,7 @@ def get_all_remotes():
 
         remotes = config['remotes'].keys()
         if not remotes:
-            raise
+            raise Exception('No remotes')
 
         return remotes
     except:
@@ -62,20 +61,22 @@ def get_all_remotes():
 
 
 def get_config():
-    try:
-        with open(home + config_file_path, 'r') as config_file:
-            config = json.load(config_file)
+    p = os.path.join(home, config_file_path)
 
-        return config
-    except:
+    if not os.path.exists(p):
         return None
 
+    with open(p, 'r') as config_file:
+        config = json.load(config_file)
+
+    return config
 
 def save_config(config):
-    try:
-        with safe_open_w(home + config_file_path) as config_file:
-            json.dump(config, config_file)
+    p = os.path.join(home, config_file_path)
+    bp = os.path.dirname(p)
 
-        return True
-    except:
-        return False
+    if not os.path.exists(bp):
+        os.makedirs(bp)
+
+    with open(p, 'w+') as config_file:
+        json.dump(config, config_file)

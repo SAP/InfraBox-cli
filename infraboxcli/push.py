@@ -81,6 +81,7 @@ def upload_zip(args, f):
     return d['data']
 
 def push(args):
+    infraboxcli.env.check_project_root(args)
     infraboxcli.env.check_env_cli_token(args)
 
     if not args.url:

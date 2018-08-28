@@ -73,25 +73,6 @@ def validate_url(url):
     except:
         return False
 
-def mkdir_p(path):
-    """
-    An implementation of `mkdir -p` UNIX command.
-    """
-    try:
-        os.makedirs(path)
-    except OSError as e:
-        if e.errno == errno.EEXIST and os.path.isdir(path):
-            pass
-        else:
-            raise
-
-def safe_open_w(path):
-    """
-    Open 'path' variable for writing with creating all parent directories if needed.
-    """
-    mkdir_p(os.path.dirname(path))
-    return open(path, 'w')
-
 def validate_uuid4(uuid_string):
     try:
         val = uuid.UUID(uuid_string, version=4)
