@@ -21,7 +21,7 @@ class WorkflowCache(object):
                 data = json.load(f)
                 self.jobs = data['jobs']
 
-        if args.infrabox_json_file:
+        if args.infrabox_file:
             # a infrabox.json file was specified with -f
             # so we don't persist the cache to not overwrite
             # the full workflow graph

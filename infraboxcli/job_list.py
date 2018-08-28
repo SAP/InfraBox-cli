@@ -2,6 +2,7 @@ import os
 import json
 import uuid
 import sys
+import yaml
 
 from builtins import range
 from pyinfrabox.infrabox import validate_json
@@ -10,7 +11,7 @@ from infraboxcli.execute import execute
 
 LOADED_FILES = {}
 
-def load_infrabox_json(path):
+def load_infrabox_file(path):
     if path in LOADED_FILES:
         logger.error('Recursive included detected with %s' % path)
         sys.exit(1)
@@ -18,7 +19,10 @@ def load_infrabox_json(path):
     LOADED_FILES[path] = path
 
     with open(path) as f:
-        data = json.load(f)
+        try:
+            data = json.load(f)
+        except ValueError:
+            data = yaml.load(f)
         validate_json(data)
         return data
 
@@ -104,9 +108,11 @@ def get_job_list(data, args, parents=None, infrabox_context=None):
 
             execute(['git', 'checkout', job['commit']], cwd=repo_path)
 
-            ib_path = job.get('infrabox_file', 'infrabox.json')
-            ib_path = os.path.join(repo_path, ib_path)
-            data = load_infrabox_json(ib_path)
+            ib_path = os.path.join(repo_path, job.get('infrabox_file', 'infrabox.json'))
+            if not os.path.exists(ib_path):
+                ib_path = os.path.join(repo_path, job.get('infrabox_file', 'infrabox.yaml'))
+
+            data = load_infrabox_file(ib_path)
             sub = get_job_list(data, args, new_parents,
                                infrabox_context=os.path.dirname(ib_path))
 
@@ -119,7 +125,7 @@ def get_job_list(data, args, parents=None, infrabox_context=None):
         else:
             p = os.path.join(infrabox_context, job['infrabox_file'])
             p = os.path.normpath(p)
-            data = load_infrabox_json(p)
+            data = load_infrabox_file(p)
             sub = get_job_list(data, args, new_parents,
                                infrabox_context=os.path.dirname(p))
 
