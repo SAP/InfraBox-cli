@@ -5,18 +5,18 @@
         "name": "pyinfrabox",
         "docker_file": "infrabox/pyinfrabox/Dockerfile",
         "build_only": false,
-        "resources": { "limits": { "cpu": 1, "memory": 1024 } }
+        "resources": { "limits": { "cpu": 0.5, "memory": 1024 } }
     }, {
         "type": "docker",
         "name": "infraboxcli-python2",
         "docker_file": "infrabox/infraboxcli/Dockerfile_python2",
         "build_only": false,
-        "resources": { "limits": { "cpu": 1, "memory": 1024 } }
+        "resources": { "limits": { "cpu": 0.5, "memory": 1024 } }
     }, {
         "type": "docker",
         "name": "infraboxcli-python3",
         "docker_file": "infrabox/infraboxcli/Dockerfile_python3",
         "build_only": false,
-        "resources": { "limits": { "cpu": 1, "memory": 1024 } }
+        "resources": { "limits": { "cpu": 0.5, "memory": 1024 } }
     }]
 }

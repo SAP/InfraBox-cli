@@ -56,7 +56,11 @@ def check_boolean(d, path):
 
 def check_number(d, path):
     if not isinstance(d, int):
-        raise ValidationError(path, "must be a number")
+        raise ValidationError(path, "must be a integer")
+
+def check_int_or_float(d, path):
+    if not isinstance(d, float) and not isinstance(d, int):
+        raise ValidationError(path, "must be a float")
 
 def check_color(d, path):
     if d not in ("red", "green", "blue", "yellow", "orange", "white", "black", "grey"):
