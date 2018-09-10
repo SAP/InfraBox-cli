@@ -497,6 +497,15 @@ def run(args):
 
     # validate infrabox.json
     data = load_infrabox_json(args.infrabox_json)
+    if args.memory:
+        logger.warn('WARNING: only int resource limits are supported right now. Using rounded int instead of provided value.')
+        for job in data['jobs']:
+            job['resources']['limits']['memory'] = int(args.memory)
+    if args.cpu:
+        logger.warn('WARNING: only int resource limits are supported right now. Using rounded int instead of provided value.')
+        for job in data['jobs']:
+            job['resources']['limits']['cpu'] = int(args.cpu)
+
     jobs = get_job_list(data, args, infrabox_context=args.project_root)
 
     if not args.job_name:

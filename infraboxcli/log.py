@@ -8,6 +8,9 @@ class Logger(object):
     def _print(self, color, s):
         print("%s[infrabox] %s%s" % (color, s, Fore.RESET))
 
+    def log(self, s, print_header=True):
+        print("%s%s" % ("[infrabox] " if print_header else "", s))
+
     def info(self, s):
         self._print(Fore.BLUE, s)
 
