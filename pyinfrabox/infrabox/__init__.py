@@ -161,7 +161,7 @@ def parse_limits(d, path):
         raise ValidationError(path + ".memory", "must be greater than 255")
 
 def parse_security_context(d, path):
-    check_allowed_properties(d, path, ('privileged',))
+    check_allowed_properties(d, path, ('privileged', ))
 
     if 'privileged' in d:
         check_boolean(d['privileged'], path + ".privileged")
@@ -246,7 +246,7 @@ def parse_docker_image(d, path):
 def parse_docker(d, path):
     check_allowed_properties(d, path, ("type", "name", "docker_file", "depends_on", "resources",
                                        "build_only", "environment",
-                                       "build_arguments", "deployments", "timeout", "security_context", "command",
+                                       "build_arguments", "deployments", "timeout", "security_context",
                                        "build_context", "cache", "repository", "cluster", "services", "registries"))
     check_required_properties(d, path, ("type", "name", "docker_file", "resources"))
     check_name(d['name'], path + ".name")
@@ -291,9 +291,6 @@ def parse_docker(d, path):
 
     if 'registries' in d:
         parse_registries(d['registries'], path + '.registries')
-
-    if 'command' in d:
-        check_string_array(d['command'], path + ".command")
 
 def parse_docker_compose(d, path):
     check_allowed_properties(d, path, ("type", "name", "docker_compose_file", "depends_on",
