@@ -39,7 +39,7 @@ def check_env_cli_token(args):
     t = jwt.decode(token, verify=False)
     args.project_id = t['project']['id']
 
-    if not args.remote_project_name:
+    if 'remote_project_name' not in args:
         current_config_project_name = get_current_project_name()
         if current_config_project_name:
             args.remote_project_name = current_config_project_name
