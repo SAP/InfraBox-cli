@@ -17,7 +17,7 @@ from infraboxcli.dashboard import remotes
 from infraboxcli.dashboard import local_config
 from infraboxcli.install import install_infrabox
 
-version = '0.7.4'
+version = '0.7.5'
 
 def main():
     username = 'unknown'
@@ -35,8 +35,8 @@ def main():
                         required=False,
                         default=os.environ.get('INFRABOX_CA_BUNDLE', None),
                         help="Path to a CA_BUNDLE file or directory with certificates of trusted CAs")
-    parser.add_argument("-f", dest='infrabox_json_file', required=False, type=str,
-                        help="Path to an infrabox.json file")
+    parser.add_argument("-f", dest='infrabox_file', required=False, type=str,
+                        help="Path to an infrabox.json or infrabox.yaml file")
     sub_parser = parser.add_subparsers(help='sub-command help')
 
     # version
@@ -74,7 +74,7 @@ def main():
     parser_graph.set_defaults(func=graph)
 
     # validate
-    validate_graph = sub_parser.add_parser('validate', help='Validate infrabox.json')
+    validate_graph = sub_parser.add_parser('validate', help='Validate infrabox.json or infrabox.yaml')
     validate_graph.set_defaults(func=validate)
 
     # list
@@ -259,15 +259,15 @@ def main():
                 logger.error("INFRABOX_CA_BUNDLE: %s not found" % args.ca_bundle)
                 sys.exit(1)
 
-    if args.infrabox_json_file:
-        if not os.path.exists(args.infrabox_json_file):
-            logger.error('%s does not exist' % args.infrabox_json_file)
+    if args.infrabox_file:
+        if not os.path.exists(args.infrabox_file):
+            logger.error('%s does not exist' % args.infrabox_file)
             sys.exit(1)
 
-        p = os.path.abspath(args.infrabox_json_file)
+        p = os.path.abspath(args.infrabox_file)
 
         args.project_root = p[0:p.rfind('/')]
-        args.infrabox_json = p
+        args.infrabox_file_path = p
         args.project_name = os.path.basename(p)
     else:
         # Find infrabox.json
@@ -276,15 +276,21 @@ def main():
         while p:
             tb = os.path.join(p, 'infrabox.json')
             if not os.path.exists(tb):
+                tb = os.path.join(p, 'infrabox.yaml')
+            if not os.path.exists(tb):
                 p = p[0:p.rfind('/')]
             else:
                 args.project_root = p
-                args.infrabox_json = tb
+                args.infrabox_file_path = tb
                 args.project_name = os.path.basename(p)
                 break
 
     if 'job_name' not in args:
         args.children = True
+
+    if 'project_root' not in args and 'is_init' not in args and 'is_pull' not in args and 'is_install' not in args:
+        logger.error("infrabox.json or infrabox.yaml not found in current or any parent directory")
+        sys.exit(1)
 
     # Run command
     args.func(args)

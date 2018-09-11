@@ -9,7 +9,7 @@ import traceback
 import yaml
 
 from infraboxcli.execute import execute
-from infraboxcli.job_list import get_job_list, load_infrabox_json
+from infraboxcli.job_list import get_job_list, load_infrabox_file
 from infraboxcli.log import logger
 from infraboxcli.workflow import WorkflowCache
 from infraboxcli.env import check_project_root
@@ -442,13 +442,15 @@ def build_and_run(args, job, cache):
         return
 
     # Dynamic child jobs
-    infrabox_json = os.path.join(job['directories']['output'], 'infrabox.json')
+    infrabox_file = os.path.join(job['directories']['output'], 'infrabox.json')
+    if not os.path.exists(infrabox_file):
+        infrabox_file = os.path.join(job['directories']['output'], 'infrabox.yaml')
 
     jobs = []
-    if os.path.exists(infrabox_json):
+    if os.path.exists(infrabox_file):
         logger.info("Loading generated jobs")
 
-        data = load_infrabox_json(infrabox_json)
+        data = load_infrabox_file(infrabox_file)
         jobs = get_job_list(data, args, infrabox_context=os.path.join(args.project_root, '.infrabox', 'output'))
 
     end_date = datetime.now()
@@ -484,7 +486,7 @@ def run(args):
     cache = WorkflowCache(args)
 
     # validate infrabox.json
-    data = load_infrabox_json(args.infrabox_json)
+    data = load_infrabox_file(args.infrabox_file_path)
     if args.memory:
         logger.warn('WARNING: only int resource limits are supported right now. Using rounded int instead of provided value.')
         for job in data['jobs']:

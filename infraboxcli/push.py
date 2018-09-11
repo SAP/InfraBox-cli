@@ -6,7 +6,7 @@ import tempfile
 import requests
 
 from infraboxcli.console import show_console
-from infraboxcli.validate import validate_infrabox_json
+from infraboxcli.validate import validate_infrabox_file
 from infraboxcli.log import logger
 import infraboxcli.env
 
@@ -92,7 +92,7 @@ def push(args):
         logger.error('%s does not exist or is not a directory' % args.project_root)
         sys.exit(1)
 
-    validate_infrabox_json(args)
+    validate_infrabox_file(args)
 
     if args.validate_only:
         return
