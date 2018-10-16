@@ -122,7 +122,7 @@ def parse_cache(d, path):
         check_boolean(d['image'], path + ".image")
 
 def parse_git(d, path):
-    check_allowed_properties(d, path, ("type", "name", "commit", "clone_url",
+    check_allowed_properties(d, path, ("type", "name", "commit", "clone_url", "branch",
                                        "depends_on", "environment", "infrabox_file"))
     check_required_properties(d, path, ("type", "name", "commit", "clone_url"))
     check_name(d['name'], path + ".name")

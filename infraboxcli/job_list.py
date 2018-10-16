@@ -101,8 +101,12 @@ def get_job_list(data, args, parents=None, infrabox_context=None):
 
         if job['type'] == "git":
             repo_path = os.path.join('/tmp', job_name)
+            clone_branch = job.get('branch', None)
             execute(['rm', '-rf', repo_path])
-            execute(['git', 'clone', '--depth=50', job['clone_url'], repo_path])
+            if clone_branch:
+                execute(['git', 'clone', '--depth=50', '--branch', clone_branch, job['clone_url'], repo_path])
+            else:
+                execute(['git', 'clone', '--depth=50', job['clone_url'], repo_path])
             execute(['git', 'config', 'remote.origin.url', job['clone_url']], cwd=repo_path)
             execute(['git', 'config', 'remote.origin.fetch', '+refs/heads/*:refs/remotes/origin/*'], cwd=repo_path)
             execute(['git', 'fetch', 'origin', job['commit']], cwd=repo_path)
