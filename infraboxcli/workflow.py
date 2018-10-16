@@ -79,8 +79,9 @@ class WorkflowCache(object):
             json.dump({'version': 1, 'jobs': self.jobs}, out, indent=4)
 
     def print_tree(self):
-        for j in self.jobs:
-            print (j['name'])
+        jobs = sorted(self.jobs, key=lambda k: k['name'])
+        for j in jobs:
+            print(j['name'])
 
     def print_graph(self):
         index = {}
