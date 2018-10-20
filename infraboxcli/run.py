@@ -204,6 +204,19 @@ def build_and_run_docker_compose(args, job):
         for name, path in job['directories'].items():
             volumes.append(str('%s:/infrabox/%s' % (path, name)))
 
+        # Mount /infrabox/context to the build context of the service if build.context
+        # is set in the compose file for the service
+        service_build = compose_file_content['services'][service].get('build', None)
+        if service_build:
+            service_build_context = service_build.get('context', None)
+            if service_build_context:
+                build_context = os.path.join(os.path.dirname(compose_file), service_build_context)
+                volumes += ['%s:/infrabox/context' % build_context]
+            else:
+                volumes += ['%s:/infrabox/context' % args.project_root]
+        else:
+            volumes += ['%s:/infrabox/context' % args.project_root]
+
         compose_file_content['services'][service]['volumes'] = volumes
 
     with open(compose_file_new, "w+") as out:
