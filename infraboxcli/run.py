@@ -254,6 +254,10 @@ def build_and_run_docker_compose(args, job):
              '-f', compose_file_new, 'up', '--abort-on-container-exit'], env=env)
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
+    # Print the return code of all the containers
+    execute(['docker-compose', '-p', args.project_name,
+             '-f', compose_file_new, 'ps'], env=env, cwd=job['build_context'])
+             
     os.remove(compose_file_new)
 
 def build_docker_image(args, job, image_name, target=None):
