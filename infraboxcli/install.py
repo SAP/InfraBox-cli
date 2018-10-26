@@ -64,7 +64,7 @@ def install_postgres():
     except:
         pass
 
-    execute(['helm', 'install', '--name', 'postgres', 'stable/postgresql',
+    execute(['helm', 'install', '--name', 'postgres', 'stable/postgresql', '--version', '1.0.0',
              '--set', 'imageTag=9.6.2,postgresPassword=postgres,probes.readiness.periodSeconds=5',
              '--namespace', 'infrabox-system'])
 
