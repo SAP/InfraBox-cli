@@ -211,7 +211,7 @@ def build_and_run_docker_compose(args, job):
             service_build_context = service_build.get('context', None)
             if service_build_context:
                 build_context = os.path.join(os.path.dirname(compose_file), service_build_context)
-                volumes += ['%s:/infrabox/context' % build_context]
+                volumes += ['%s:/infrabox/context' % str(build_context)]
             else:
                 volumes += ['%s:/infrabox/context' % args.project_root]
         else:
