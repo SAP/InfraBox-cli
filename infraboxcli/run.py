@@ -219,6 +219,13 @@ def build_and_run_docker_compose(args, job):
 
         compose_file_content['services'][service]['volumes'] = volumes
 
+        build = compose_file_content['services'][service].get('build', None)
+        if build:
+            if not build.get('args', None):
+                build['args'] = []
+
+            build['args'] += ['INFRABOX_BUILD_NUMBER=local']
+
     with open(compose_file_new, "w+") as out:
         yaml.dump(compose_file_content, out, default_flow_style=False)
 
@@ -257,7 +264,7 @@ def build_and_run_docker_compose(args, job):
     # Print the return code of all the containers
     execute(['docker-compose', '-p', args.project_name,
              '-f', compose_file_new, 'ps'], env=env, cwd=job['build_context'])
-             
+
     os.remove(compose_file_new)
 
 def build_docker_image(args, job, image_name, target=None):
