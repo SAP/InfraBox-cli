@@ -286,7 +286,8 @@ def build_docker_image(args, job, image_name, target=None):
     cmd += ['--build-arg', 'INFRABOX_BUILD_NUMBER=local']
 
     # memory limit
-    cmd += ['-m', '%sm' % job['resources']['limits']['memory']]
+    if not args.unlimited:
+        cmd += ['-m', '%sm' % job['resources']['limits']['memory']]
 
     if target:
         cmd += ['--target', target]
