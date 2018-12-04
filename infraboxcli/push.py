@@ -50,7 +50,7 @@ def zipdir(args):
                     ignore_list.append(i)
 
     ft = tempfile.TemporaryFile()
-    ziph = zipfile.ZipFile(ft, 'w', zipfile.ZIP_DEFLATED)
+    ziph = zipfile.ZipFile(ft, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
 
     add_files(args, ignore_list, args.project_root, ziph)
 
