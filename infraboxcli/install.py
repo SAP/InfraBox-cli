@@ -210,7 +210,7 @@ def install():
                      ),
         inquirer.List('infrabox-version',
                       message="Which version of InfraBox do you want to install",
-                      choices=['1.1.2'],
+                      choices=['1.1.4'],
                      ),
         inquirer.Text('admin-email', message="Admin email"),
         inquirer.Checkbox('components',

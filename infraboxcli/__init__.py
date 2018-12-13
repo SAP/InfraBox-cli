@@ -17,7 +17,7 @@ from infraboxcli.dashboard import remotes
 from infraboxcli.dashboard import local_config
 from infraboxcli.install import install_infrabox
 
-version = '0.8.2'
+version = '0.8.3'
 
 def main():
     username = 'unknown'
