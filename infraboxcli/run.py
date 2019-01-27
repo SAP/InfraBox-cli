@@ -15,6 +15,8 @@ from infraboxcli.workflow import WorkflowCache
 from infraboxcli.env import check_project_root
 from pyinfrabox import docker_compose
 
+from past.builtins import basestring
+
 parent_jobs = []
 
 def makedirs(path):
@@ -198,7 +200,8 @@ def build_and_run_docker_compose(args, job):
 
         volumes = []
         for v in compose_file_content['services'][service].get('volumes', []):
-            v = v.replace('/infrabox/context', args.project_root)
+            if isinstance(v, basestring):
+                v = v.replace('/infrabox/context', args.project_root)
             volumes.append(v)
 
         for name, path in job['directories'].items():
