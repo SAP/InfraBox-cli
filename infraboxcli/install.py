@@ -8,7 +8,6 @@ import subprocess
 import yaml
 
 import inquirer
-from halo import Halo
 
 CLUSTER_PROVIDERS = [
     'Google Kubernetes Engine',
@@ -25,8 +24,8 @@ def execute(cmd, cwd=None, shell=False, ignore_error=False):
             print(e.output)
             sys.exit(1)
 
-@Halo(text='Creating GKE Cluster', spinner='dots')
 def create_gke_cluster(name):
+    print('# Creating GKE Cluster')
     execute(['gcloud', 'container', 'clusters', 'create', name,
              '--zone', 'us-east1-b',
              '--machine-type', 'n1-standard-4'])
@@ -37,13 +36,13 @@ def create_namespace(name):
     except:
         execute(['kubectl', 'create', 'ns', name])
 
-@Halo(text='Creating Namespaces', spinner='dots')
 def create_namespaces():
+    print('# Creating Namespaces')
     create_namespace('infrabox-system')
     create_namespace('infrabox-worker')
 
-@Halo(text='Installing helm', spinner='dots')
 def install_helm():
+    print('# Installing helm')
     try:
         execute(['kubectl', 'get', '-n', 'kube-system', 'sa', 'tiller'], ignore_error=True)
         return
@@ -56,8 +55,8 @@ def install_helm():
              '--clusterrole', 'cluster-admin', '--serviceaccount=kube-system:tiller'])
     execute(['helm', 'init', '--service-account', 'tiller', '--wait'])
 
-@Halo(text='Installing PostgreSQL', spinner='dots')
 def install_postgres():
+    print('# Installing PostgreSQL')
     try:
         execute(['kubectl', 'get', '-n', 'infrabox-system', 'deployments', 'postgres-postgresql'], ignore_error=True)
         return
@@ -68,8 +67,8 @@ def install_postgres():
              '--set', 'imageTag=9.6.2,postgresPassword=postgres,probes.readiness.periodSeconds=5',
              '--namespace', 'infrabox-system'])
 
-@Halo(text='Installing Minio', spinner='dots')
 def install_minio():
+    print('# Installing Minio')
     try:
         execute(['kubectl', 'get', '-n', 'infrabox-system', 'deployments', 'infrabox-minio'], ignore_error=True)
         return
@@ -79,15 +78,15 @@ def install_minio():
     execute(['helm', 'install', '--set', 'serviceType=ClusterIP,replicas=1,persistence.enabled=false',
              '-n', 'infrabox-minio', '--wait', '--namespace', 'infrabox-system', 'stable/minio'])
 
-@Halo(text='Preflight checks', spinner='dots')
 def preflight_checks():
+    print('# Preflight checks')
     execute(['helm', 'version', '--client'])
     execute(['kubectl', 'version', '--client'])
     execute(['gcloud', '--version'])
     execute(['git', 'version'])
 
-@Halo(text='Install nginx ingress', spinner='dots')
 def install_nginx_ingress():
+    print('# Install nginx ingress')
     try:
         execute(['kubectl', 'get', '-n', 'kube-system', 'deployments', 'nic-nginx-ingress-controller'],
                 ignore_error=True)
@@ -105,8 +104,8 @@ def get_host():
     return "%s.nip.io" % ip
 
 
-@Halo(text='Clone InfraBox repository', spinner='dots')
 def clone_repo(a):
+    print('# Clone InfraBox repository')
     execute(['mkdir', '-p', a['workdir']])
     repo_dir = os.path.join(a['workdir'], 'InfraBox')
 
@@ -114,8 +113,8 @@ def clone_repo(a):
     execute(['git', 'clone', 'https://github.com/SAP/InfraBox.git'], cwd=a['workdir'])
     execute(['git', 'checkout', a['infrabox-version']], cwd=repo_dir)
 
-@Halo(text='Generate keys', spinner='dots')
 def generate_keys(a):
+    print('# Generate keys')
     if os.path.exists(os.path.join(a['workdir'], 'id_rsa')):
         return
 
@@ -123,8 +122,8 @@ def generate_keys(a):
     execute('ssh-keygen -f id_rsa.pub -e -m pem > id_rsa.pem', shell=True, cwd=a['workdir'])
 
 
-@Halo(text='Install InfraBox', spinner='dots')
 def helm_install_infrabox(a):
+    print('# Install InfraBox')
     config = {
         'image': {
             'tag': a['infrabox-version'],
@@ -185,9 +184,8 @@ def helm_install_infrabox(a):
              '-f', 'values.yaml', '--wait',
             ], cwd=a['workdir'])
 
-
-@Halo(text='Install certificates', spinner='dots')
 def install_certificates(a):
+    print('# Install certificates')
     try:
         execute(['kubectl', 'get', '-n', 'infrabox-system', 'secrets', 'infrabox-tls-certs'], ignore_error=True)
         return

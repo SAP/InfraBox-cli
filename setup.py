@@ -28,7 +28,6 @@ setup(name='infraboxcli',
           'pyyaml',
           'PyJWT',
           'cryptography',
-          'halo==0.0.14',
           'inquirer',
           'pyyaml'
       ],
