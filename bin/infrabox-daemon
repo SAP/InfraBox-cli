@@ -1,0 +1,193 @@
+#! /usr/bin/env python
+"""
+Process which imports all the dependencies and builds the CLI.
+Then waits for args to parse.
+"""
+import json
+import os
+import signal
+import sys
+from io import StringIO
+
+import click
+import daemon
+
+# Used to determine if we should stop the daemon
+inactive_daemon = False
+check_period = 1
+death_delay = 1800
+
+
+# Wraps streams to forward them through the connection
+class StreamWrapper(StringIO):
+    """
+    Object used to mimic a file by communicating with the client.
+    The goal of this object is to let the client do all of the stream writing/reading,
+    so that there is no issue with stream redirection.
+    """
+
+    def __getattribute__(self, item):
+        def wrapped(*args, **kwargs):
+            self._socket.send([self._kind, "callable", item, args, kwargs])
+            ret = json.loads(self._socket.recv())
+            return ret
+
+        if item in ["_socket", "_kind"]:
+            return object.__getattribute__(self, item)
+
+        attr = super(StreamWrapper, self).__getattribute__(item)
+        if callable(attr):
+            return wrapped
+
+        self._socket.send([self._kind, "get_attr", item])
+        return json.loads(self._socket.recv())
+
+    def __init__(self, kind, socket):
+        """
+        :param kind: "in", "out", or "err" (see cli_client.py)
+        :param socket: a socket over which we will do requests
+        """
+        super(StreamWrapper, self).__init__()
+        self._kind = kind
+        self._socket = socket
+
+
+# OS signal handler
+def shutdown(signum, frame):
+    global inactive_daemon
+    inactive_daemon = True
+
+
+# The daemon's main loop
+def daemon_routine(socket_path):
+    from multiprocessing.connection import Listener
+    from threading import Semaphore, Thread, Lock
+    from time import sleep, time
+
+    from infraboxcli import run_cli, logger, cli
+    import infraboxcli
+
+    last_connection_timestamp = time()
+    tasks_running = Semaphore(0)  # Number of tasks waiting or running
+    task_lock = Lock()  # Lock actually be able to run
+
+    # Function executed by the thread checking if the daemon has been used recently or if we should kill it
+    def kill_daemon():
+        global inactive_daemon
+        while not inactive_daemon:
+            cur_time = time()
+            if cur_time - last_connection_timestamp > death_delay:
+                inactive_daemon = True
+            sleep(check_period)
+
+    # Function executed by the thread launching the CLI
+    def start_cli(conn):
+        """
+        :param conn: the connection with the client
+        """
+        ret_code = 0
+        try:
+            task_lock.acquire()
+
+            # We need to reload the settings (essentially to erase env settings changes)
+            infraboxcli.CLI_SETTINGS = infraboxcli.CLI_SETTINGS.load()
+
+            # Waiting for the current working directory
+            # Useful for local project stuff
+            cwd = list(conn.recv())[0]
+            os.chdir(cwd)
+
+            # Waiting for arguments
+            client_sys_argv = list(conn.recv())
+
+            # Notifying the daemon that a task is running
+            tasks_running.release()
+
+            # Setting up the std stream handlers
+            sys.stdin = StreamWrapper("in", conn)
+            sys.stdout = StreamWrapper("out", conn)
+            sys.stderr = StreamWrapper("err", conn)
+
+            # Launching the CLI
+            # We change the program's name here, so that the help message displays the right program name
+            ret_code = run_cli(client_sys_argv[1:], prog_name=client_sys_argv[0])
+
+        except Exception:
+            logger.exception()
+            ret_code = 1
+
+        finally:
+            # Sending the exit code to the client
+            conn.send(["exit_code", ret_code])
+            # Closing the connection with the client
+            conn.close()
+
+            task_lock.release()
+            #  Notifying the daemon that a task has ended
+            tasks_running.acquire()
+
+    # =================== DAEMON ONLY COMMANDS ===================
+    # Adding an exit command
+    @click.command(name="exit")
+    def exit_daemon():
+        """Manually closes the daemon."""
+        global inactive_daemon
+        inactive_daemon = True
+
+    cli.add_command(exit_daemon)
+
+    # Killing the daemon if needed
+    Thread(target=kill_daemon).start()
+
+    # Python 2 fix
+    if not hasattr(Listener, "__exit__"):
+        Listener.__exit__ = lambda self, exc_type, exc_value, traceback: Listener.close(self)
+        Listener.__enter__ = lambda self: self
+
+    # Staring the daemon's main loop
+    with Listener(socket_path, family="AF_UNIX", authkey=b'secret password') as listener:
+        listener._listener._socket.settimeout(check_period)
+
+        # Waiting for connections
+        while not inactive_daemon:
+            # If no connection is established before timeout, an exception is raised
+            # and we can check if the daemon is inactive
+            try:
+                conn = listener.accept()
+            except:
+                continue
+
+            # Updating the last connection timestampx
+            last_connection_timestamp = time()
+
+            Thread(target=start_cli, args=(conn,)).start()
+
+        # Waiting for the last task to finish before closing the Listener
+        while True:
+            if tasks_running.acquire(blocking=False):
+                tasks_running.release()
+            else:
+                break
+            sleep(check_period)
+        os.remove(socket_path)
+
+
+def start_daemon(socket_path):
+    with daemon.DaemonContext(
+            signal_map={
+                signal.SIGTERM: shutdown,
+                signal.SIGTSTP: shutdown,
+                signal.SIGINT: shutdown
+            },
+            chroot_directory=None,
+            working_directory=os.getcwd()
+    ):
+        daemon_routine(socket_path)
+
+
+def main():
+    start_daemon(sys.argv[1])
+
+
+if __name__ == "__main__":
+    main()

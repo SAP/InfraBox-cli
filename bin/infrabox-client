@@ -1,0 +1,113 @@
+#! /usr/bin/env python
+"""
+Can(/will?) replace cli.py to execute commands.
+Currently launches cli_daemon.py automatically and does the same thing as cli.py (only faster).
+Forwards arguments to the daemon.
+"""
+from __future__ import print_function
+
+import json
+import multiprocessing.connection as connection
+import os
+import shlex
+import socket
+import subprocess
+import sys
+from threading import Thread
+from time import sleep
+
+import appdirs
+from future.builtins import input
+
+
+def main():
+    socket_path = os.path.join(appdirs.user_data_dir("InfraBoxCLI"), 'InfraBoxCLI_socket')
+
+    # Adding args from stdin to args -> supports piping
+    if not sys.stdin.isatty():
+        sys.argv += shlex.split(input())
+
+    exit_code = 0
+    conn = None
+    try:
+        # Launches the daemon if necessary
+        if not os.path.exists(socket_path):
+            Thread(target=subprocess.call, args=[["infrabox-daemon", socket_path]]).start()
+
+        cmds = [["login", "-e"], ["local", "install"]]
+        for cmd in cmds:
+            if sys.argv[1: 1 + len(cmd)] == cmd:
+                import infraboxcli
+                infraboxcli.run_cli(sys.argv[1:])
+                exit()
+
+        # Creating the connection (this type of socket times out instantly)
+        ind = 50
+        while ind > 0:
+            try:
+                conn = connection.Client(socket_path, family="AF_UNIX", authkey=b'secret password')
+                break
+            except socket.error as e:
+                if e.errno != 2:
+                    raise e
+                sleep(.1)
+                ind -= 1
+
+        # Sending the current working directory
+        # Useful for local project stuff
+        conn.send([os.getcwd()])
+
+        # Sending the arguments
+        conn.send(sys.argv)
+
+        # Waiting for a message of the form [kind, value"] where kind is either "in", "out", "err" or "exit_code"
+        # The loop only breaks when receiving a "exit_code" message
+        while True:
+            params = list(conn.recv())
+            message = params[0]
+
+            # We got the exit code, the value is the exit code
+            if message == "exit_code":
+                exit_code = params[1]
+                break
+
+            if message == "in":
+                stream = sys.stdin
+            # We got a message to print, the value is the text to be displayed
+            elif message == "out":
+                stream = sys.stdout
+            # We got an error to print, the value is the error text to be displayed
+            else:
+                stream = sys.stderr
+
+            kind, item = params[1:3]
+            if kind == "callable":
+                args, kwargs = list(params[3]), dict(params[4])
+                for i, v in enumerate(args):
+                    if isinstance(v, bytes):
+                        args[i] = v.decode('UTF-8')
+
+                try:
+                    ret = stream.__getattribute__(item)(*args, **kwargs)
+                except:
+                    ret = None
+                conn.send(json.dumps(ret))
+            elif kind == "get_attr":
+                conn.send(json.dumps(stream.__getattribute__(item)))
+
+    except socket.error:
+        print("Daemon not reachable. Is it shutting down or has it been SIGKILLed?.")
+
+        if os.path.exists(socket_path):
+            os.remove(socket_path)
+            print("Daemon socket file removed. The client should work again. Please restart it.")
+        exit(1)
+
+    finally:
+        if conn is not None:
+            conn.close()
+        exit(exit_code)
+
+
+if __name__ == "__main__":
+    main()

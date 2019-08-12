@@ -1,3 +1,22 @@
-#!/usr/bin/python
-import infraboxcli
-infraboxcli.main()
+#! /usr/bin/env python
+import shlex
+import sys
+
+from future.builtins import input
+
+from infraboxcli import run_cli
+
+
+def main():
+    # Adding args from stdin to args -> supports piping
+    if not sys.stdin.isatty():
+        try:
+            sys.argv += shlex.split(input())
+        except EOFError:
+            pass
+
+    exit(run_cli())
+
+
+if __name__ == "__main__":
+    main()
