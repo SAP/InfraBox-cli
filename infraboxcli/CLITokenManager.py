@@ -20,11 +20,11 @@ class CLITokenManager(TokenManager):
         if not os.path.isdir(self._PROJECT_TOKEN_FOLDER):
             os.makedirs(self._PROJECT_TOKEN_FOLDER)
 
-        self._login_token = None
-        if os.path.isfile(self._LOGIN_TOKEN_PATH):
+        self._login_token = {"token": os.environ.get("INFRABOX_CLI_TOKEN", None)}
+        if not self._login_token["token"] and os.path.isfile(self._LOGIN_TOKEN_PATH):
             with open(self._LOGIN_TOKEN_PATH, "r") as f:
                 self._login_token = {"token": "".join(line.strip() for line in f.readlines())}
-
+    
     @locked(_LOCKFILE_PATH)
     def login(self, token):
         """

@@ -29,7 +29,7 @@ def tabulate(data, headers=None):
 @click.option("-s", "--grid-style", "grid_style", default=None, type=click.Choice(
     choices=['fancy_grid', 'grid', 'html', 'latex', 'plain', 'simple', 'tsv', 'json']),
               help="The style used to display a grid. (initially \"simple\")")
-@click.option("-u", "--url", "infrabox_url", default=None,
+@click.option("-u", "--url", "infrabox_url", default=os.environ.get("INFRABOX_URL", None),
               help="Address of the API server.")
 @click.option("-c", "--ca-bundle", "ca_bundle", default=os.environ.get('INFRABOX_CA_BUNDLE', None),
               help="The path to a CA_BUNDLE file or directory with certificates of trusted CAs.")
