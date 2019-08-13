@@ -30,7 +30,6 @@ def build_from_id(project_id, build_id, full):
         build.get_build_base_information(api)
         if full:
             build.get_jobs(api, True)
-            settings.add_build_to_cache(build)
 
     # Selecting the right information to display
     attrs = ["build_number", "id", "restart_counter"] + (["duration", "status"] if full else [])
