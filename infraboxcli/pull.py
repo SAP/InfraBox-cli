@@ -64,7 +64,7 @@ def pull(args):
     for d in manifest['dependencies']:
         p = os.path.join(inputs_path, d['name'])
         logger.info('Downloading output of %s to %s' % (d['name'], p))
-        os.makedirs(p)
+        os.makedirs(p, exist_ok=True)
         package_path = os.path.join(download_path, '%s.%s' % (d['id'], d['output']['format']))
         download_file(d['output']['url'], package_path, args)
 
