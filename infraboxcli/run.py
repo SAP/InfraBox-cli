@@ -348,7 +348,7 @@ def run_container(args, job, image_name):
 
     cmd.append(image_name)
 
-    if job['type'] == 'docker-image' and job.get('command', None):
+    if (job['type'] == 'docker-image' or job['type'] == 'docker') and job.get('command', None):
         cmd += job['command']
 
     logger.info("Run docker container")
