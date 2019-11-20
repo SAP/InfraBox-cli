@@ -364,6 +364,13 @@ def run_container(args, job, image_name):
     logger.info("Commiting Container")
     execute(['docker', 'commit', container_name, image_name], cwd=args.project_root)
 
+def tag_docker_image(image_name, deployments):
+    new_images = []
+    for d in deployments:
+        new_image_name = "%s/%s:%s" % (d['host'], d['repository'], d.get('tag', 'build_local'))
+        execute(['docker', 'tag', image_name, new_image_name])
+        new_images.append(new_image_name)
+    return new_images
 
 def run_docker_image(args, job):
     create_infrabox_directories(args, job)
@@ -373,10 +380,7 @@ def run_docker_image(args, job):
         run_container(args, job, image_name)
 
     deployments = job.get('deployments', [])
-    for d in deployments:
-        new_image_name = "%s/%s:%s" % (d['host'], d['repository'], d.get('tag', 'build_local'))
-        logger.info("Tagging image: %s" % new_image_name)
-        execute(['docker', 'tag', image_name, new_image_name])
+    tag_docker_image(image_name, deployments)
 
 def build_and_run_docker(args, job):
     create_infrabox_directories(args, job)
@@ -390,6 +394,7 @@ def build_and_run_docker(args, job):
         image_name = image_name.lower()
 
     deployments = job.get('deployments', [])
+    new_images = []
     if deployments:
         for d in deployments:
             target = d.get('target', None)
@@ -398,17 +403,15 @@ def build_and_run_docker(args, job):
                 continue
 
             build_docker_image(args, job, image_name, target=target)
-
-            new_image_name = "%s/%s:%s" % (d['host'], d['repository'], d.get('tag', 'build_local'))
-            execute(['docker', 'tag', image_name, new_image_name])
+            new_images.extend(tag_docker_image(image_name, [d]))  # tag when target is set
 
     build_docker_image(args, job, image_name)
     if not job.get('build_only', True):
         run_container(args, job, image_name)
 
-        for d in deployments:
-            new_image_name = "%s/%s:%s" % (d['host'], d['repository'], d.get('tag', 'build_local'))
-            execute(['docker', 'tag', image_name, new_image_name])
+    new_images.extend(tag_docker_image(image_name, filter(lambda d: 'target' not in d, deployments))) # tag when target is _not_ set
+    for new_image in new_images:
+        logger.info(new_image)
 
 def get_parent_job(name):
     for job in parent_jobs:

@@ -1,3 +1,4 @@
 #!/usr/bin/python
 import infraboxcli
+print infraboxcli.__file__
 infraboxcli.main()
