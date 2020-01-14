@@ -219,6 +219,7 @@ def build_and_run_docker_compose(args, job):
                 volumes += ['%s:/infrabox/context' % args.project_root]
         else:
             volumes += ['%s:/infrabox/context' % args.project_root]
+        volumes = list(dict.fromkeys(volumes))
 
         compose_file_content['services'][service]['volumes'] = volumes
 
