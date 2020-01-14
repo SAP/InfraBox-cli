@@ -226,8 +226,8 @@ def build_and_run_docker_compose(args, job):
         if build:
             if not build.get('args', None):
                 build['args'] = []
-
-            build['args'] += ['INFRABOX_BUILD_NUMBER=local']
+            elif not any([build_arg.startswith("INFRABOX_BUILD_NUMBER=") for build_arg in build['args']]):
+                build['args'] += ['INFRABOX_BUILD_NUMBER=local']
 
     with open(compose_file_new, "w+") as out:
         yaml.dump(compose_file_content, out, default_flow_style=False)
@@ -286,7 +286,8 @@ def build_docker_image(args, job, image_name, target=None):
         for a in args.build_arg:
             cmd += ['--build-arg', a]
 
-    cmd += ['--build-arg', 'INFRABOX_BUILD_NUMBER=local']
+    if not args.build_arg or not any([build_arg.startswith("INFRABOX_BUILD_NUMBER=") for build_arg in args.build_arg]):
+        cmd += ['--build-arg', 'INFRABOX_BUILD_NUMBER=local']
 
     # memory limit
     if not args.unlimited:
@@ -374,7 +375,17 @@ def tag_docker_image(image_name, deployments):
 
 def run_docker_image(args, job):
     create_infrabox_directories(args, job)
-    image_name = job['image'].replace('$INFRABOX_BUILD_NUMBER', 'local')
+
+    if args.build_arg:
+        args_infrabox_build_nr = [build_arg for build_arg in args.build_arg if build_arg.startswith("INFRABOX_BUILD_NUMBER=")]
+    else:
+        args_infrabox_build_nr = []
+
+    if args_infrabox_build_nr:
+        arg_infrabox_build_nr = args_infrabox_build_nr[-1].replace("INFRABOX_BUILD_NUMBER=", "")
+    else:
+        arg_infrabox_build_nr = 'local'
+    image_name = job['image'].replace('$INFRABOX_BUILD_NUMBER', arg_infrabox_build_nr)
 
     if job.get('run', True):
         run_container(args, job, image_name)
