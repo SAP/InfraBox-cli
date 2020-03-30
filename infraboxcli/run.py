@@ -321,6 +321,9 @@ def run_container(args, job, image_name):
     for name, path in job['directories'].items():
         cmd += ['-v', '%s:/infrabox/%s' % (path, name)]
 
+    if 'entrypoint' in job:
+        cmd += ['--entrypoint', job['entrypoint']]
+
     if 'environment' in job:
         for name, value in job['environment'].items():
             if isinstance(value, dict):
