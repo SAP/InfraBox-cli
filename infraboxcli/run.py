@@ -328,7 +328,7 @@ def run_container(args, job, image_name):
             else:
                 cmd += ['-e', '%s=%s' % (name, value)]
 
-    cmd += ['-e', 'INFRABOX_CLI=true']
+    cmd += ['-e', 'INFRABOX_CLI=true', '-e', 'INFRABOX_BUILD_NUMBER=local']
 
     if args.env:
         for e in args.env:
