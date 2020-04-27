@@ -84,6 +84,7 @@ def create_infrabox_directories(args, job, service=None, services=None, compose_
     infrabox_coverage = os.path.join(infrabox_upload, 'coverage')
     infrabox_markup = os.path.join(infrabox_upload, 'markup')
     infrabox_badge = os.path.join(infrabox_upload, 'badge')
+    infrabox_archive = os.path.join(infrabox_upload, 'archive')
     infrabox_job_json = os.path.join(infrabox, 'job.json')
     infrabox_gosu = os.path.join(infrabox, 'gosu.sh')
     infrabox_local_cache = args.local_cache
@@ -112,6 +113,7 @@ def create_infrabox_directories(args, job, service=None, services=None, compose_
         "upload/coverage": infrabox_coverage,
         "upload/markup": infrabox_markup,
         "upload/badge": infrabox_badge,
+        "upload/archive": infrabox_archive,
         "cache": infrabox_cache,
         "local-cache": args.local_cache,
         "job.json:ro": infrabox_job_json,
