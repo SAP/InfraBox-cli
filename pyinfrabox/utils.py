@@ -29,8 +29,10 @@ def check_allowed_properties(d, path, allowed):
 
     for key in d:
         if key not in allowed:
-            raise ValidationError(path + '(' + d['name'] + ')',
-                                  "invalid property '%s'" % key)
+            if 'name' in d.keys():
+                raise ValidationError(path + '(' + d['name'] + ')', "invalid property '%s'" % key)
+            else:
+                raise ValidationError(path, "invalid property '%s'" % key)
 
 
 def check_required_properties(d, path, required):
@@ -39,9 +41,10 @@ def check_required_properties(d, path, required):
 
     for key in required:
         if key not in d:
-            raise ValidationError(path + '(' + d['name'] + ')',
-                                  "property '%s' is required" % key)
-
+            if 'name' in d.keys():
+                raise ValidationError(path + '(' + d['name'] + ')', "property '%s' is required" % key)
+            else:
+                raise ValidationError(path, "property '%s' is required" % key)
 
 def check_string_array(e, path):
     if not isinstance(e, list):
