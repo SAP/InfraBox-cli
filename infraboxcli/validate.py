@@ -19,7 +19,10 @@ def validate_infrabox_file(args):
             data = json.load(f)
         except ValueError:
             f.seek(0)
-            data = yaml.load(f, Loader=yaml.FullLoader)
+            if sys.version_info.major == 2:
+                data = yaml.load(f)
+            else:
+                data = yaml.load(f, Loader=yaml.FullLoader)
         validate_json(data)
 
 def validate(args):
