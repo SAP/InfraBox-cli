@@ -1,3 +1,5 @@
+[![REUSE status](https://api.reuse.software/badge/github.com/SAP/InfraBox-cli)](https://api.reuse.software/info/github.com/SAP/InfraBox-cli)
+
 # InfraBox CLI
 With the InfraBox CLI you can run your InfraBox jobs on your local machine and configure your project.
 
@@ -97,7 +99,3 @@ If you reference secrets in your job definition (i.e. as environment variable) t
 If you need help please post your questions to [Stack Overflow](https://stackoverflow.com/questions/tagged/infrabox).
 In case you found a bug please open a [Github Issue](https://github.com/SAP/InfraBox-cli/issues).
 Follow us on Twitter: [@Infra_Box](https://twitter.com/Infra_Box) or have look at our Slack channel [infrabox.slack.com](https://infrabox.slack.com/).
-
-## License
-Copyright (c) 2018 SAP SE or an SAP affiliate company. All rights reserved.
-This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the [LICENSE file](LICENSE).
