@@ -111,18 +111,36 @@ class WorkflowCache(object):
                     label=cluster['name'].split('/')[-1],
                     indent=indent))
             elif len(cluster) == 1:
-                for inner_name, inner_cluster in cluster.iteritems():
-                    print_cluster(inner_name, inner_cluster, indent)
+                if (sys.version_info.major == 2):
+                    for inner_name, inner_cluster in cluster.iteritems():
+                        print_cluster(inner_name, inner_cluster, indent)
+                elif (sys.version_info.major == 3):
+                    for inner_name, inner_cluster in cluster.items():
+                        print_cluster(inner_name, inner_cluster, indent)
+                else:
+                    raise Exception('Unsupport python version')
             else:
                 print('{indent}subgraph "cluster_{name}" {{'.format(name=name, indent=indent))
 
-                for inner_name, inner_cluster in cluster.iteritems():
-                    print_cluster(inner_name, inner_cluster, indent + '  ')
+                if (sys.version_info.major == 2):
+                    for inner_name, inner_cluster in cluster.iteritems():
+                        print_cluster(inner_name, inner_cluster, indent + '  ')
+                elif (sys.version_info.major == 3):
+                    for inner_name, inner_cluster in cluster.items():
+                        print_cluster(inner_name, inner_cluster, indent + '  ')
+                else:
+                    raise Exception('Unsupport python version')
 
                 print('{indent}}}'.format(indent=indent))
 
-        for name, cluster in index.iteritems():
-            print_cluster(name, cluster)
+        if (sys.version_info.major == 2):
+            for name, cluster in index.iteritems():
+                print_cluster(name, cluster)
+        elif (sys.version_info.major == 3):
+            for name, cluster in index.items():
+                print_cluster(name, cluster)
+        else:
+            raise Exception('Unsupport python version')
 
         for j in self.jobs:
             name = j['name']
