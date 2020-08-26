@@ -23,7 +23,10 @@ def load_infrabox_file(path):
             data = json.load(f)
         except ValueError:
             f.seek(0)
-            data = yaml.load(f)
+            if (sys.version_info.major == 2) or (yaml.__version__ < "5.1"):
+                data = yaml.load(f)
+            else:
+                data = yaml.load(f, Loader=yaml.FullLoader)
         validate_json(data)
         return data
 
