@@ -5,7 +5,7 @@ def readme():
         return f.read()
 
 setup(name='infraboxcli',
-      version='0.8.7',
+      version='0.8.8',
       url='https://github.com/infrabox/cli',
       description='Command Line Interface for InfraBox',
       long_description=readme(),
@@ -22,11 +22,10 @@ setup(name='infraboxcli',
                 'pyinfrabox.testresult'],
       install_requires=[
           'future',
-          'jsonschema',
+          'jsonschema==2.6.0',
           'requests',
           'colorama==0.3.9',
           'socketIO_client',
-          'pyyaml',
           'PyJWT',
           'cryptography',
           'inquirer',
