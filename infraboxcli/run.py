@@ -93,6 +93,8 @@ def create_infrabox_directories(args, job, service=None, services=None, compose_
     # docker will create them as root!
     makedirs_if_not_exists(infrabox_cache)
     makedirs_if_not_exists(infrabox_local_cache)
+    makedirs_if_not_exists(infrabox_upload)
+    makedirs_if_not_exists(infrabox_archive)
 
     logger.info('Recreating directories')
 
