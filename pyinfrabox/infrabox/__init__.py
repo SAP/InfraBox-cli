@@ -251,7 +251,7 @@ def parse_docker_image(d, path):
 
 def parse_docker(d, path):
     check_allowed_properties(d, path, ("type", "name", "docker_file", "depends_on", "resources",
-                                       "build_only", "environment",
+                                       "build_only", "environment", "target",
                                        "build_arguments", "deployments", "timeout", "security_context", "command",
                                        "build_context", "cache", "repository", "cluster", "services", "registries"))
     check_required_properties(d, path, ("type", "name", "docker_file", "resources"))
@@ -303,7 +303,7 @@ def parse_docker(d, path):
 
 def parse_docker_compose(d, path):
     check_allowed_properties(d, path, ("type", "name", "docker_compose_file", "depends_on",
-                                       "environment", "resources", "cache", "timeout", "cluster",
+                                       "environment", "resources", "cache", "timeout", "cluster", "stop_timeout",
                                        "repository", "registries"))
     check_required_properties(d, path, ("type", "name", "docker_compose_file", "resources"))
     check_name(d['name'], path + ".name")
@@ -556,6 +556,6 @@ def validate_json(d):
             if dep_job == job_name:
                 raise ValidationError("Jobs", "Circular dependency detected.")
             if dep_job in all_deps:
-                queue.extend([j for j in all_deps[dep_job].keys() if j not in queue])
+                queue.extend(all_deps[dep_job].keys())
 
     return True
