@@ -331,6 +331,8 @@ def parse_docker_compose(d, path):
     check_required_properties(d, path, ("type", "name", "docker_compose_file", "resources"))
     check_name(d['name'], path + ".name")
     check_text(d['docker_compose_file'], path + ".docker_compose_file")
+    if d.get('compose_profiles', None):
+        check_string_array(d['compose_profiles'], path + ".compose_profiles")
     parse_resources(d['resources'], path + ".resources")
 
     if 'cluster' in d:
