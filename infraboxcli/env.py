@@ -36,7 +36,7 @@ def check_env_cli_token(args):
 
     args.token = token
 
-    t = jwt.decode(token, verify=False)
+    t = jwt.decode(token, verify=False, options={"verify_signature": False})
     args.project_id = t['project']['id']
 
     if 'remote_project_name' not in args:
