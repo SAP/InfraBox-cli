@@ -242,8 +242,8 @@ def parse_resources(d, path):
 def parse_docker_image(d, path):
     check_allowed_properties(d, path, ("type", "name", "image", "depends_on", "resources",
                                        "environment", "timeout", "security_context",
-                                       "build_context", "cache", "repository", "command",
-                                       "deployments", "run",
+                                       "build_context", "cache", "repository", "entrypoint",
+                                       "command", "deployments", "run",
                                        "cluster", "registries", "services"))
     check_required_properties(d, path, ("type", "name", "image", "resources"))
     check_name(d['name'], path + ".name")
@@ -255,6 +255,9 @@ def parse_docker_image(d, path):
 
     if 'cluster' in d:
         parse_cluster(d['cluster'], path + ".cluster")
+
+    if 'entrypoint' in d:
+        check_text(d['entrypoint'], path + ".entrypoint")
 
     if 'command' in d:
         check_string_array(d['command'], path + ".command")
