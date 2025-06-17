@@ -45,7 +45,10 @@ class WorkflowCache(object):
 
                 if children:
                     for p in j.get('depends_on', []):
-                        jobs += self.get_jobs(p['name'], children)
+                        if 'name' in p:
+                            jobs += self.get_jobs(p['name'], children)
+                        if 'job' in p:
+                            jobs += self.get_jobs(p['job'], children)
 
         if not jobs:
             logger.error("job %s not found in infrabox.json" % job_name)
