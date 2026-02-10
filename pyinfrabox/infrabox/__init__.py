@@ -292,7 +292,7 @@ def parse_docker_image(d, path):
 
 def parse_docker(d, path):
     check_allowed_properties(d, path, ("type", "name", "docker_file", "depends_on", "resources",
-                                       "build_only", "environment", "target", "enable_docker_build_kit",
+                                       "build_only", "environment", "target", "enable_docker_buildkit",
                                        "build_arguments", "deployments", "timeout", "security_context", "command",
                                        "build_context", "cache", "repository", "cluster", "services", "registries"))
     check_required_properties(d, path, ("type", "name", "docker_file", "resources"))
@@ -312,8 +312,8 @@ def parse_docker(d, path):
     if 'build_only' in d:
         check_boolean(d['build_only'], path + ".build_only")
 
-    if 'enable_docker_build_kit' in d:
-        check_boolean(d['enable_docker_build_kit'], path + ".enable_docker_build_kit" )
+    if 'enable_docker_buildkit' in d:
+        check_boolean(d['enable_docker_buildkit'], path + ".enable_docker_buildkit" )
 
     if 'cache' in d:
         parse_cache(d['cache'], path + ".cache")
@@ -347,7 +347,7 @@ def parse_docker(d, path):
 
 
 def parse_docker_compose(d, path):
-    check_allowed_properties(d, path, ("type", "name", "docker_compose_file", "depends_on", "stop_timeout", "enable_docker_build_kit",
+    check_allowed_properties(d, path, ("type", "name", "docker_compose_file", "depends_on", "stop_timeout", "enable_docker_buildkit",
                                        "compose_profiles", "environment", "resources", "cache", "timeout", "cluster",
                                        "repository", "registries", "parallel_build"))
     check_required_properties(d, path, ("type", "name", "docker_compose_file", "resources"))
@@ -378,8 +378,8 @@ def parse_docker_compose(d, path):
     if 'registries' in d:
         parse_registries(d['registries'], path + '.registries')
 
-    if 'enable_docker_build_kit' in d:
-        check_boolean(d['enable_docker_build_kit'], path + ".enable_docker_build_kit" )
+    if 'enable_docker_buildkit' in d:
+        check_boolean(d['enable_docker_buildkit'], path + ".enable_docker_buildkit" )
 
 
 def parse_wait(d, path):
@@ -420,7 +420,12 @@ def parse_registry_docker_registry(d, path):
     check_text(d['host'], path + ".host")
     check_text(d['repository'], path + ".repository")
     check_text(d['username'], path + ".username")
-    parse_secret_ref(d['password'], path + ".password")
+
+    if 'password' in d:
+        if '$vault' in d['password']:
+            parse_vault_ref(d['password'], path + ".password")
+        else:
+            parse_secret_ref(d['password'], path + ".password")
 
 
 def parse_registry_ecr(d, path):
@@ -428,8 +433,15 @@ def parse_registry_ecr(d, path):
 
     check_text(d['host'], path + ".host")
     check_text(d['region'], path + ".region")
-    parse_secret_ref(d['secret_access_key'], path + ".secret_access_key")
-    parse_secret_ref(d['access_key_id'], path + ".access_key_id")
+    if '$vault' in d['secret_access_key']:
+        parse_vault_ref(d['secret_access_key'], path + ".secret_access_key")
+    else:
+        parse_secret_ref(d['secret_access_key'], path + ".secret_access_key")
+
+    if '$vault' in d['access_key_id']:
+        parse_vault_ref(d['access_key_id'], path + ".access_key_id")
+    else:
+        parse_secret_ref(d['access_key_id'], path + ".access_key_id")
 
 
 def parse_deployment_ecr(d, path):
@@ -461,11 +473,13 @@ def parse_deployment_ecr(d, path):
 
 def parse_registry_gcr(d, path):
     check_required_properties(d, path, ("type", "service_account", "repository", "host"))
-    parse_secret_ref(d['service_account'], path + ".service_account")
 
     check_text(d['host'], path + ".host")
     check_text(d['repository'], path + ".region")
-    parse_secret_ref(d['service_account'], path + ".service_account")
+    if '$vault' in d['service_account']:
+        parse_vault_ref(d['service_account'], path + ".service_account")
+    else:
+        parse_secret_ref(d['service_account'], path + ".service_account")
 
 
 def parse_deployment_gcr(d, path):
@@ -628,12 +642,12 @@ def validate_json(d):
         if deps:
             all_deps[job_name] = deps
 
-    for job_name, deps in all_deps.items():
+    for job_name, deps in list(all_deps.items()):
         queue = list(deps.keys())
         for dep_job in queue:
             if dep_job == job_name:
                 raise ValidationError("Jobs", "Circular dependency detected.")
             if dep_job in all_deps:
-                queue.extend(all_deps[dep_job].keys())
+                queue.extend(list(all_deps[dep_job].keys()))
 
     return True
