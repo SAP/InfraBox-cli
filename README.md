@@ -38,6 +38,13 @@ It outputs the names of all available jobs. An example output may look like this
     tutorial-1/tutorial-1/step5/tests
 
 ## Run a Job
+
+The validator accepts the documented `enable_docker_build_kit` boolean option
+for both `docker` and `docker-compose` jobs. The earlier CLI spelling
+`enable_docker_buildkit` is also accepted for compatibility. See the
+[Docker job configuration](https://github.com/SAP/InfraBox/blob/master/docs/job/docker.md)
+for the server-side option.
+
 InfraBox CLI may be used to run you jobs on your local machine. It will also respect all the dependencies and run the jobs in the correct order. Available options are:
 
     usage: infrabox run [-h] [--no-rm] [-t TAG] [--local-cache LOCAL_CACHE]

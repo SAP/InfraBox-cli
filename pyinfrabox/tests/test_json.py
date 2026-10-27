@@ -3,13 +3,64 @@ import unittest
 from pyinfrabox import ValidationError
 from pyinfrabox.infrabox import validate_json
 
+
+class TestBuildKitOptions(unittest.TestCase):
+    @staticmethod
+    def document(job_type, option=None, value=None):
+        job = {
+            'type': job_type,
+            'name': 'build-image',
+            'resources': {'limits': {'cpu': 1, 'memory': 1024}},
+        }
+        filename = 'docker_file' if job_type == 'docker' else 'docker_compose_file'
+        job[filename] = 'Dockerfile' if job_type == 'docker' else 'docker-compose.yml'
+        if option is not None:
+            job[option] = value
+        return {'version': 1, 'jobs': [job]}
+
+    def test_documented_docker_option(self):
+        for value in (True, False):
+            validate_json(self.document('docker', 'enable_docker_build_kit', value))
+
+    def test_documented_compose_option(self):
+        for value in (True, False):
+            validate_json(self.document('docker-compose', 'enable_docker_build_kit', value))
+
+    def test_legacy_docker_option(self):
+        for value in (True, False):
+            validate_json(self.document('docker', 'enable_docker_buildkit', value))
+
+    def test_legacy_compose_option(self):
+        for value in (True, False):
+            validate_json(self.document('docker-compose', 'enable_docker_buildkit', value))
+
+    def test_both_spellings_require_booleans(self):
+        for job_type in ('docker', 'docker-compose'):
+            for option in ('enable_docker_build_kit', 'enable_docker_buildkit'):
+                for value in (None, 1, 'true', [], {}):
+                    with self.assertRaises(ValidationError) as error:
+                        validate_json(self.document(job_type, option, value))
+                    self.assertIn(option, str(error.exception))
+                    self.assertIn('must be a boolean', str(error.exception))
+
+    def test_omitted_option_is_valid(self):
+        for job_type in ('docker', 'docker-compose'):
+            validate_json(self.document(job_type))
+
+    def test_unknown_option_is_rejected(self):
+        for job_type in ('docker', 'docker-compose'):
+            with self.assertRaises(ValidationError) as error:
+                validate_json(self.document(job_type, 'enable_docker_build_kitty', True))
+            self.assertIn('invalid property', str(error.exception))
+
+
 class TestDockerCompose(unittest.TestCase):
     def raises_expect(self, data, expected):
         try:
             validate_json(data)
             assert False
         except ValidationError as e:
-            self.assertEqual(e.message, expected)
+            self.assertEqual(str(e), expected)
 
     def test_version(self):
         self.raises_expect({}, "#: property 'version' is required")
